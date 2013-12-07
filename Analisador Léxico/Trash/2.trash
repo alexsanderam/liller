@@ -1,0 +1,75 @@
+{Digit}			{ printf("\nDigito.\n") return; }
+{Digits}		{ printf("\nDigitos.\n") return; }
+{Scientific}		{ printf("\nCientífico.\n") return; }
+{Number}		{ printf("\nNúmero.\n") return; }
+
+{Letter}		{ printf("\nCaracter.\n") return; }
+{String}		{ printf("\nString.\n") return; }
+
+{ID}			{ printf("\nIdentificador.\n") return; }
+
+{Comment}		{ printf("\nComentário.\n") return; }
+{Delimiter}		{ printf("\nDelimitador.\n") return; }
+{WS}			{ printf("\nLixo.\n") return; }
+
+{If}			{ printf("\nSe.\n") return; }
+{Else}			{ printf("\nSenão.\n") return; }
+{Switch}		{ return; }
+{Case}			{ printf("\nCaso.\n") return; }
+{For}			{ printf("\nPara.\n") return; }
+{Do}			{ printf("\nFaça.\n") return; }
+{While}			{ printf("\nEnquanto.\n") return; }
+{Each}			{ printf("\nCada.\n") return; }
+{GoTo}			{ printf("\nVáPara.\n") return; }
+
+{Char}			{ printf("\nTipoChar.\n") return; }
+{Int}			{ printf("\nTipoInt.\n") return; }
+{Void}			{ printf("\nTipoVoid.\n") return; }
+{Float}			{ printf("\nTipoFloat.\n") return; }
+{Double}		{ printf("\nTipoDouble.\n") return; }
+{Unsigned}		{ printf("\nTipoSemSinal.\n") return; }
+{Long}			{ printf("\nTipoLongo.\n") return; }
+
+{Continue}		{ printf("\nContinue.\n") return; }
+{Break}			{ printf("\nPare.\n") return; }
+{Return}		{ printf("\nRetorne.\n") return; }
+
+{OpSum}			{ printf("\nOpSoma.\n") return; }
+{OpSub}			{ printf("\nOpSubtração.\n") return; }
+{OpMult}		{ printf("\nOpMultiplicação.\n") return; }
+{OpDiv}			{ printf("\nOpDivisão.\n") return; }
+
+{OpLogicAnd}		{ printf("\nOpLogicoE.\n") return; }
+{OpLogicOr}		{ printf("\nOpLogicoOu.\n") return; }
+{OpLogicNot}		{ printf("\nOpLogicoNão.\n") return; }
+{OpBinAnd}		{ printf("\nOpBinE.\n") return; }
+{OpBinOr}		{ printf("\nOpBinOu.\n") return; }
+{OpBinExclusiveOr}	{ printf("\nOpBinOuExclusivo.\n") return; }
+{OpBinNot}		{ printf("\nOpBinNão.\n") return; }
+{OpBinShiftR}		{ printf("\nOpBinShitR.\n") return; }
+{OpBinShiftL}		{ printf("\nOpBinShiftL.\n") return; }
+
+{OpLess}		{ printf("\nOpMenor.\n") return; }
+{OpGreater}		{ printf("\nOpMaior.\n") return; }
+{OpEqLess}		{ printf("\nOpMenorOuIgual.\n") return; }
+{OpEqGreater}		{ printf("\nOpMaiorOuIgual.\n") return; }
+{OpEq}			{ printf("\nOpIgual.\n") return; }
+{OpDiff}		{ printf("\nOpDiferente.\n") return; }
+
+{PtsR}			{ printf("\nPR.\n") return; }
+{PtsL}			{ printf("\nPL.\n") return; }
+{BktR}			{ printf("\nBktR.\n") return; }
+{BktL}			{ printf("\nBktL.\n") return; }
+{BrcR}			{ printf("\nBrcR.\n") return; }
+{BrcL}			{ printf("\nBrcL.\n") return; }
+
+{Comma}			{ printf("\nVírgula.\n") return; }
+{SemiColon}		{ printf("\nPontoEVírgula.\n") return; }
+{Assign}		{ printf("\nAtribuição.\n") return; }
+{Percent}		{ printf("\nPercentual.\n") return; }
+
+{Delimiter}		{ printf("\nDelimitador.\n") return; }
+
+.			{ B; }
+<<EOF>>	 	  { X; }
+
