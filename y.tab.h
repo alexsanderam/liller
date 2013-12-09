@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 /* A Bison parser, made by GNU Bison 2.4.1.  */
 
@@ -6,13 +5,6 @@
    
       Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-=======
-/* A Bison parser, made by GNU Bison 2.5.  */
-
-/* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
->>>>>>> 19c3c5e67bc7712b835794a025d927eb1a14d593
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -48,7 +40,6 @@
       know about them.  */
    enum yytokentype {
      TK_INT = 258,
-<<<<<<< HEAD
      TK_FLOAT = 259,
      TK_SCIENTIFIC = 260,
      TK_CHAR = 261,
@@ -71,25 +62,10 @@
      TK_OP_DIV = 278,
      TK_ASSIGN = 279,
      TK_OP_MOD = 280
-=======
-     TK_MAIN = 259,
-     TK_ID = 260,
-     TK_TYPE_INT = 261,
-     TK_TYPE_VOID = 262,
-     TK_END = 263,
-     TK_ERROR = 264,
-     TK_OP_SUM = 265,
-     TK_OP_SUB = 266,
-     TK_OP_MUL = 267,
-     TK_OP_DIV = 268,
-     TK_ASSIGN = 269,
-     TK_OP_MOD = 270
->>>>>>> 19c3c5e67bc7712b835794a025d927eb1a14d593
    };
 #endif
 /* Tokens.  */
 #define TK_INT 258
-<<<<<<< HEAD
 #define TK_FLOAT 259
 #define TK_SCIENTIFIC 260
 #define TK_CHAR 261
@@ -112,20 +88,6 @@
 #define TK_OP_DIV 278
 #define TK_ASSIGN 279
 #define TK_OP_MOD 280
-=======
-#define TK_MAIN 259
-#define TK_ID 260
-#define TK_TYPE_INT 261
-#define TK_TYPE_VOID 262
-#define TK_END 263
-#define TK_ERROR 264
-#define TK_OP_SUM 265
-#define TK_OP_SUB 266
-#define TK_OP_MUL 267
-#define TK_OP_DIV 268
-#define TK_ASSIGN 269
-#define TK_OP_MOD 270
->>>>>>> 19c3c5e67bc7712b835794a025d927eb1a14d593
 
 
 
