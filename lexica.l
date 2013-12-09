@@ -13,6 +13,8 @@ TypeUnsigned "unsigned"
 TypeLong "long"
 TypeBoolean "boolean"
 
+Return "return"
+
 Space [ \t\n]
 Digit [0-9]
 Num {Digit}+
@@ -56,23 +58,25 @@ Assign "="
 
 {Assign}	{ return TK_ASSIGN; }
 
-{Int}			{ yylval.traduction = yytext; return TK_INT; }
-{Float}			{ yylval.traduction = yytext; return TK_FLOAT; }
+{Int}		{ yylval.traduction = yytext; return TK_INT; }
+{Float}		{ yylval.traduction = yytext; return TK_FLOAT; }
 {Scientific}	{ yylval.traduction = yytext; return TK_SCIENTIFIC; }
-{Char}			{ yylval.traduction = yytext; return TK_CHAR; }
+{Char}		{ yylval.traduction = yytext; return TK_CHAR; }
 
-{TypeChar} 		{ yylval.traduction = yytext; return TK_TYPE_CHAR; }
+{TypeChar} 	{ yylval.traduction = yytext; return TK_TYPE_CHAR; }
 {TypeString} 	{ yylval.traduction = yytext; return TK_TYPE_STRING; }
-{TypeInt} 		{ yylval.traduction = yytext; return TK_TYPE_INT; }
-{TypeVoid} 		{ yylval.traduction = yytext; return TK_TYPE_VOID; }
+{TypeInt} 	{ yylval.traduction = yytext; return TK_TYPE_INT; }
+{TypeVoid} 	{ yylval.traduction = yytext; return TK_TYPE_VOID; }
 {TypeFloat} 	{ yylval.traduction = yytext; return TK_TYPE_FLOAT; }
 {TypeDouble} 	{ yylval.traduction = yytext; return TK_TYPE_DOUBLE; }
 {TypeUnsigned} 	{ yylval.traduction = yytext; return TK_TYPE_UNSIGNED; }
-{TypeLong} 		{ yylval.traduction = yytext; return TK_TYPE_LONG; }
+{TypeLong} 	{ yylval.traduction = yytext; return TK_TYPE_LONG; }
 {TypeBoolean} 	{ yylval.traduction = yytext; return TK_TYPE_BOOLEAN; }
 
+{Return} 	{ yylval.traduction = yytext; return TK_RETURN; }
 
-{ID}			{ yylval.label = yytext; return TK_ID; }
+
+{ID}		{ yylval.label = yytext; return TK_ID; }
 
 .				{ *yytext; }
 

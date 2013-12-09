@@ -37,6 +37,7 @@ string generateLabel();
 %token TK_END TK_ERROR
 %token TK_OP_SUM TK_OP_SUB TK_OP_MUL TK_OP_DIV
 %token TK_ASSIGN
+%token TK_RETURN
 
 
 %start Begin
@@ -50,19 +51,59 @@ string generateLabel();
 
 Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 			{
-				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()\n{\n"  << $5.traduction << "\treturn 0;\n}" << endl; 
+				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << $5.traduction << endl; 
 			}
 			|
 			TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 			{
-			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n"  << $6.traduction << "\treturn 0;\n}" << endl;
+			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << $6.traduction << endl;
 			}
 			;
 
-BLOCK		: '{' COMMANDS '}'
+BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
 			{
-				$$.traduction = $2.traduction;
+				$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
 			}
+			|
+			{
+				$$.traduction = "";
+			}
+			;
+
+RETURN		: TK_RETURN TK_INT ';'
+			{
+				$$.traduction = "\n\t" + $1.traduction + " " + $2.traduction + ";";
+			}
+			|
+			{
+				$$.traduction = "";
+			}
+			;
+
+DECLARATIONS: DECLARATION  DECLARATIONS
+			{
+				$$.traduction = $1.traduction + $2.traduction;
+			}
+			|
+			{	
+				$$.traduction = "\n";
+			}	
+			;
+
+DECLARATION	: TYPE TK_ID ';'
+			{
+				if(IDMap.find($2.label) == IDMap.end())
+				{
+					IDMap[$2.label].label = generateLabel();
+					IDMap[$2.label].type = $1.traduction;
+				}
+
+				$$.label = IDMap[$2.label].label;
+				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
+			}
+			;
+			
+TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_UNSIGNED | TK_TYPE_LONG | TK_TYPE_BOOLEAN
 			;
 
 COMMANDS	: COMMAND COMMANDS
@@ -75,8 +116,10 @@ COMMANDS	: COMMAND COMMANDS
 			}
 
 COMMAND 	: E 	';'
-			| 
-			DECLARATION ';'
+			| DECLARATION
+			{
+				$$.traduction = $1.traduction;
+			}
 			;
 
 E 			: E TK_OP_SUM E
@@ -126,22 +169,6 @@ E 			: E TK_OP_SUM E
 				$$.label = IDMap[$1.label].label;
 				$$.traduction = $3.traduction + "\t" + $$.label + " = " + $3.label + ";\n"; 
 			}
-			;
-
-DECLARATION	: TYPE TK_ID
-			{
-				if(IDMap.find($2.label) == IDMap.end())
-				{
-					IDMap[$2.label].label = generateLabel();
-					IDMap[$2.label].type = $1.traduction;
-				}
-
-				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
-			}
-			;
-			
-TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_UNSIGNED | TK_TYPE_LONG | TK_TYPE_BOOLEAN
 			;
 %%
 
