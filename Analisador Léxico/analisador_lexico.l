@@ -136,8 +136,13 @@ Pound "#"
 
 Digit [0-9]
 Int ([-|+])?{Digit}+
+<<<<<<< HEAD
 Float {Int}(\.{Digit}+)
 Scientific ({Int}|{Float})[e|E][+|-]{Digit}+
+=======
+Float {Int}(\.{Int})
+Scientific ({Int}|{Float})[e|E][+|-]{Int}
+>>>>>>> 19c3c5e67bc7712b835794a025d927eb1a14d593
 
 Letter [A-Za-z]
 String "\""([^\n\"\\]*(\\[.\n])*)*"\""
