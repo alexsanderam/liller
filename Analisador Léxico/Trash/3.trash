@@ -1,0 +1,70 @@
+{If}			{ return; }
+{Else}			{ return; }
+{Switch}		{ return; }
+{Case}			{ return; }
+{For}			{ return; }
+{Do}			{ return; }
+{While}			{ return; }
+{Each}			{ return; }
+{GoTo}			{ return; }
+
+{Char}			{ return; }
+{Int}			{ return; }
+{Void}			{ return; }
+{Float}			{ return; }
+{Double}		{ return; }
+{Unsigned}		{ return; }
+{Long}			{ return; }
+
+{Continue}		{ return; }
+{Break}			{ return; }
+{Return}		{ return; }
+
+{OpSum}			{ return; }
+{OpSub}			{ return; }
+{OpMult}		{ return; }
+{OpDiv}			{ return; }
+
+{OpLogicAnd}		{ return; }
+{OpLogicOr}		{ return; }
+{OpLogicNot}		{ return; }
+{OpBinAnd}		{ return; }
+{OpBinOr}		{ return; }
+{OpBinExclusiveOr}	{ return; }
+{OpBinNot}		{ return; }
+{OpBinShiftR}		{ return; }
+{OpBinShiftL}		{ return; }
+
+{OpLess}		{ return; }
+{OpGreater}		{ return; }
+{OpEqLess}		{ return; }
+{OpEqGreater}		{ return; }
+{OpEq}			{ return; }
+{OpDiff}		{ return; }
+
+{PtsR}			{ return; }
+{PtsL}			{ return; }
+{BktR}			{ return; }
+{BktL}			{ return; }
+{BrcR}			{ return; }
+{BrcL}			{ return; }
+
+{Comma}			{ return; }
+{SemiColon}		{ return; }
+{Assign}		{ return; }
+{Percent}		{ return; }
+
+{Delimiter}		{ return B; }
+
+{Digit}			{ return; }
+{Digits}		{ return; }
+{Scientific}		{ return; }
+{Number}		{ return; }
+
+{Letter}		{ return; }
+{String}		{ return; }
+
+{ID}			{ return; }
+
+{Comment}		{ return; }
+{WS}			{ return; }
