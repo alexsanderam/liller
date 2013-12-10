@@ -44,12 +44,12 @@ string generateLabel();
 
 Begin 			: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 			{
-				cout << "/*Compiler Liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()\n{\n" << $5.traduction << "\treturn 0;\n}" << endl; 
+				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()\n{\n" << $5.traduction << "\treturn 0;\n}" << endl; 
 			}
 			|
 			TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 			{
-			cout << "/*Compiler Liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << $6.traduction << "\treturn 0;\n}" << endl;
+			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << $6.traduction << "\treturn 0;\n}" << endl;
 			}
 			;
 
