@@ -136,8 +136,8 @@ Pound "#"
 
 Digit [0-9]
 Int ([-|+])?{Digit}+
-Float {Int}(\.{Int})
-Scientific ({Int}|{Float})[e|E][+|-]{Int}
+Float {Int}(\.{Digit}+)
+Scientific ({Int}|{Float})[e|E][+|-]{Digit}+
 
 Letter [A-Za-z]
 String "\""([^\n\"\\]*(\\[.\n])*)*"\""

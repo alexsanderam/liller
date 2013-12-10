@@ -38,34 +38,56 @@
       know about them.  */
    enum yytokentype {
      TK_INT = 258,
-     TK_MAIN = 259,
-     TK_ID = 260,
-     TK_TYPE_INT = 261,
-     TK_TYPE_VOID = 262,
-     TK_END = 263,
-     TK_ERROR = 264,
-     TK_OP_SUM = 265,
-     TK_OP_SUB = 266,
-     TK_OP_MUL = 267,
-     TK_OP_DIV = 268,
-     TK_ASSIGN = 269,
-     TK_OP_MOD = 270
+     TK_FLOAT = 259,
+     TK_SCIENTIFIC = 260,
+     TK_CHAR = 261,
+     TK_MAIN = 262,
+     TK_ID = 263,
+     TK_TYPE_CHAR = 264,
+     TK_TYPE_STRING = 265,
+     TK_TYPE_INT = 266,
+     TK_TYPE_VOID = 267,
+     TK_TYPE_FLOAT = 268,
+     TK_TYPE_DOUBLE = 269,
+     TK_TYPE_UNSIGNED = 270,
+     TK_TYPE_LONG = 271,
+     TK_TYPE_BOOLEAN = 272,
+     TK_END = 273,
+     TK_ERROR = 274,
+     TK_OP_SUM = 275,
+     TK_OP_SUB = 276,
+     TK_OP_MUL = 277,
+     TK_OP_DIV = 278,
+     TK_ASSIGN = 279,
+     TK_RETURN = 280,
+     TK_OP_MOD = 281
    };
 #endif
 /* Tokens.  */
 #define TK_INT 258
-#define TK_MAIN 259
-#define TK_ID 260
-#define TK_TYPE_INT 261
-#define TK_TYPE_VOID 262
-#define TK_END 263
-#define TK_ERROR 264
-#define TK_OP_SUM 265
-#define TK_OP_SUB 266
-#define TK_OP_MUL 267
-#define TK_OP_DIV 268
-#define TK_ASSIGN 269
-#define TK_OP_MOD 270
+#define TK_FLOAT 259
+#define TK_SCIENTIFIC 260
+#define TK_CHAR 261
+#define TK_MAIN 262
+#define TK_ID 263
+#define TK_TYPE_CHAR 264
+#define TK_TYPE_STRING 265
+#define TK_TYPE_INT 266
+#define TK_TYPE_VOID 267
+#define TK_TYPE_FLOAT 268
+#define TK_TYPE_DOUBLE 269
+#define TK_TYPE_UNSIGNED 270
+#define TK_TYPE_LONG 271
+#define TK_TYPE_BOOLEAN 272
+#define TK_END 273
+#define TK_ERROR 274
+#define TK_OP_SUM 275
+#define TK_OP_SUB 276
+#define TK_OP_MUL 277
+#define TK_OP_DIV 278
+#define TK_ASSIGN 279
+#define TK_RETURN 280
+#define TK_OP_MOD 281
 
 
 

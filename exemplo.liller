@@ -1,7 +1,17 @@
 int main()
-{
+{	
+	int k;
+	int j;
+	float z;
+
 	k = j = 1 + 1;
 	k = 2;
 	j = 3;
-	z = i;
+	z = k;
+
+	{
+		1 + 50;
+	}
+
+	return 0;
 }
