@@ -51,18 +51,11 @@ string generateLabel();
 
 Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 			{
-<<<<<<< HEAD
-				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()\n{\n" << $5.traduction << "\treturn 0;\n}" << endl; 
-=======
 				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << $5.traduction << endl; 
->>>>>>> 328776d0a93ca2896fe687d85295837164fb6171
 			}
 			|
 			TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 			{
-<<<<<<< HEAD
-			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)\n{\n" << $6.traduction << "\treturn 0;\n}" << endl;
-=======
 			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << $6.traduction << endl;
 			}
 			;
@@ -74,7 +67,6 @@ BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
 			|
 			{
 				$$.traduction = "";
->>>>>>> 328776d0a93ca2896fe687d85295837164fb6171
 			}
 			;
 

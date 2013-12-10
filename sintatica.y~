@@ -51,11 +51,7 @@ string generateLabel();
 
 Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 			{
-<<<<<<< HEAD
-				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()\n{\n" << $5.traduction << "\treturn 0;\n}" << endl; 
-=======
 				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << $5.traduction << endl; 
->>>>>>> 328776d0a93ca2896fe687d85295837164fb6171
 			}
 			|
 			TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
@@ -170,11 +166,7 @@ E 			: E TK_OP_SUM E
 				//if(IDMap.find($1.label) == IDMap.end())	
 					//IDMap[$1.label].label = generateLabel();
 
-<<<<<<< HEAD
-				$$.label = labelsMap[$1.label];
-=======
 				$$.label = IDMap[$1.label].label;
->>>>>>> 328776d0a93ca2896fe687d85295837164fb6171
 				$$.traduction = $3.traduction + "\t" + $$.label + " = " + $3.label + ";\n"; 
 			}
 			;
