@@ -41,26 +41,29 @@
      TK_FLOAT = 259,
      TK_SCIENTIFIC = 260,
      TK_CHAR = 261,
-     TK_MAIN = 262,
-     TK_ID = 263,
-     TK_TYPE_CHAR = 264,
-     TK_TYPE_STRING = 265,
-     TK_TYPE_INT = 266,
-     TK_TYPE_VOID = 267,
-     TK_TYPE_FLOAT = 268,
-     TK_TYPE_DOUBLE = 269,
-     TK_TYPE_UNSIGNED = 270,
-     TK_TYPE_LONG = 271,
-     TK_TYPE_BOOLEAN = 272,
-     TK_END = 273,
-     TK_ERROR = 274,
-     TK_OP_SUM = 275,
-     TK_OP_SUB = 276,
-     TK_OP_MUL = 277,
-     TK_OP_DIV = 278,
-     TK_ASSIGN = 279,
-     TK_RETURN = 280,
-     TK_OP_MOD = 281
+     TK_STRING = 262,
+     TK_MAIN = 263,
+     TK_ID = 264,
+     TK_TYPE_CHAR = 265,
+     TK_TYPE_STRING = 266,
+     TK_TYPE_INT = 267,
+     TK_TYPE_VOID = 268,
+     TK_TYPE_FLOAT = 269,
+     TK_TYPE_DOUBLE = 270,
+     TK_TYPE_BOOLEAN = 271,
+     TK_MODIFIER_UNSIGNED = 272,
+     TK_MODIFIER_SIGNED = 273,
+     TK_MODIFIER_SHORT = 274,
+     TK_MODIFIER_LONG = 275,
+     TK_END = 276,
+     TK_ERROR = 277,
+     TK_OP_SUM = 278,
+     TK_OP_SUB = 279,
+     TK_OP_MUL = 280,
+     TK_OP_DIV = 281,
+     TK_ASSIGN = 282,
+     TK_RETURN = 283,
+     TK_OP_MOD = 284
    };
 #endif
 /* Tokens.  */
@@ -68,26 +71,29 @@
 #define TK_FLOAT 259
 #define TK_SCIENTIFIC 260
 #define TK_CHAR 261
-#define TK_MAIN 262
-#define TK_ID 263
-#define TK_TYPE_CHAR 264
-#define TK_TYPE_STRING 265
-#define TK_TYPE_INT 266
-#define TK_TYPE_VOID 267
-#define TK_TYPE_FLOAT 268
-#define TK_TYPE_DOUBLE 269
-#define TK_TYPE_UNSIGNED 270
-#define TK_TYPE_LONG 271
-#define TK_TYPE_BOOLEAN 272
-#define TK_END 273
-#define TK_ERROR 274
-#define TK_OP_SUM 275
-#define TK_OP_SUB 276
-#define TK_OP_MUL 277
-#define TK_OP_DIV 278
-#define TK_ASSIGN 279
-#define TK_RETURN 280
-#define TK_OP_MOD 281
+#define TK_STRING 262
+#define TK_MAIN 263
+#define TK_ID 264
+#define TK_TYPE_CHAR 265
+#define TK_TYPE_STRING 266
+#define TK_TYPE_INT 267
+#define TK_TYPE_VOID 268
+#define TK_TYPE_FLOAT 269
+#define TK_TYPE_DOUBLE 270
+#define TK_TYPE_BOOLEAN 271
+#define TK_MODIFIER_UNSIGNED 272
+#define TK_MODIFIER_SIGNED 273
+#define TK_MODIFIER_SHORT 274
+#define TK_MODIFIER_LONG 275
+#define TK_END 276
+#define TK_ERROR 277
+#define TK_OP_SUM 278
+#define TK_OP_SUB 279
+#define TK_OP_MUL 280
+#define TK_OP_DIV 281
+#define TK_ASSIGN 282
+#define TK_RETURN 283
+#define TK_OP_MOD 284
 
 
 

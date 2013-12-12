@@ -30,10 +30,11 @@ string generateLabel();
 
 %}
 
-%token TK_INT TK_FLOAT TK_SCIENTIFIC TK_CHAR
+%token TK_INT TK_FLOAT TK_SCIENTIFIC TK_CHAR TK_STRING
 %token TK_MAIN 
 %token TK_ID 
-%token TK_TYPE_CHAR TK_TYPE_STRING TK_TYPE_INT TK_TYPE_VOID TK_TYPE_FLOAT TK_TYPE_DOUBLE TK_TYPE_UNSIGNED TK_TYPE_LONG TK_TYPE_BOOLEAN
+%token TK_TYPE_CHAR TK_TYPE_STRING TK_TYPE_INT TK_TYPE_VOID TK_TYPE_FLOAT TK_TYPE_DOUBLE TK_TYPE_BOOLEAN
+%token TK_MODIFIER_UNSIGNED TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_MODIFIER_LONG
 %token TK_END TK_ERROR
 %token TK_OP_SUM TK_OP_SUB TK_OP_MUL TK_OP_DIV
 %token TK_ASSIGN
@@ -103,7 +104,28 @@ DECLARATION	: TYPE TK_ID ';'
 			}
 			;
 			
-TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_UNSIGNED | TK_TYPE_LONG | TK_TYPE_BOOLEAN
+TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_BOOLEAN
+			|
+			TK_MODIFIER_UNSIGNED TK_TYPE_CHAR | TK_MODIFIER_SIGNED TK_TYPE_CHAR | TK_MODIFIER_UNSIGNED TK_TYPE_INT | TK_MODIFIER_SIGNED TK_TYPE_INT | TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_LONG TK_TYPE_DOUBLE
+			{
+				$$.traduction = $1.traduction + " " + $2.traduction;
+			}
+			| TK_MODIFIER_SHORT | TK_MODIFIER_LONG
+			{
+				$$.traduction = $1.traduction + " int";
+			}
+			| TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT | | TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+			{
+				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction;
+			}
+			| TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+			{
+				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction + " " + $4.traduction;
+			}
+			| TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
+			{
+				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction + " int";
+			}
 			;
 
 COMMANDS	: COMMAND COMMANDS
@@ -147,7 +169,7 @@ E 			: E TK_OP_SUM E
 				$$.label = generateLabel();
 				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " % " + $3.label + ";\n";
 			}
-			| TK_INT
+			| NUMBER
 			{
 				$$.label = generateLabel();
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
@@ -170,6 +192,10 @@ E 			: E TK_OP_SUM E
 				$$.traduction = $3.traduction + "\t" + $$.label + " = " + $3.label + ";\n"; 
 			}
 			;
+
+NUMBER		: TK_INT | TK_FLOAT | TK_SCIENTIFIC
+			;
+
 %%
 
 #include "lex.yy.c"

@@ -9,9 +9,12 @@ TypeInt "int"
 TypeVoid "void"
 TypeFloat "float"
 TypeDouble "double"
-TypeUnsigned "unsigned"
-TypeLong "long"
 TypeBoolean "boolean"
+
+ModifierUnsigned "unsigned"
+ModifierSigned "signed"
+ModifierShort "short"
+ModifierLong "long"
 
 Return "return"
 
@@ -19,6 +22,7 @@ Space [ \t\n]
 Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
+String "\""([^\n\"\\]*(\\[.\n])*)*"\""
 
 Delim {Space}+
 
@@ -69,9 +73,12 @@ Assign "="
 {TypeVoid} 	{ yylval.traduction = yytext; return TK_TYPE_VOID; }
 {TypeFloat} 	{ yylval.traduction = yytext; return TK_TYPE_FLOAT; }
 {TypeDouble} 	{ yylval.traduction = yytext; return TK_TYPE_DOUBLE; }
-{TypeUnsigned} 	{ yylval.traduction = yytext; return TK_TYPE_UNSIGNED; }
-{TypeLong} 	{ yylval.traduction = yytext; return TK_TYPE_LONG; }
 {TypeBoolean} 	{ yylval.traduction = yytext; return TK_TYPE_BOOLEAN; }
+
+{ModifierUnsigned} 	{ yylval.traduction = yytext; return TK_MODIFIER_UNSIGNED; }
+{ModifierSigned} 	{ yylval.traduction = yytext; return TK_MODIFIER_SIGNED; }
+{ModifierShort} 	{ yylval.traduction = yytext; return TK_MODIFIER_SHORT; }
+{ModifierLong} 	{ yylval.traduction = yytext; return TK_MODIFIER_LONG; }
 
 {Return} 	{ yylval.traduction = yytext; return TK_RETURN; }
 
