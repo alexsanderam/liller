@@ -1,6 +1,6 @@
 int main()
 {	
-	long k;
+	short int k;
 	int j;
 	float z;
 

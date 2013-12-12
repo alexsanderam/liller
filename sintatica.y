@@ -91,41 +91,34 @@ DECLARATIONS: DECLARATION  DECLARATIONS
 			}	
 			;
 
-DECLARATION	: TYPE TK_ID ';'
+DECLARATION	: MODIFIERS TYPE TK_ID ';'
 			{
-				if(IDMap.find($2.label) == IDMap.end())
+				if(IDMap.find($3.label) == IDMap.end())
 				{
-					IDMap[$2.label].label = generateLabel();
-					IDMap[$2.label].type = $1.traduction;
+					IDMap[$3.label].label = generateLabel();
+					IDMap[$3.label].type = $1.traduction + $2.traduction;
 				}
 
-				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
+				$$.label = IDMap[$3.label].label;
+				$$.traduction = "\t" + $1.traduction + " " + $2.traduction + " " + IDMap[$3.label].label + ";\n";
 			}
 			;
-			
-TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_BOOLEAN
-			|
-			TK_MODIFIER_UNSIGNED TK_TYPE_CHAR | TK_MODIFIER_SIGNED TK_TYPE_CHAR | TK_MODIFIER_UNSIGNED TK_TYPE_INT | TK_MODIFIER_SIGNED TK_TYPE_INT | TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_LONG TK_TYPE_DOUBLE
+
+MODIFIERS	: MODIFIER MODIFIERS
 			{
 				$$.traduction = $1.traduction + " " + $2.traduction;
 			}
-			| TK_MODIFIER_SHORT | TK_MODIFIER_LONG
+			|
 			{
-				$$.traduction = $1.traduction + " int";
+				$$.traduction = "";
 			}
-			| TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT | | TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-			{
-				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction;
-			}
-			| TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-			{
-				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction + " " + $4.traduction;
-			}
-			| TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
-			{
-				$$.traduction = $1.traduction + " " + $2.traduction + " " + $3.traduction + " int";
-			}
+			;
+
+MODIFIER	: TK_MODIFIER_UNSIGNED | TK_MODIFIER_SIGNED | TK_MODIFIER_SHORT | TK_MODIFIER_LONG
+			;
+
+			
+TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_BOOLEAN			
 			;
 
 COMMANDS	: COMMAND COMMANDS
