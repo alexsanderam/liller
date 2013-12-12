@@ -16,6 +16,7 @@ typedef struct{
 typedef map<string, id_struct> VARIABLESMAP;
 
 VARIABLESMAP IDMap;
+string declarations = "";
 
 struct args
 {
@@ -63,6 +64,7 @@ Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 
 BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
 			{
+				//$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
 				$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
 			}
 			|
@@ -81,7 +83,7 @@ RETURN		: TK_RETURN TK_INT ';'
 			}
 			;
 
-DECLARATIONS: DECLARATION  DECLARATIONS
+DECLARATIONS	: DECLARATION  DECLARATIONS
 			{
 				$$.traduction = $1.traduction + $2.traduction;
 			}
@@ -103,6 +105,7 @@ DECLARATION	: TYPE TK_ID ';'
 				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
 			}
 			;
+
 			
 TYPE		: TK_TYPE_CHAR | TK_TYPE_STRING | TK_TYPE_INT | TK_TYPE_VOID | TK_TYPE_FLOAT | TK_TYPE_DOUBLE | TK_TYPE_BOOLEAN
 			|
@@ -187,42 +190,78 @@ COMMANDS	: COMMAND COMMANDS
 
 COMMAND 	: E 	';'
 			| DECLARATION
-			{
-				$$.traduction = $1.traduction;
-			}
 			;
 
-E 			: E TK_OP_SUM E
+
+E 			: E ARITHMETIC_OPERATION E
 			{
+				string cast = "";
 				$$.label = generateLabel();
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " + " + $3.label + ";\n";
+				IDMap[$$.label].label = $$.label;
+
+				if((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "int"))
+				{
+					IDMap[$$.label].type = "int";
+					cast = "(int) ";
+				}
+				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "float")) || ((IDMap[$1.label].type == "float") && (IDMap[$3.label].type == "int")))
+				{
+					IDMap[$$.label].type = "float";
+					cast = "(float) ";
+				}
+				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "char")) || ((IDMap[$1.label].type == "char") && (IDMap[$3.label].type == "int")))
+				{
+					IDMap[$$.label].type = "int";
+					cast = "(int) ";
+				}
+				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "string")) || ((IDMap[$1.label].type == "string") && (IDMap[$3.label].type == "int")))
+				{
+					IDMap[$$.label].type = "string";
+					cast = "(string) ";
+				}
+	
+				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + cast + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
 			}
-			| E TK_OP_SUB E
+			| TK_INT
 			{
 				$$.label = generateLabel();
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " - " + $3.label + ";\n";
-			}
-			| E TK_OP_MUL E
-			{
-				$$.label = generateLabel();
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " * " + $3.label + ";\n";
-			}
-			| E TK_OP_DIV E
-			{
-				$$.label = generateLabel();
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " / " + $3.label + ";\n";
-			}
-			| E TK_OP_MOD E
-			{
-				$$.label = generateLabel();
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " % " + $3.label + ";\n";
-			}
-			| NUMBER
-			{
-				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "int";
+
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 			}
+			| TK_FLOAT
+			{
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "float";
 
+				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
+			}
+			| TK_SCIENTIFIC
+			{
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "float"; //poderia ser double
+
+				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
+			}
+			| TK_CHAR
+			{
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "char";
+
+				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";				
+			}
+			| TK_STRING
+			{
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "string";
+
+				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";				
+			}
 			| TK_ID
 			{
 				//if(IDMap.find($1.label) == IDMap.end())	
@@ -241,7 +280,7 @@ E 			: E TK_OP_SUM E
 			}
 			;
 
-NUMBER		: TK_INT | TK_FLOAT | TK_SCIENTIFIC
+ARITHMETIC_OPERATION	: TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
 			;
 
 %%
