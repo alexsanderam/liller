@@ -49,15 +49,15 @@ Assign "="
 
 [(){}[\];,]	{ return *yytext; }
 
-{OpSum}		{yyval.traduction = "+"; return TK_OP_SUM; }
+{OpSum}		{yylval.traduction = "+"; return TK_OP_SUM; }
 
-{OpSub}		{yyval.traduction = "-"; return TK_OP_SUB; }
+{OpSub}		{yylval.traduction = "-"; return TK_OP_SUB; }
 
-{OpMult}	{yyval.traduction = "*"; return TK_OP_MUL; }
+{OpMult}	{yylval.traduction = "*"; return TK_OP_MUL; }
 
-{OpDiv}		{yyval.traduction = "/"; return TK_OP_DIV; }
+{OpDiv}		{yylval.traduction = "/"; return TK_OP_DIV; }
 
-{OpMod}		{yyval.traduction = "%"; return TK_OP_MOD; }
+{OpMod}		{yylval.traduction = "%"; return TK_OP_MOD; }
 
 
 {Assign}	{ return TK_ASSIGN; }

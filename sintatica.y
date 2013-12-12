@@ -23,6 +23,7 @@ struct args
 {
 	string label;
 	string traduction;
+	string type; /*auxiliar*/
 };
 
 int yylex(void);
@@ -84,9 +85,9 @@ RETURN		: TK_RETURN TK_INT ';'
 			}
 			;
 
-DECLARATIONS	: DECLARATION  DECLARATIONS
+DECLARATIONS	: DECLARATION ';' DECLARATIONS
 			{
-				$$.traduction = $1.traduction + $2.traduction;
+				$$.traduction = $1.traduction + $3.traduction;
 				declarations = $$.traduction;
 			}
 			|
@@ -95,8 +96,23 @@ DECLARATIONS	: DECLARATION  DECLARATIONS
 			}	
 			;
 
-DECLARATION	: TYPE TK_ID ';'
+
+DECLARATION	: DECLARATION ',' TK_ID
 			{
+
+				if(IDMap.find($3.label) == IDMap.end())
+				{
+					IDMap[$3.label].label = generateLabel();
+					IDMap[$3.label].type = $1.type;
+				}
+
+				$$.label = IDMap[$3.label].label;
+				$$.traduction = $1.traduction + "\t" + $1.type + " " + IDMap[$3.label].label + ";\n";
+				$$.type = $1.type;
+			}
+			| TYPE TK_ID
+			{
+
 				if(IDMap.find($2.label) == IDMap.end())
 				{
 					IDMap[$2.label].label = generateLabel();
@@ -105,6 +121,9 @@ DECLARATION	: TYPE TK_ID ';'
 
 				$$.label = IDMap[$2.label].label;
 				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
+
+				$$.type = IDMap[$2.label].type;
+
 			}
 			;
 
@@ -191,7 +210,7 @@ COMMANDS	: COMMAND COMMANDS
 			}
 
 COMMAND 	: E 	';'	
-			| DECLARATION
+			| DECLARATION ';'
 			{
 				declarations += $1.traduction;
 				$$.traduction = "";
