@@ -16,7 +16,9 @@ typedef struct{
 typedef map<string, id_struct> VARIABLESMAP;
 
 VARIABLESMAP IDMap;
-string declarations = "";
+
+string declarations;
+int block = 0;
 
 struct args
 {
@@ -64,7 +66,8 @@ Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 
 BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
 			{
-				$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
+				//$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
+				$$.traduction = "\n{\n" + declarations + "\n" + $3.traduction + $4.traduction + $5.traduction + "\n}";
 			}
 			|
 			{
@@ -85,6 +88,7 @@ RETURN		: TK_RETURN TK_INT ';'
 DECLARATIONS	: DECLARATION  DECLARATIONS
 			{
 				$$.traduction = $1.traduction + $2.traduction;
+				declarations = $$.traduction;
 			}
 			|
 			{	
@@ -220,6 +224,9 @@ E 			: E ARITHMETIC_OPERATION E
 				}
 	
 				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + cast + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+
 			}
 			| TK_INT
 			{
@@ -228,6 +235,8 @@ E 			: E ARITHMETIC_OPERATION E
 				IDMap[$$.label].type = "int";
 
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
 			| TK_FLOAT
 			{
@@ -236,6 +245,8 @@ E 			: E ARITHMETIC_OPERATION E
 				IDMap[$$.label].type = "float";
 
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
 			| TK_SCIENTIFIC
 			{
@@ -244,6 +255,8 @@ E 			: E ARITHMETIC_OPERATION E
 				IDMap[$$.label].type = "float"; //poderia ser double
 
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
 			| TK_CHAR
 			{
@@ -252,6 +265,8 @@ E 			: E ARITHMETIC_OPERATION E
 				IDMap[$$.label].type = "char";
 
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";				
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
 			| TK_STRING
 			{
@@ -260,6 +275,8 @@ E 			: E ARITHMETIC_OPERATION E
 				IDMap[$$.label].type = "string";
 
 				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";				
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
 			| TK_ID
 			{
@@ -274,8 +291,13 @@ E 			: E ARITHMETIC_OPERATION E
 				//if(IDMap.find($1.label) == IDMap.end())	
 					//IDMap[$1.label].label = generateLabel();
 
+				string cast = "";
+
+				if (IDMap[$3.label].type != IDMap[$1.label].type)
+					cast = "(" + IDMap[$1.label].type + ") ";
+
 				$$.label = IDMap[$1.label].label;
-				$$.traduction = $3.traduction + "\t" + $$.label + " = " + $3.label + ";\n"; 
+				$$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n"; 
 			}
 			;
 
