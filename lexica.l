@@ -28,6 +28,9 @@ Delim {Space}+
 Int ([-|+])?{Num}
 Float {Int}(\.{Num})
 Scientific ({Int}|{Float})[e|E][+|-]{Num}
+Boolean [{True} | {False}]
+True "true"
+False "false"
 
 Char \'({Letter}|{Num})\'
 ID {Letter}({Letter}|{Num})*
@@ -67,6 +70,10 @@ Assign "="
 {Scientific}	{ yylval.traduction = yytext; return TK_SCIENTIFIC; }
 {Char}		{ yylval.traduction = yytext; return TK_CHAR; }
 {String}	{ yylval.traduction = yytext; return TK_STRING; }
+{Boolean}	{ yylval.traduction = yytext; return TK_BOOL; }
+
+{True}		{ yylval.traduction = yytext; return TK_TRUE; }
+{False}		{ yylval.traduction = yytext; return TK_FALSE; }
 
 {TypeChar} 	{ yylval.traduction = yytext; return TK_TYPE_CHAR; }
 {TypeString} 	{ yylval.traduction = yytext; return TK_TYPE_STRING; }

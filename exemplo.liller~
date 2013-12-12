@@ -2,7 +2,8 @@ int main()
 {	
 	unsigned short int k;
 	int j;
-	float z, p;
+	float z, v;
+	bool x;
 
 	k = j = 1 + 1;
 	k = 2;

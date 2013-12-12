@@ -33,7 +33,8 @@ string generateLabel();
 
 %}
 
-%token TK_INT TK_FLOAT TK_SCIENTIFIC TK_CHAR TK_STRING
+%token TK_INT TK_FLOAT TK_SCIENTIFIC TK_CHAR TK_STRING TK_BOOL
+%token TK_TRUE TK_FALSE
 %token TK_MAIN 
 %token TK_ID 
 %token TK_TYPE_CHAR TK_TYPE_STRING TK_TYPE_INT TK_TYPE_VOID TK_TYPE_FLOAT TK_TYPE_DOUBLE TK_TYPE_BOOLEAN
@@ -64,10 +65,10 @@ Begin 		: TK_TYPE_INT TK_MAIN '(' ')' BLOCK
 			}
 			;
 
-BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
+BLOCK		: '{' COMMANDS BLOCK RETURN '}'
 			{
-				//$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + $5.traduction + "\n}";
-				$$.traduction = "\n{\n" + declarations + "\n" + $3.traduction + $4.traduction + $5.traduction + "\n}";
+				//$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + "\n}";
+				$$.traduction = "\n{\n" + declarations + $2.traduction + $3.traduction + $4.traduction + "\n}";
 			}
 			|
 			{
@@ -85,17 +86,6 @@ RETURN		: TK_RETURN TK_INT ';'
 			}
 			;
 
-DECLARATIONS	: DECLARATION ';' DECLARATIONS
-			{
-				$$.traduction = $1.traduction + $3.traduction;
-				declarations = $$.traduction;
-			}
-			|
-			{	
-				$$.traduction = "\n";
-			}	
-			;
-
 
 DECLARATION	: DECLARATION ',' TK_ID
 			{
@@ -107,8 +97,30 @@ DECLARATION	: DECLARATION ',' TK_ID
 				}
 
 				$$.label = IDMap[$3.label].label;
-				$$.traduction = $1.traduction + "\t" + $1.type + " " + IDMap[$3.label].label + ";\n";
-				$$.type = $1.type;
+				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
+				$$.type = IDMap[$3.label].type;
+			}
+			| DECLARATION ',' TK_ID TK_ASSIGN E
+			{
+				string cast = "";
+				string atribuition = "";
+
+				if(IDMap.find($3.label) == IDMap.end())
+				{
+					IDMap[$3.label].label = generateLabel();
+					IDMap[$3.label].type = $1.type;
+				}
+
+				if (IDMap[$5.label].type != IDMap[$3.label].type)
+					cast = "(" + IDMap[$3.label].type + ") ";
+
+				atribuition = $5.traduction + "\t" + IDMap[$3.label].label + " = " + cast + $5.label + ";\n";
+
+
+				$$.label = IDMap[$3.label].label;
+				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n\n" + atribuition + "\n";
+				$$.type = IDMap[$3.label].type;	
+							
 			}
 			| TYPE TK_ID
 			{
@@ -120,13 +132,14 @@ DECLARATION	: DECLARATION ',' TK_ID
 				}
 
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
-
+				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
 				$$.type = IDMap[$2.label].type;
 
 			}
-			/*| TYPE TK_ID ';'
+			| TYPE TK_ID TK_ASSIGN E
 			{
+				string cast = "";
+				string atribuition = "";
 
 				if(IDMap.find($2.label) == IDMap.end())
 				{
@@ -134,12 +147,17 @@ DECLARATION	: DECLARATION ',' TK_ID
 					IDMap[$2.label].type = $1.traduction;
 				}
 
+				if (IDMap[$4.label].type != IDMap[$2.label].type)
+					cast = "(" + IDMap[$2.label].type + ") ";
+
+				atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";
+
+
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
-
+				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n\n" + atribuition + "\n";
 				$$.type = IDMap[$2.label].type;
-			}*/
 
+			}
 			;
 
 			
@@ -219,7 +237,7 @@ COMMANDS	: COMMAND COMMANDS
 			{
 				$$.traduction = $1.traduction + "\n" + $2.traduction;
 			}
-			|
+			| 
 			{
 				$$.traduction = "";
 			}
@@ -257,6 +275,11 @@ E 			: E ARITHMETIC_OPERATION E
 				{
 					IDMap[$$.label].type = "string";
 					cast = "(string) ";
+				}
+				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "bool")) || ((IDMap[$1.label].type == "bool") && (IDMap[$3.label].type == "int")))
+				{
+					IDMap[$$.label].type = "bool";
+					cast = "(bool) ";
 				}
 	
 				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + cast + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
@@ -314,6 +337,16 @@ E 			: E ARITHMETIC_OPERATION E
 
 				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 			}
+			| TK_BOOL
+			{
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+				IDMap[$$.label].type = "bool";
+
+				$$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";				
+
+				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+			}
 			| TK_ID
 			{
 				//if(IDMap.find($1.label) == IDMap.end())	
@@ -322,10 +355,18 @@ E 			: E ARITHMETIC_OPERATION E
 				$$.label = IDMap[$1.label].label;
 				$$.traduction = "";
 			}
-			| TK_ID TK_ASSIGN E
+			| ATRIBUITION
 			{
-				//if(IDMap.find($1.label) == IDMap.end())	
-					//IDMap[$1.label].label = generateLabel();
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+			}
+			;
+
+
+ATRIBUITION	: TK_ID TK_ASSIGN E
+			{
+				if(IDMap.find($1.label) == IDMap.end())	
+					IDMap[$1.label].label = generateLabel();
 
 				string cast = "";
 
@@ -335,7 +376,8 @@ E 			: E ARITHMETIC_OPERATION E
 				$$.label = IDMap[$1.label].label;
 				$$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n"; 
 			}
-			;
+
+
 
 ARITHMETIC_OPERATION	: TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
 			;
