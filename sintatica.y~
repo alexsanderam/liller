@@ -18,7 +18,6 @@ typedef map<string, id_struct> VARIABLESMAP;
 VARIABLESMAP IDMap;
 
 string declarations;
-int block = 0;
 
 struct args
 {
@@ -75,7 +74,7 @@ BLOCK		: '{' DECLARATIONS COMMANDS BLOCK RETURN '}'
 			}
 			;
 
-RETURN		: TK_RETURN TK_INT ';'
+RETURN		: TK_RETURN E ';'
 			{
 				$$.traduction = "\n\t" + $1.traduction + " " + $2.traduction + ";";
 			}
@@ -96,16 +95,34 @@ DECLARATIONS	: DECLARATION  DECLARATIONS
 			}	
 			;
 
-DECLARATION	: TYPE TK_ID ';'
+DECLARATION	: TYPE IDENTIFIERS ';'
 			{
-				if(IDMap.find($2.label) == IDMap.end())
+				$$.traduction = $2.traduction;
+			}
+			;
+
+
+IDENTIFIERS	: TK_ID ',' IDENTIFIERS
+			{
+				if(IDMap.find($1.label) == IDMap.end())
 				{
-					IDMap[$2.label].label = generateLabel();
-					IDMap[$2.label].type = $1.traduction;
+					IDMap[$1.label].label = generateLabel();
+					IDMap[$1.label].type = type;
 				}
 
-				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + $1.traduction + " " + IDMap[$2.label].label + ";\n";
+				$$.label = IDMap[$1.label].label;
+				$$.traduction = "\t" + type + " " + IDMap[$1.label].label + ";\n" + $3.traduction;
+			}
+			|TK_ID
+			{
+				if(IDMap.find($1.label) == IDMap.end())
+				{
+					IDMap[$1.label].label = generateLabel();
+					IDMap[$1.label].type = type;
+				}
+
+				$$.label = IDMap[$1.label].label;
+				$$.traduction = "\t" + type + " " + IDMap[$1.label].label + ";\n";				
 			}
 			;
 
@@ -191,8 +208,12 @@ COMMANDS	: COMMAND COMMANDS
 				$$.traduction = "";
 			}
 
-COMMAND 	: E 	';'
+COMMAND 	: E 	';'	
 			| DECLARATION
+			{
+				declarations += $1.traduction;
+				$$.traduction = "";
+			}
 			;
 
 
@@ -205,7 +226,6 @@ E 			: E ARITHMETIC_OPERATION E
 				if((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "int"))
 				{
 					IDMap[$$.label].type = "int";
-					cast = "(int) ";
 				}
 				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "float")) || ((IDMap[$1.label].type == "float") && (IDMap[$3.label].type == "int")))
 				{
