@@ -30,6 +30,7 @@ int yylex(void);
 void yyerror(string);
 
 string generateLabel();
+id_struct* defineKeyOperating(id_struct, id_struct);
 
 %}
 
@@ -253,38 +254,52 @@ COMMAND 	: E 	';'
 
 E 			: E ARITHMETIC_OPERATION E
 			{
+				
 				string cast = "";
+				id_struct* keyOperating;
+				id_struct* weakOperating;
+				id_struct* strongOperating;
+
 				$$.label = generateLabel();
 				IDMap[$$.label].label = $$.label;
 
-				if((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "int"))
-				{
-					IDMap[$$.label].type = "int";
-				}
-				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "float")) || ((IDMap[$1.label].type == "float") && (IDMap[$3.label].type == "int")))
-				{
-					IDMap[$$.label].type = "float";
-					cast = "(float) ";
-				}
-				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "char")) || ((IDMap[$1.label].type == "char") && (IDMap[$3.label].type == "int")))
-				{
-					IDMap[$$.label].type = "int";
-					cast = "(int) ";
-				}
-				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "string")) || ((IDMap[$1.label].type == "string") && (IDMap[$3.label].type == "int")))
-				{
-					IDMap[$$.label].type = "string";
-					cast = "(string) ";
-				}
-				else if (((IDMap[$1.label].type == "int") && (IDMap[$3.label].type == "bool")) || ((IDMap[$1.label].type == "bool") && (IDMap[$3.label].type == "int")))
-				{
-					IDMap[$$.label].type = "bool";
-					cast = "(bool) ";
-				}
-	
-				$$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + cast + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+				$$.traduction = $1.traduction + $3.traduction;
 
-				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+				if(IDMap[$1.label].type == IDMap[$3.label].type)
+				{
+					IDMap[$$.label].type = IDMap[$1.label].type;
+					$$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+					declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+				}
+				else
+				{
+					keyOperating = defineKeyOperating(IDMap[$1.label], IDMap[$3.label]);
+
+					IDMap[keyOperating->label].label = keyOperating->label;
+					IDMap[keyOperating->label].type = keyOperating->type;
+					IDMap[$$.label].type = keyOperating->type;
+
+
+					if(keyOperating->type == IDMap[$1.label].type)
+					{
+						weakOperating = &(IDMap[$1.label]);
+						strongOperating = &(IDMap[$3.label]);
+	
+						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
+					}
+					else
+					{
+						weakOperating = &(IDMap[$3.label]);
+						strongOperating = &(IDMap[$1.label]);
+
+						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
+					}
+
+					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+					declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+				}
 
 			}
 			| TK_INT
@@ -409,5 +424,66 @@ string generateLabel()
 	label << "_temp" << counter++;
 
 	return label.str();
-	
 }					
+
+id_struct* defineKeyOperating(id_struct op1, id_struct op2)
+{
+	id_struct* keyOperating = new id_struct;
+	
+	keyOperating->label = generateLabel();
+
+	if((op1.type == "int") && (op2.type == "int"))
+	{
+		keyOperating->type = "int";
+	}
+	else if((op1.type == "float") && (op2.type == "float"))
+	{
+		keyOperating->type = "float";
+	}
+	else if((op1.type == "char") && (op2.type == "char"))
+	{
+		keyOperating->type = "char";
+	}
+	else if((op1.type == "string") && (op2.type == "string"))
+	{
+		keyOperating->type = "string";
+	}
+	else if((op1.type == "bool") && (op2.type == "bool"))
+	{
+		keyOperating->type = "bool";
+	}
+	else if ((op1.type == "int") && (op2.type == "float"))
+	{
+		keyOperating->type = "float";
+	}
+	else if ((op1.type == "float") && (op2.type == "int"))
+	{
+		keyOperating->type = "float";
+	}
+	else if ((op1.type == "int") && (op2.type == "char"))
+	{
+		keyOperating->type = "int";
+	}
+	else if ((op1.type == "char") && (op2.type == "int"))
+	{
+		keyOperating->type = "int";
+	}
+	else if ((op1.type == "int") && (op2.type == "string"))
+	{
+		keyOperating->type = "string";
+	}
+	else if ((op1.type == "string") && (op2.type == "int"))
+	{
+		keyOperating->type = "string";
+	}
+	else if ((op1.type == "int") && (op2.type == "bool"))
+	{
+		keyOperating->type = "bool";
+	}
+	else if ((op1.type == "bool") && (op2.type == "int"))
+	{
+		keyOperating->type = "bool";
+	}
+
+	return keyOperating;
+}
