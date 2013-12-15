@@ -523,8 +523,8 @@ static const yytype_uint16 yyrline[] =
      126,   140,   165,   165,   165,   165,   165,   165,   165,   167,
      171,   175,   179,   183,   187,   191,   195,   195,   199,   203,
      207,   211,   215,   219,   223,   227,   231,   237,   242,   246,
-     247,   255,   305,   315,   325,   335,   345,   355,   365,   373,
-     381,   397,   397,   397,   397,   397
+     247,   255,   303,   313,   323,   333,   343,   353,   363,   371,
+     379,   395,   395,   395,   395,   395
 };
 #endif
 
@@ -1840,8 +1840,6 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 256 "sintatica.y"
     {
-				
-				string cast = "";
 				id_struct* keyOperating;
 				id_struct* weakOperating;
 				id_struct* strongOperating;
@@ -1893,7 +1891,7 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 306 "sintatica.y"
+#line 304 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1908,7 +1906,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 316 "sintatica.y"
+#line 314 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1923,7 +1921,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 326 "sintatica.y"
+#line 324 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1938,7 +1936,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 336 "sintatica.y"
+#line 334 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1953,7 +1951,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 346 "sintatica.y"
+#line 344 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1968,7 +1966,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 356 "sintatica.y"
+#line 354 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1983,7 +1981,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 366 "sintatica.y"
+#line 364 "sintatica.y"
     {
 				//if(IDMap.find($1.label) == IDMap.end())	
 					//IDMap[$1.label] = generateLabel();
@@ -1996,7 +1994,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 374 "sintatica.y"
+#line 372 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
 				(yyval).label = (yyvsp[(1) - (1)]).label;
@@ -2006,7 +2004,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 382 "sintatica.y"
+#line 380 "sintatica.y"
     {
 				if(IDMap.find((yyvsp[(1) - (3)]).label) == IDMap.end())	
 					IDMap[(yyvsp[(1) - (3)]).label].label = generateLabel();
@@ -2024,7 +2022,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2028 "y.tab.c"
+#line 2026 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2255,7 +2253,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 400 "sintatica.y"
+#line 398 "sintatica.y"
 
 
 #include "lex.yy.c"

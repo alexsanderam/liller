@@ -254,8 +254,6 @@ COMMAND 	: E 	';'
 
 E 			: E ARITHMETIC_OPERATION E
 			{
-				
-				string cast = "";
 				id_struct* keyOperating;
 				id_struct* weakOperating;
 				id_struct* strongOperating;
@@ -282,16 +280,16 @@ E 			: E ARITHMETIC_OPERATION E
 
 					if(keyOperating->type == IDMap[$1.label].type)
 					{
-						weakOperating = &(IDMap[$1.label]);
-						strongOperating = &(IDMap[$3.label]);
+						weakOperating = &(IDMap[$3.label]);
+						strongOperating = &(IDMap[$1.label]);
 	
 						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
 						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
 					}
 					else
 					{
-						weakOperating = &(IDMap[$3.label]);
-						strongOperating = &(IDMap[$1.label]);
+						weakOperating = &(IDMap[$1.label]);
+						strongOperating = &(IDMap[$3.label]);
 
 						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
 						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";

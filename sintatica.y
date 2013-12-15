@@ -254,8 +254,6 @@ COMMAND 	: E 	';'
 
 E 			: E ARITHMETIC_OPERATION E
 			{
-				
-				string cast = "";
 				id_struct* keyOperating;
 				id_struct* weakOperating;
 				id_struct* strongOperating;
