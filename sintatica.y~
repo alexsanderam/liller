@@ -42,6 +42,10 @@ id_struct* defineKeyOperating(id_struct, id_struct);
 %token TK_MODIFIER_UNSIGNED TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_MODIFIER_LONG
 %token TK_END TK_ERROR
 %token TK_OP_SUM TK_OP_SUB TK_OP_MUL TK_OP_DIV
+%token TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER TK_OP_REL_EQ TK_OP_REL_DIFF
+%token TK_OP_LOGIC_AND TK_OP_LOGIC_OR TK_OP_LOGIC_NOT
+%token TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_NOT TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
+
 %token TK_ASSIGN
 %token TK_RETURN
 
@@ -97,8 +101,10 @@ DECLARATION	: DECLARATION ',' TK_ID
 					IDMap[$3.label].type = $1.type;
 				}
 
+				declarations += "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
+
 				$$.label = IDMap[$3.label].label;
-				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
+				$$.traduction = $1.traduction;
 				$$.type = IDMap[$3.label].type;
 			}
 			| DECLARATION ',' TK_ID TK_ASSIGN E
@@ -116,10 +122,10 @@ DECLARATION	: DECLARATION ',' TK_ID
 					cast = "(" + IDMap[$3.label].type + ") ";
 
 				atribuition = $5.traduction + "\t" + IDMap[$3.label].label + " = " + cast + $5.label + ";\n";
-
+				declarations += "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
 
 				$$.label = IDMap[$3.label].label;
-				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n\n" + atribuition + "\n";
+				$$.traduction = "\n" + atribuition + "\n";
 				$$.type = IDMap[$3.label].type;	
 							
 			}
@@ -132,8 +138,10 @@ DECLARATION	: DECLARATION ',' TK_ID
 					IDMap[$2.label].type = $1.traduction;
 				}
 
+				declarations += "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
+
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
+				$$.traduction = 
 				$$.type = IDMap[$2.label].type;
 
 			}
@@ -154,8 +162,10 @@ DECLARATION	: DECLARATION ',' TK_ID
 				atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";
 
 
+				declarations += "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
+
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n\n" + atribuition + "\n";
+				$$.traduction = "\n" + atribuition + "\n";
 				$$.type = IDMap[$2.label].type;
 
 			}
@@ -246,8 +256,7 @@ COMMANDS	: COMMAND COMMANDS
 COMMAND 	: E 	';'	
 			| DECLARATION ';'
 			{
-				declarations += $1.traduction;
-				$$.traduction = "";
+				$$.traduction = $1.traduction;;
 			}
 			;
 
@@ -298,6 +307,16 @@ E 			: E ARITHMETIC_OPERATION E
 					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
 					declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 				}
+
+			}
+			| E RELATIONAL_OPERATION E
+			{
+				
+
+			}
+			| E BIN_OPERATION E
+			{
+
 
 			}
 			| TK_INT
@@ -391,9 +410,36 @@ ATRIBUITION	: TK_ID TK_ASSIGN E
 			}
 
 
+LE			: LE LOGIC_OPERATION LE
+			{
+				
+			}
+			| TK_BOOL
+			{
+
+			}
+			| TK_OP_LOGIC_NOT TK_BOOL
+			{
+
+			}
+
 
 ARITHMETIC_OPERATION	: TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
-			;
+						;
+
+
+RELATIONAL_OPERATION	: TK_OP_REL_LESS | TK_OP_REL_GREATER | TK_OP_REL_EQLESS | TK_OP_REL_EQGREATER | TK_OP_REL_EQ | TK_OP_REL_DIFF
+						;
+						
+
+
+LOGIC_OPERATION 		: TK_OP_LOGIC_OR | TK_OP_LOGIC_AND
+						;
+
+
+
+BIN_OPERATION			: TK_OP_BIN_AND | TK_OP_BIN_OR | TK_OP_BIN_XOR | TK_OP_BIN_NOT | TK_OP_BIN_SHIFTR | TK_OP_BIN_SHIFTL
+						;
 
 %%
 

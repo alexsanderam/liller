@@ -101,10 +101,8 @@ DECLARATION	: DECLARATION ',' TK_ID
 					IDMap[$3.label].type = $1.type;
 				}
 
-				declarations += "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
-
 				$$.label = IDMap[$3.label].label;
-				$$.traduction = $1.traduction;
+				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
 				$$.type = IDMap[$3.label].type;
 			}
 			| DECLARATION ',' TK_ID TK_ASSIGN E
@@ -122,10 +120,10 @@ DECLARATION	: DECLARATION ',' TK_ID
 					cast = "(" + IDMap[$3.label].type + ") ";
 
 				atribuition = $5.traduction + "\t" + IDMap[$3.label].label + " = " + cast + $5.label + ";\n";
-				declarations += "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
+
 
 				$$.label = IDMap[$3.label].label;
-				$$.traduction = "\n" + atribuition + "\n";
+				$$.traduction = $1.traduction + "\t" + IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n\n" + atribuition + "\n";
 				$$.type = IDMap[$3.label].type;	
 							
 			}
@@ -138,10 +136,8 @@ DECLARATION	: DECLARATION ',' TK_ID
 					IDMap[$2.label].type = $1.traduction;
 				}
 
-				declarations += "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
-
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "";
+				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
 				$$.type = IDMap[$2.label].type;
 
 			}
@@ -162,10 +158,8 @@ DECLARATION	: DECLARATION ',' TK_ID
 				atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";
 
 
-				declarations += "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
-
 				$$.label = IDMap[$2.label].label;
-				$$.traduction = "\n" + atribuition + "\n";
+				$$.traduction = "\t" + IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n\n" + atribuition + "\n";
 				$$.type = IDMap[$2.label].type;
 
 			}
@@ -256,7 +250,8 @@ COMMANDS	: COMMAND COMMANDS
 COMMAND 	: E 	';'	
 			| DECLARATION ';'
 			{
-				$$.traduction = $1.traduction;;
+				declarations += $1.traduction;
+				$$.traduction = "";
 			}
 			;
 
