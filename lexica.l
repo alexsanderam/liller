@@ -42,6 +42,24 @@ OpMult [*]
 OpDiv [/]
 OpMod "%"
 
+OpRelLess "<"
+OpRelGreater ">"
+OpRelEqLess "<="
+OpRelEqGreater ">="
+OpRelEq "=="
+OpRelDiff "!="
+
+OpLogicAnd "&&"
+OpLogicOr "||"
+OpLogicNot "!"
+
+OpLogicBinAnd "&"
+OpLogicBinOr "|"
+OpLogicBinXor "^"
+OpLogicBinNot "~"
+OpLogicBinShiftR ">>"
+OpLogicBinShiftL "<<"
+
 Assign "="
 
 %%
@@ -53,14 +71,29 @@ Assign "="
 [(){}[\];,]	{ return *yytext; }
 
 {OpSum}		{yylval.traduction = "+"; return TK_OP_SUM; }
-
 {OpSub}		{yylval.traduction = "-"; return TK_OP_SUB; }
-
 {OpMult}	{yylval.traduction = "*"; return TK_OP_MUL; }
-
 {OpDiv}		{yylval.traduction = "/"; return TK_OP_DIV; }
-
 {OpMod}		{yylval.traduction = "%"; return TK_OP_MOD; }
+
+
+{OpRelLess}			{yylval.traduction = "<"; return TK_OP_REL_LESS; }
+{OpRelGreater}		{yylval.traduction = ">"; return TK_OP_REL_GREATER; }
+{OpRelEqLess}		{yylval.traduction = "<="; return TK_OP_REL_EQLESS; }
+{OpRelEqGreater}	{yylval.traduction = ">="; return TK_OP_REL_EQGREATER; }
+{OpRelEq}			{yylval.traduction = "=="; return TK_OP_REL_EQ; }
+{OpRelDiff}			{yylval.traduction = "!="; return TK_OP_REL_DIFF; }
+
+{OpLogicAnd}		{yylval.traduction = "&&"; return TK_OP_LOGIC_AND; }
+{OpLogicOr}			{yylval.traduction = "||"; return TK_OP_LOGIC_OR; }	
+{OpLogicNot}		{yylval.traduction = "!"; return TK_OP_LOGIC_NOT; }
+
+{OpLogicBinAnd}			{yylval.traduction = "&"; return TK_OP_BIN_AND; }
+{OpLogicBinOr}			{yylval.traduction = "|"; return TK_OP_BIN_OR; }
+{OpLogicBinXor}			{yylval.traduction = "^"; return TK_OP_BIN_XOR; }
+{OpLogicBinNot}			{yylval.traduction = "~"; return TK_OP_BIN_NOT; }
+{OpLogicBinShiftR}		{yylval.traduction = ">>"; return TK_OP_BIN_SHIFTR; }
+{OpLogicBinShiftL}		{yylval.traduction = "<<"; return TK_OP_BIN_SHIFTL; }
 
 
 {Assign}	{ return TK_ASSIGN; }
