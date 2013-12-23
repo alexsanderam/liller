@@ -77,34 +77,60 @@
 
 using namespace std;
 
-typedef struct{
+typedef struct
+{
 	string type;
+	string modifier;
 	string label;
 } id_struct;
-
-typedef map<string, id_struct> VARIABLESMAP;
-
-VARIABLESMAP IDMap;
-
-string declarations;
 
 struct args
 {
 	string label;
 	string traduction;
 	string type; /*auxiliar*/
+	string modifier; /*auxiliar*/
 };
+
+typedef struct opStruct
+{
+	string op1Type;
+	string op2Type;
+	string sOperator;
+
+	bool operator ==(const opStruct &ops) const
+	{   
+		return ((op1Type == ops.op1Type) && (op2Type == ops.op2Type) && (sOperator == ops.sOperator));
+	};
+
+
+	bool operator <(const opStruct &ops) const
+	{   
+
+		return ((op1Type < ops.op1Type) || ((op1Type == ops.op1Type) && (op2Type < ops.op2Type)) || (((op1Type == ops.op1Type) && (op2Type == ops.op2Type)) && (sOperator < ops.sOperator)));
+	};
+
+} operation_struct;
+
+
+map<string, id_struct> IDMap;
+map<operation_struct, string> operationsMap;
+
+string declarations = "";
+
+bool error = false; /*utilizado para identificar se tem algum erro de compilação ou não*/
 
 int yylex(void);
 void yyerror(string);
 
 string generateLabel();
-id_struct* defineKeyOperating(id_struct, id_struct);
+id_struct* defineKeyOperating(id_struct, id_struct, string);
+void loadOpearationsMap(void);
 
 
 
 /* Line 268 of yacc.c  */
-#line 108 "y.tab.c"
+#line 134 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -240,7 +266,7 @@ typedef int YYSTYPE;
 
 
 /* Line 343 of yacc.c  */
-#line 244 "y.tab.c"
+#line 270 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -555,13 +581,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    62,    62,    67,    73,    79,    84,    89,    95,   110,
-     132,   148,   175,   175,   175,   175,   175,   175,   175,   177,
-     181,   185,   189,   193,   197,   201,   205,   205,   209,   213,
-     217,   221,   225,   229,   233,   237,   241,   247,   252,   256,
-     257,   264,   312,   317,   322,   332,   342,   352,   362,   372,
-     382,   390,   398,   427,   427,   427,   427,   427,   431,   431,
-     431,   431,   431,   431,   441,   441,   441,   441,   441,   441
+       0,    89,    89,    97,   106,   111,   117,   122,   128,   152,
+     186,   211,   250,   256,   262,   268,   274,   280,   286,   292,
+     298,   304,   310,   316,   322,   328,   334,   340,   346,   352,
+     358,   364,   370,   376,   382,   388,   394,   402,   407,   411,
+     412,   419,   467,   472,   477,   487,   497,   507,   517,   527,
+     537,   546,   554,   586,   586,   586,   586,   586,   590,   590,
+     590,   590,   590,   590,   600,   600,   600,   600,   600,   600
 };
 #endif
 
@@ -1564,27 +1590,32 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 63 "sintatica.y"
+#line 90 "sintatica.y"
     {
-				cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << (yyvsp[(5) - (5)]).traduction << endl; 
+				if(!error)				
+					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << (yyvsp[(5) - (5)]).traduction << endl; 
+				else
+					exit(1);
 			}
     break;
 
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 68 "sintatica.y"
+#line 98 "sintatica.y"
     {
-			cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << (yyvsp[(6) - (6)]).traduction << endl;
+				if(!error)
+					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << (yyvsp[(6) - (6)]).traduction << endl;
+				else
+					exit(1);
 			}
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 74 "sintatica.y"
+#line 107 "sintatica.y"
     {
-				//$$.traduction = "\n{\n" + $2.traduction + $3.traduction + $4.traduction + "\n}";
 				(yyval).traduction = "\n{\n" + declarations + (yyvsp[(2) - (5)]).traduction + (yyvsp[(3) - (5)]).traduction + (yyvsp[(4) - (5)]).traduction + "\n}";
 			}
     break;
@@ -1592,7 +1623,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 79 "sintatica.y"
+#line 111 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1601,7 +1632,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 85 "sintatica.y"
+#line 118 "sintatica.y"
     {
 				(yyval).traduction = "\n\t" + (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + ";";
 			}
@@ -1610,7 +1641,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 89 "sintatica.y"
+#line 122 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1619,16 +1650,25 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 96 "sintatica.y"
+#line 129 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(3) - (3)]).label) == IDMap.end())
 				{
 					IDMap[(yyvsp[(3) - (3)]).label].label = generateLabel();
 					IDMap[(yyvsp[(3) - (3)]).label].type = (yyvsp[(1) - (3)]).type;
+					IDMap[(yyvsp[(3) - (3)]).label].modifier = (yyvsp[(1) - (3)]).modifier;
 				}
+				else
+					yyerror("identifier: '" + (yyvsp[(3) - (3)]).label + "' already declared.");
+	
+				
+				if(IDMap[(yyvsp[(3) - (3)]).label].modifier != "")
+					declarations += "\t" + IDMap[(yyvsp[(3) - (3)]).label].modifier + " ";
+				else
+					declarations += "\t";
 
-				declarations += "\t" + IDMap[(yyvsp[(3) - (3)]).label].type + " " + IDMap[(yyvsp[(3) - (3)]).label].label + ";\n";
+				declarations += IDMap[(yyvsp[(3) - (3)]).label].type + " " + IDMap[(yyvsp[(3) - (3)]).label].label + ";\n";
 
 				(yyval).label = IDMap[(yyvsp[(3) - (3)]).label].label;
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction;
@@ -1639,7 +1679,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 111 "sintatica.y"
+#line 153 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1648,13 +1688,25 @@ yyreduce:
 				{
 					IDMap[(yyvsp[(3) - (5)]).label].label = generateLabel();
 					IDMap[(yyvsp[(3) - (5)]).label].type = (yyvsp[(1) - (5)]).type;
+					IDMap[(yyvsp[(3) - (5)]).label].modifier = (yyvsp[(1) - (5)]).modifier;
 				}
+				else
+					yyerror("identifier: '" + (yyvsp[(3) - (5)]).label + "' already declared.");
 
 				if (IDMap[(yyvsp[(5) - (5)]).label].type != IDMap[(yyvsp[(3) - (5)]).label].type)
+				{
+					//aqui deve se verificar quais casts são possíveis.
 					cast = "(" + IDMap[(yyvsp[(3) - (5)]).label].type + ") ";
+				}
 
 				atribuition = (yyvsp[(5) - (5)]).traduction + "\t" + IDMap[(yyvsp[(3) - (5)]).label].label + " = " + cast + (yyvsp[(5) - (5)]).label + ";\n";
-				declarations += "\t" + IDMap[(yyvsp[(3) - (5)]).label].type + " " + IDMap[(yyvsp[(3) - (5)]).label].label + ";\n";
+
+				if(IDMap[(yyvsp[(3) - (5)]).label].modifier != "")
+					declarations += "\t" + IDMap[(yyvsp[(3) - (5)]).label].modifier + " ";
+				else
+					declarations += "\t";
+
+				declarations += IDMap[(yyvsp[(3) - (5)]).label].type + " " + IDMap[(yyvsp[(3) - (5)]).label].label + ";\n";
 
 				(yyval).label = IDMap[(yyvsp[(3) - (5)]).label].label;
 				(yyval).traduction = "\n" + atribuition + "\n";
@@ -1666,16 +1718,25 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 133 "sintatica.y"
+#line 187 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(2) - (2)]).label) == IDMap.end())
 				{
 					IDMap[(yyvsp[(2) - (2)]).label].label = generateLabel();
-					IDMap[(yyvsp[(2) - (2)]).label].type = (yyvsp[(1) - (2)]).traduction;
+					IDMap[(yyvsp[(2) - (2)]).label].type = (yyvsp[(1) - (2)]).type;
+					IDMap[(yyvsp[(2) - (2)]).label].modifier = (yyvsp[(1) - (2)]).modifier;
 				}
+				else
+					yyerror("identifier: '" + (yyvsp[(2) - (2)]).label + "' already declared.");
 
-				declarations += "\t" + IDMap[(yyvsp[(2) - (2)]).label].type + " " + IDMap[(yyvsp[(2) - (2)]).label].label + ";\n";
+				if(IDMap[(yyvsp[(2) - (2)]).label].modifier != "")
+					declarations += "\t" + IDMap[(yyvsp[(2) - (2)]).label].modifier + " ";
+				else
+					declarations += "\t";
+
+
+				declarations += IDMap[(yyvsp[(2) - (2)]).label].type + " " + IDMap[(yyvsp[(2) - (2)]).label].label + ";\n";
 
 				(yyval).label = IDMap[(yyvsp[(2) - (2)]).label].label;
 				(yyval).traduction = "";
@@ -1687,7 +1748,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 149 "sintatica.y"
+#line 212 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1695,16 +1756,28 @@ yyreduce:
 				if(IDMap.find((yyvsp[(2) - (4)]).label) == IDMap.end())
 				{
 					IDMap[(yyvsp[(2) - (4)]).label].label = generateLabel();
-					IDMap[(yyvsp[(2) - (4)]).label].type = (yyvsp[(1) - (4)]).traduction;
+					IDMap[(yyvsp[(2) - (4)]).label].modifier = (yyvsp[(1) - (4)]).modifier;
+					IDMap[(yyvsp[(2) - (4)]).label].type = (yyvsp[(1) - (4)]).modifier;
 				}
+				else
+					yyerror("identifier: '" + (yyvsp[(2) - (4)]).label + "' already declared.");
 
 				if (IDMap[(yyvsp[(4) - (4)]).label].type != IDMap[(yyvsp[(2) - (4)]).label].type)
+				{
+					//aqui deve se verificar quais casts são possíveis.
 					cast = "(" + IDMap[(yyvsp[(2) - (4)]).label].type + ") ";
+				}
 
 				atribuition = (yyvsp[(4) - (4)]).traduction + "\t" + IDMap[(yyvsp[(2) - (4)]).label].label + " = " + cast + (yyvsp[(4) - (4)]).label + ";\n";
 
 
-				declarations += "\t" + IDMap[(yyvsp[(2) - (4)]).label].type + " " + IDMap[(yyvsp[(2) - (4)]).label].label + ";\n";
+				if(IDMap[(yyvsp[(2) - (4)]).label].modifier != "")
+					declarations += "\t" + IDMap[(yyvsp[(2) - (4)]).label].modifier + " ";
+				else
+					declarations += "\t";
+
+
+				declarations += IDMap[(yyvsp[(2) - (4)]).label].type + " " + IDMap[(yyvsp[(2) - (4)]).label].label + ";\n";
 
 				(yyval).label = IDMap[(yyvsp[(2) - (4)]).label].label;
 				(yyval).traduction = "\n" + atribuition + "\n";
@@ -1713,163 +1786,285 @@ yyreduce:
 			}
     break;
 
+  case 12:
+
+/* Line 1806 of yacc.c  */
+#line 251 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 13:
+
+/* Line 1806 of yacc.c  */
+#line 257 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 14:
+
+/* Line 1806 of yacc.c  */
+#line 263 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 15:
+
+/* Line 1806 of yacc.c  */
+#line 269 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 16:
+
+/* Line 1806 of yacc.c  */
+#line 275 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 17:
+
+/* Line 1806 of yacc.c  */
+#line 281 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 18:
+
+/* Line 1806 of yacc.c  */
+#line 287 "sintatica.y"
+    {
+				(yyval).type = (yyvsp[(1) - (1)]).traduction;
+				(yyval).modifier = "";
+				(yyval).traduction = "";
+			}
+    break;
+
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 178 "sintatica.y"
+#line 293 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 182 "sintatica.y"
+#line 299 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 186 "sintatica.y"
+#line 305 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 190 "sintatica.y"
+#line 311 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 194 "sintatica.y"
+#line 317 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 198 "sintatica.y"
+#line 323 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 202 "sintatica.y"
+#line 329 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).traduction;
+				(yyval).type = (yyvsp[(2) - (2)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
+				(yyval).traduction = "";
+			}
+    break;
+
+  case 26:
+
+/* Line 1806 of yacc.c  */
+#line 335 "sintatica.y"
+    {
+				(yyval).type = "int";
+				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 206 "sintatica.y"
+#line 341 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (1)]).traduction + " int";
+				(yyval).type = "int";
+				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 210 "sintatica.y"
+#line 347 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction;
+				(yyval).type = (yyvsp[(3) - (3)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 214 "sintatica.y"
+#line 353 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction;
+				(yyval).type = (yyvsp[(3) - (3)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 218 "sintatica.y"
+#line 359 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction;
+				(yyval).type = (yyvsp[(3) - (3)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 222 "sintatica.y"
+#line 365 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction;
+				(yyval).type = (yyvsp[(3) - (3)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 226 "sintatica.y"
+#line 371 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction;
+				(yyval).type = (yyvsp[(3) - (3)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 230 "sintatica.y"
+#line 377 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " + (yyvsp[(3) - (4)]).traduction + " " + (yyvsp[(4) - (4)]).traduction;
+				(yyval).type = (yyvsp[(4) - (4)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 234 "sintatica.y"
+#line 383 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " + (yyvsp[(3) - (4)]).traduction + " " + (yyvsp[(4) - (4)]).traduction;
+				(yyval).type = (yyvsp[(4) - (4)]).traduction;
+				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 238 "sintatica.y"
+#line 389 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction + " int";
+				(yyval).type = "int";
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 242 "sintatica.y"
+#line 395 "sintatica.y"
     {
-				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).traduction + " int";
+				(yyval).type = "int";
+				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
+				(yyval).traduction = "";
 			}
     break;
 
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 248 "sintatica.y"
+#line 403 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + "\n" + (yyvsp[(2) - (2)]).traduction;
 			}
@@ -1878,7 +2073,7 @@ yyreduce:
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 252 "sintatica.y"
+#line 407 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1887,7 +2082,7 @@ yyreduce:
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 258 "sintatica.y"
+#line 413 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (2)]).traduction;;
 			}
@@ -1896,7 +2091,7 @@ yyreduce:
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 265 "sintatica.y"
+#line 420 "sintatica.y"
     {
 				id_struct* keyOperating;
 				id_struct* weakOperating;
@@ -1915,7 +2110,7 @@ yyreduce:
 				}
 				else
 				{
-					keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label]);
+					keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
 
 					IDMap[keyOperating->label].label = keyOperating->label;
 					IDMap[keyOperating->label].type = keyOperating->type;
@@ -1949,7 +2144,7 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 313 "sintatica.y"
+#line 468 "sintatica.y"
     {
 				
 
@@ -1959,7 +2154,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 318 "sintatica.y"
+#line 473 "sintatica.y"
     {
 
 
@@ -1969,7 +2164,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 323 "sintatica.y"
+#line 478 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1984,7 +2179,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 333 "sintatica.y"
+#line 488 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -1999,7 +2194,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 343 "sintatica.y"
+#line 498 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2014,7 +2209,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 353 "sintatica.y"
+#line 508 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2029,7 +2224,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 363 "sintatica.y"
+#line 518 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2044,7 +2239,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 373 "sintatica.y"
+#line 528 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2059,12 +2254,13 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 383 "sintatica.y"
+#line 538 "sintatica.y"
     {
-				//if(IDMap.find($1.label) == IDMap.end())	
-					//IDMap[$1.label] = generateLabel();
+				if(IDMap.find((yyvsp[(1) - (1)]).label) == IDMap.end())	
+					yyerror("identifier: '" + (yyvsp[(1) - (1)]).label + "' not declared.");
 
-				(yyval).label = IDMap[(yyvsp[(1) - (1)]).label].label;
+				//$$.label = IDMap[$1.label].label;
+				//$$.type = IDMap[$1.label].type;
 				(yyval).traduction = "";
 			}
     break;
@@ -2072,7 +2268,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 391 "sintatica.y"
+#line 547 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
 				(yyval).label = (yyvsp[(1) - (1)]).label;
@@ -2082,15 +2278,18 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 399 "sintatica.y"
+#line 555 "sintatica.y"
     {
 				if(IDMap.find((yyvsp[(1) - (3)]).label) == IDMap.end())	
-					IDMap[(yyvsp[(1) - (3)]).label].label = generateLabel();
+					yyerror("identifier: '" + (yyvsp[(1) - (3)]).label + "' not declared.");
 
 				string cast = "";
 
 				if (IDMap[(yyvsp[(3) - (3)]).label].type != IDMap[(yyvsp[(1) - (3)]).label].type)
+				{
+					//aqui deve-se verificar quais casts são possíveis
 					cast = "(" + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
+				}
 
 				(yyval).label = IDMap[(yyvsp[(1) - (3)]).label].label;
 				(yyval).traduction = (yyvsp[(3) - (3)]).traduction + "\t" + (yyval).label + " = " + cast + (yyvsp[(3) - (3)]).label + ";\n"; 
@@ -2100,7 +2299,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2104 "y.tab.c"
+#line 2303 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2331,7 +2530,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 444 "sintatica.y"
+#line 605 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -2340,15 +2539,17 @@ int yyparse();
 
 int main( int argc, char* argv[] )
 {
+	loadOpearationsMap();
 	yyparse();
 
 	return 0;
 }
 
-void yyerror( string MSG )
+void yyerror(string MSG)
 {
-	cout << MSG << endl;
-	exit (0);
+	error = true; /*há algum erro de compilação*/	
+	cerr << ":" << yylineno << ": error: " + MSG << endl;
+	//exit(0);
 }
 
 string generateLabel()
@@ -2361,65 +2562,560 @@ string generateLabel()
 	return label.str();
 }					
 
-id_struct* defineKeyOperating(id_struct op1, id_struct op2)
+id_struct* defineKeyOperating(id_struct op1, id_struct op2, string sOperator)
 {
 	id_struct* keyOperating = new id_struct;
+	operation_struct ops;
+
+	ops.op1Type = op1.type;
+	ops.op2Type = op2.type;
+	ops.sOperator = sOperator;
+
+	if(operationsMap.find(ops) == operationsMap.end())
+	{		
+		ops.op1Type = op2.type;
+		ops.op2Type = op1.type;
+
+		if(operationsMap.find(ops) == operationsMap.end())
+			yyerror("operation types: '" + op1.type + " " + sOperator + " " + op2.type + "' not defined.");
+	}
 	
 	keyOperating->label = generateLabel();
-
-	if((op1.type == "int") && (op2.type == "int"))
-	{
-		keyOperating->type = "int";
-	}
-	else if((op1.type == "float") && (op2.type == "float"))
-	{
-		keyOperating->type = "float";
-	}
-	else if((op1.type == "char") && (op2.type == "char"))
-	{
-		keyOperating->type = "char";
-	}
-	else if((op1.type == "string") && (op2.type == "string"))
-	{
-		keyOperating->type = "string";
-	}
-	else if((op1.type == "bool") && (op2.type == "bool"))
-	{
-		keyOperating->type = "bool";
-	}
-	else if ((op1.type == "int") && (op2.type == "float"))
-	{
-		keyOperating->type = "float";
-	}
-	else if ((op1.type == "float") && (op2.type == "int"))
-	{
-		keyOperating->type = "float";
-	}
-	else if ((op1.type == "int") && (op2.type == "char"))
-	{
-		keyOperating->type = "int";
-	}
-	else if ((op1.type == "char") && (op2.type == "int"))
-	{
-		keyOperating->type = "int";
-	}
-	else if ((op1.type == "int") && (op2.type == "string"))
-	{
-		keyOperating->type = "string";
-	}
-	else if ((op1.type == "string") && (op2.type == "int"))
-	{
-		keyOperating->type = "string";
-	}
-	else if ((op1.type == "int") && (op2.type == "bool"))
-	{
-		keyOperating->type = "bool";
-	}
-	else if ((op1.type == "bool") && (op2.type == "int"))
-	{
-		keyOperating->type = "bool";
-	}
+	keyOperating->type = operationsMap[ops];
 
 	return keyOperating;
+}
+
+
+void loadOpearationsMap(void)
+{
+	operation_struct* ops;
+
+	/*Operações aritméticas*/
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "string";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "string";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "string";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "string";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "string";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "float";		
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "float";		
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "float";		
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "float";		
+
+	/*Operações relacionais*/
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+			
+			
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "int";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "char";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+			
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "string";
+	ops->op2Type = "string";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	/*Operações binárias*/
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "<<";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "int";
+	ops->sOperator = "<<";
+	operationsMap[*ops] = "char";	
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "<<";
+	operationsMap[*ops] = "char";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = ">>";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "int";
+	ops->sOperator = ">>";
+	operationsMap[*ops] = "char";	
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = ">>";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "&";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "int";
+	ops->sOperator = "&";
+	operationsMap[*ops] = "char";	
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "&";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "|";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "int";
+	ops->sOperator = "|";
+	operationsMap[*ops] = "char";	
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "|";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "^";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "int";
+	ops->sOperator = "^";
+	operationsMap[*ops] = "char";	
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "^";
+	operationsMap[*ops] = "char";
+
+	/*Operações lógicas*/
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "&&";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "bool";
+	ops->sOperator = "||";
+	operationsMap[*ops] = "bool";
+
 }
 

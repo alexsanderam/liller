@@ -18,10 +18,11 @@ ModifierLong "long"
 
 Return "return"
 
-Space [ \t\n]
+Space [ \t]
 Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
+Line [\n]
 
 Delim {Space}+
 
@@ -65,6 +66,7 @@ Assign "="
 %%
 
 {Delim} 	{}
+{Line}		{yylineno++;}
 
 "main"		{return TK_MAIN;}
 
