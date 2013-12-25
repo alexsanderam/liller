@@ -1,5 +1,9 @@
 int main()
 {	
+	/*Aqui é um comentário
+	Este arquivo é de exemplo da Linguagem Liller
+	e do Compilador prescot-liller.*/
+	
 	unsigned short int k;
 	int j;
 	float z, v = 10;
@@ -10,7 +14,7 @@ int main()
 	j = 3 * 2 / 5.0;
 
 	int p;
-	int j;
+	//int j; //isto ocasiona um erro, esta variável já foi declarada antes
 	
 	z = k;
 

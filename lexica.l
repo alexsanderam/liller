@@ -23,6 +23,7 @@ Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
 Line [\n]
+Comment ("//"[^\n]*)|("/*"[^"*/"]*"*/")
 
 Delim {Space}+
 
@@ -66,6 +67,7 @@ Assign "="
 %%
 
 {Delim} 	{}
+{Comment}	{}
 {Line}		{yylineno++;}
 
 "main"		{return TK_MAIN;}
