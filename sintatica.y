@@ -409,6 +409,7 @@ COMMANDS	: COMMAND COMMANDS
 			}
 
 COMMAND 	: E 	';'	
+			| E_RELATIONAL ';'
 			| DECLARATION ';'
 			{
 				$$.traduction = $1.traduction;;
@@ -448,7 +449,7 @@ E 			: E ARITHMETIC_OPERATION E
 						strongOperating = &(IDMap[$1.label]);
 	
 						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
-						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
 					}
 					else
 					{
@@ -456,22 +457,12 @@ E 			: E ARITHMETIC_OPERATION E
 						strongOperating = &(IDMap[$3.label]);
 
 						$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
-						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
 					}
 
 					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
 					declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
 				}
-
-			}
-			| E RELATIONAL_OPERATION E
-			{
-				
-
-			}
-			| E BIN_OPERATION E
-			{
-
 
 			}
 			| TK_INT
@@ -548,6 +539,11 @@ E 			: E ARITHMETIC_OPERATION E
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
 			}
+			| '(' E ')'
+			{
+				$$.traduction = $2.traduction;
+				$$.label = $2.label;
+			}
 			;
 
 
@@ -567,6 +563,61 @@ ATRIBUITION	: TK_ID TK_ASSIGN E
 				$$.label = IDMap[$1.label].label;
 				$$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n"; 
 			}
+
+
+E_RELATIONAL 	: E RELATIONAL_OPERATION E 
+				{
+					id_struct* keyOperating;
+					id_struct* weakOperating;
+					id_struct* strongOperating;
+
+					$$.label = generateLabel();
+					IDMap[$$.label].label = $$.label;
+
+					$$.traduction = $1.traduction + $3.traduction;
+
+					if(IDMap[$1.label].type == IDMap[$3.label].type)
+					{
+						IDMap[$$.label].type = IDMap[$1.label].type;
+						$$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+						declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+					}
+					else
+					{
+						keyOperating = defineKeyOperating(IDMap[$1.label], IDMap[$3.label], $2.traduction);
+
+						IDMap[keyOperating->label].label = keyOperating->label;
+						IDMap[keyOperating->label].type = keyOperating->type;
+						IDMap[$$.label].type = keyOperating->type;
+
+
+						if(keyOperating->type == IDMap[$1.label].type)
+						{
+							weakOperating = &(IDMap[$3.label]);
+							strongOperating = &(IDMap[$1.label]);
+
+							$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+							$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
+						}
+						else
+						{
+							weakOperating = &(IDMap[$1.label]);
+							strongOperating = &(IDMap[$3.label]);
+
+							$$.traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+							$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
+						}
+
+						declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+						declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
+					}
+				}
+				| '(' E_RELATIONAL ')'
+				{
+					$$.traduction = $2.traduction;
+					$$.label = $2.label;
+				}
+			
 
 
 LE			: LE LOGIC_OPERATION LE
