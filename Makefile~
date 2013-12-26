@@ -4,4 +4,4 @@ all:
 		yacc -d sintatica.y
 		g++ -o glf y.tab.c -lfl
 
-		./glf < exemplo.liller
+		./glf < exemplo.l

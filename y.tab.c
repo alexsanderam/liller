@@ -124,7 +124,7 @@ int yylex(void);
 void yyerror(string);
 
 string generateLabel();
-string verifyResultOperation(id_struct, id_struct, string);
+string verifyResultOperation(string, string, string);
 id_struct* defineKeyOperating(id_struct, id_struct);
 void loadOpearationsMap(void);
 
@@ -2112,7 +2112,7 @@ yyreduce:
 
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
 
-				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label].type, IDMap[(yyvsp[(3) - (3)]).label].type, (yyvsp[(2) - (3)]).traduction);
 
 				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
 				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
@@ -2326,7 +2326,7 @@ yyreduce:
 
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
 
-				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+				resultOperationType = verifyResultOperation((yyvsp[(1) - (3)]).type, (yyvsp[(3) - (3)]).type, (yyvsp[(2) - (3)]).traduction);
 
 				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
 				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
@@ -2652,22 +2652,22 @@ string generateLabel()
 }					
 
 
-string verifyResultOperation(id_struct op1, id_struct op2, string sOperator)
+string verifyResultOperation(string op1Type, string op2Type, string sOperator)
 {
 	operation_struct ops;
 
-	ops.op1Type = op1.type;
-	ops.op2Type = op2.type;
+	ops.op1Type = op1Type;
+	ops.op2Type = op2Type;
 	ops.sOperator = sOperator;
 
 
 	if(operationsMap.find(ops) == operationsMap.end())
 	{		
-		ops.op1Type = op2.type;
-		ops.op2Type = op1.type;
+		ops.op1Type = op2Type;
+		ops.op2Type = op1Type;
 
 		if(operationsMap.find(ops) == operationsMap.end())
-			yyerror("operation types: '" + op1.type + " " + sOperator + " " + op2.type + "' not defined.");
+			yyerror("operation types: '" + op1Type + " " + sOperator + " " + op2Type + "' not defined.");
 	}
 	
 	return operationsMap[ops];
@@ -2681,7 +2681,7 @@ id_struct* defineKeyOperating(id_struct op1, id_struct op2)
 
 	/*Para determinar o operando chave, podemos fazer uma verificação de uma operação aritmética,
 	como a soma. Por isso, foi utilizado neste caso. Verifique o mapa de operações.*/
-	keyOperating->type = verifyResultOperation(op1, op2, "+");
+	keyOperating->type = verifyResultOperation(op1.type, op2.type, "+");
 
 	if(keyOperating->type == op1.type)
 		keyOperating->modifier = op1.modifier;

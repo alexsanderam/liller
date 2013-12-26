@@ -23,7 +23,7 @@ Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
 Line [\n]
-Comment ("//"[^\n]*[\n\0])|("/*"[^*]*"*/")
+
 
 Delim {Space}+
 
@@ -64,40 +64,56 @@ OpLogicBinShiftL "<<"
 
 Assign "="
 
+%x COMMENTS
+%x COMMENTS_2
 %%
 
+"/*"			{BEGIN(COMMENTS);}
+<COMMENTS>"*"+"/" 	{BEGIN(INITIAL);}
+<COMMENTS>[^*\n]*	{}
+<COMMENTS>"*"+[^*/\n]*	{}
+<COMMENTS>\n     	{ ++yylineno; }
+<COMMENTS>.		{}
+
+
+"//"			{BEGIN(COMMENTS_2);}
+<COMMENTS_2>[\0] 	{; BEGIN(INITIAL);}
+<COMMENTS_2>[\n] 	{ ++yylineno; BEGIN(INITIAL);}
+<COMMENTS_2>[^*\n]*	{}
+<COMMENTS_2>.		{}
+
+
 {Delim} 	{}
-{Comment}	{}
 {Line}		{yylineno++;}
 
 "main"		{return TK_MAIN;}
 
 [(){}[\];,]	{ return *yytext; }
 
-{OpSum}		{yylval.traduction = "+"; return TK_OP_SUM; }
-{OpSub}		{yylval.traduction = "-"; return TK_OP_SUB; }
-{OpMult}	{yylval.traduction = "*"; return TK_OP_MUL; }
-{OpDiv}		{yylval.traduction = "/"; return TK_OP_DIV; }
-{OpMod}		{yylval.traduction = "%"; return TK_OP_MOD; }
+{OpSum}		{yylval.traduction = yytext; return TK_OP_SUM; }
+{OpSub}		{yylval.traduction = yytext; return TK_OP_SUB; }
+{OpMult}	{yylval.traduction = yytext; return TK_OP_MUL; }
+{OpDiv}		{yylval.traduction = yytext; return TK_OP_DIV; }
+{OpMod}		{yylval.traduction = yytext; return TK_OP_MOD; }
 
 
-{OpRelLess}			{yylval.traduction = "<"; return TK_OP_REL_LESS; }
-{OpRelGreater}		{yylval.traduction = ">"; return TK_OP_REL_GREATER; }
-{OpRelEqLess}		{yylval.traduction = "<="; return TK_OP_REL_EQLESS; }
-{OpRelEqGreater}	{yylval.traduction = ">="; return TK_OP_REL_EQGREATER; }
-{OpRelEq}			{yylval.traduction = "=="; return TK_OP_REL_EQ; }
-{OpRelDiff}			{yylval.traduction = "!="; return TK_OP_REL_DIFF; }
+{OpRelLess}			{yylval.traduction = yytext; return TK_OP_REL_LESS; }
+{OpRelGreater}		{yylval.traduction = yytext; return TK_OP_REL_GREATER; }
+{OpRelEqLess}		{yylval.traduction = yytext; return TK_OP_REL_EQLESS; }
+{OpRelEqGreater}	{yylval.traduction = yytext; return TK_OP_REL_EQGREATER; }
+{OpRelEq}			{yylval.traduction = yytext; return TK_OP_REL_EQ; }
+{OpRelDiff}			{yylval.traduction = yytext; return TK_OP_REL_DIFF; }
 
-{OpLogicAnd}		{yylval.traduction = "&&"; return TK_OP_LOGIC_AND; }
-{OpLogicOr}			{yylval.traduction = "||"; return TK_OP_LOGIC_OR; }	
-{OpLogicNot}		{yylval.traduction = "!"; return TK_OP_LOGIC_NOT; }
+{OpLogicAnd}		{yylval.traduction = yytext; return TK_OP_LOGIC_AND; }
+{OpLogicOr}			{yylval.traduction = yytext; return TK_OP_LOGIC_OR; }	
+{OpLogicNot}		{yylval.traduction = yytext; return TK_OP_LOGIC_NOT; }
 
-{OpLogicBinAnd}			{yylval.traduction = "&"; return TK_OP_BIN_AND; }
-{OpLogicBinOr}			{yylval.traduction = "|"; return TK_OP_BIN_OR; }
-{OpLogicBinXor}			{yylval.traduction = "^"; return TK_OP_BIN_XOR; }
-{OpLogicBinNot}			{yylval.traduction = "~"; return TK_OP_BIN_NOT; }
-{OpLogicBinShiftR}		{yylval.traduction = ">>"; return TK_OP_BIN_SHIFTR; }
-{OpLogicBinShiftL}		{yylval.traduction = "<<"; return TK_OP_BIN_SHIFTL; }
+{OpLogicBinAnd}			{yylval.traduction = yytext; return TK_OP_BIN_AND; }
+{OpLogicBinOr}			{yylval.traduction = yytext; return TK_OP_BIN_OR; }
+{OpLogicBinXor}			{yylval.traduction = yytext; return TK_OP_BIN_XOR; }
+{OpLogicBinNot}			{yylval.traduction = yytext; return TK_OP_BIN_NOT; }
+{OpLogicBinShiftR}		{yylval.traduction = yytext; return TK_OP_BIN_SHIFTR; }
+{OpLogicBinShiftL}		{yylval.traduction = yytext; return TK_OP_BIN_SHIFTL; }
 
 
 {Assign}	{ return TK_ASSIGN; }
