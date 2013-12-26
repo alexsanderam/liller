@@ -23,7 +23,7 @@ Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
 Line [\n]
-Comment ("//"[^\n]*)|("/*"[^"*/"]*"*/")
+Comment ("//"[^\n]*[\n\0])|("/*"[^*]*"*/")
 
 Delim {Space}+
 

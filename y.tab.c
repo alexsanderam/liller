@@ -124,13 +124,14 @@ int yylex(void);
 void yyerror(string);
 
 string generateLabel();
-id_struct* defineKeyOperating(id_struct, id_struct, string);
+string verifyResultOperation(id_struct, id_struct, string);
+id_struct* defineKeyOperating(id_struct, id_struct);
 void loadOpearationsMap(void);
 
 
 
 /* Line 268 of yacc.c  */
-#line 134 "y.tab.c"
+#line 135 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -266,7 +267,7 @@ typedef int YYSTYPE;
 
 
 /* Line 343 of yacc.c  */
-#line 270 "y.tab.c"
+#line 271 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -581,13 +582,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    89,    89,    97,   106,   111,   117,   122,   128,   152,
-     186,   211,   250,   256,   262,   268,   274,   280,   286,   292,
-     298,   304,   310,   316,   322,   328,   334,   340,   346,   352,
-     358,   364,   370,   376,   382,   388,   394,   402,   407,   411,
-     412,   413,   420,   468,   478,   488,   498,   508,   518,   528,
-     537,   542,   550,   568,   615,   637,   637,   637,   637,   637,
-     641,   641,   641,   641,   641,   641
+       0,    90,    90,    98,   107,   112,   118,   123,   129,   154,
+     189,   215,   255,   261,   267,   273,   279,   285,   291,   297,
+     303,   309,   315,   321,   327,   333,   339,   345,   351,   357,
+     363,   369,   375,   381,   387,   393,   399,   407,   412,   416,
+     417,   418,   425,   484,   494,   504,   514,   524,   534,   544,
+     554,   559,   567,   589,   648,   670,   670,   670,   670,   670,
+     674,   674,   674,   674,   674,   674
 };
 #endif
 
@@ -1594,7 +1595,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 90 "sintatica.y"
+#line 91 "sintatica.y"
     {
 				if(!error)				
 					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << (yyvsp[(5) - (5)]).traduction << endl; 
@@ -1606,7 +1607,7 @@ yyreduce:
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 98 "sintatica.y"
+#line 99 "sintatica.y"
     {
 				if(!error)
 					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << (yyvsp[(6) - (6)]).traduction << endl;
@@ -1618,7 +1619,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 107 "sintatica.y"
+#line 108 "sintatica.y"
     {
 				(yyval).traduction = "\n{\n" + declarations + (yyvsp[(2) - (5)]).traduction + (yyvsp[(3) - (5)]).traduction + (yyvsp[(4) - (5)]).traduction + "\n}";
 			}
@@ -1627,7 +1628,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 111 "sintatica.y"
+#line 112 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1636,7 +1637,7 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 118 "sintatica.y"
+#line 119 "sintatica.y"
     {
 				(yyval).traduction = "\n\t" + (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + ";";
 			}
@@ -1645,7 +1646,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 122 "sintatica.y"
+#line 123 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1654,7 +1655,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 129 "sintatica.y"
+#line 130 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(3) - (3)]).label) == IDMap.end())
@@ -1677,13 +1678,14 @@ yyreduce:
 				(yyval).label = IDMap[(yyvsp[(3) - (3)]).label].label;
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction;
 				(yyval).type = IDMap[(yyvsp[(3) - (3)]).label].type;
+				(yyval).modifier = IDMap[(yyvsp[(3) - (3)]).label].modifier;
 			}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 153 "sintatica.y"
+#line 155 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1697,10 +1699,10 @@ yyreduce:
 				else
 					yyerror("identifier: '" + (yyvsp[(3) - (5)]).label + "' already declared.");
 
-				if (IDMap[(yyvsp[(5) - (5)]).label].type != IDMap[(yyvsp[(3) - (5)]).label].type)
+				if ((IDMap[(yyvsp[(5) - (5)]).label].modifier != IDMap[(yyvsp[(3) - (5)]).label].modifier) || (IDMap[(yyvsp[(5) - (5)]).label].type != IDMap[(yyvsp[(3) - (5)]).label].type))
 				{
 					//aqui deve se verificar quais casts são possíveis.
-					cast = "(" + IDMap[(yyvsp[(3) - (5)]).label].type + ") ";
+					cast = "(" + IDMap[(yyvsp[(3) - (5)]).label].modifier + (IDMap[(yyvsp[(3) - (5)]).label].modifier != "" ? " " : "") + IDMap[(yyvsp[(3) - (5)]).label].type + ") ";
 				}
 
 				atribuition = (yyvsp[(5) - (5)]).traduction + "\t" + IDMap[(yyvsp[(3) - (5)]).label].label + " = " + cast + (yyvsp[(5) - (5)]).label + ";\n";
@@ -1715,6 +1717,7 @@ yyreduce:
 				(yyval).label = IDMap[(yyvsp[(3) - (5)]).label].label;
 				(yyval).traduction = "\n" + atribuition + "\n";
 				(yyval).type = IDMap[(yyvsp[(3) - (5)]).label].type;	
+				(yyval).modifier = IDMap[(yyvsp[(3) - (5)]).label].modifier;
 							
 			}
     break;
@@ -1722,7 +1725,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 187 "sintatica.y"
+#line 190 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(2) - (2)]).label) == IDMap.end())
@@ -1745,6 +1748,7 @@ yyreduce:
 				(yyval).label = IDMap[(yyvsp[(2) - (2)]).label].label;
 				(yyval).traduction = "";
 				(yyval).type = IDMap[(yyvsp[(2) - (2)]).label].type;
+				(yyval).modifier = IDMap[(yyvsp[(2) - (2)]).label].modifier;
 
 			}
     break;
@@ -1752,7 +1756,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 212 "sintatica.y"
+#line 216 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1760,16 +1764,16 @@ yyreduce:
 				if(IDMap.find((yyvsp[(2) - (4)]).label) == IDMap.end())
 				{
 					IDMap[(yyvsp[(2) - (4)]).label].label = generateLabel();
+					IDMap[(yyvsp[(2) - (4)]).label].type = (yyvsp[(1) - (4)]).type;
 					IDMap[(yyvsp[(2) - (4)]).label].modifier = (yyvsp[(1) - (4)]).modifier;
-					IDMap[(yyvsp[(2) - (4)]).label].type = (yyvsp[(1) - (4)]).modifier;
 				}
 				else
 					yyerror("identifier: '" + (yyvsp[(2) - (4)]).label + "' already declared.");
 
-				if (IDMap[(yyvsp[(4) - (4)]).label].type != IDMap[(yyvsp[(2) - (4)]).label].type)
+				if ((IDMap[(yyvsp[(4) - (4)]).label].modifier != IDMap[(yyvsp[(2) - (4)]).label].modifier) || (IDMap[(yyvsp[(4) - (4)]).label].type != IDMap[(yyvsp[(2) - (4)]).label].type))
 				{
 					//aqui deve se verificar quais casts são possíveis.
-					cast = "(" + IDMap[(yyvsp[(2) - (4)]).label].type + ") ";
+					cast = "(" + IDMap[(yyvsp[(2) - (4)]).label].modifier + (IDMap[(yyvsp[(2) - (4)]).label].modifier != "" ? " " : "") + IDMap[(yyvsp[(2) - (4)]).label].type + ") ";
 				}
 
 				atribuition = (yyvsp[(4) - (4)]).traduction + "\t" + IDMap[(yyvsp[(2) - (4)]).label].label + " = " + cast + (yyvsp[(4) - (4)]).label + ";\n";
@@ -1786,6 +1790,7 @@ yyreduce:
 				(yyval).label = IDMap[(yyvsp[(2) - (4)]).label].label;
 				(yyval).traduction = "\n" + atribuition + "\n";
 				(yyval).type = IDMap[(yyvsp[(2) - (4)]).label].type;
+				(yyval).modifier = IDMap[(yyvsp[(2) - (4)]).label].modifier;
 
 			}
     break;
@@ -1793,7 +1798,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 251 "sintatica.y"
+#line 256 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1804,7 +1809,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 257 "sintatica.y"
+#line 262 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1815,7 +1820,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 263 "sintatica.y"
+#line 268 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1826,7 +1831,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 269 "sintatica.y"
+#line 274 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1837,7 +1842,7 @@ yyreduce:
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 275 "sintatica.y"
+#line 280 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1848,7 +1853,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 281 "sintatica.y"
+#line 286 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1859,7 +1864,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 287 "sintatica.y"
+#line 292 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1870,7 +1875,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 293 "sintatica.y"
+#line 298 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1881,7 +1886,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 299 "sintatica.y"
+#line 304 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1892,7 +1897,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 305 "sintatica.y"
+#line 310 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1903,7 +1908,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 311 "sintatica.y"
+#line 316 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1914,7 +1919,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 317 "sintatica.y"
+#line 322 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1925,7 +1930,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 323 "sintatica.y"
+#line 328 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1936,7 +1941,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 329 "sintatica.y"
+#line 334 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1947,7 +1952,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 335 "sintatica.y"
+#line 340 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
@@ -1958,7 +1963,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 341 "sintatica.y"
+#line 346 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
@@ -1969,7 +1974,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 347 "sintatica.y"
+#line 352 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -1980,7 +1985,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 353 "sintatica.y"
+#line 358 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -1991,7 +1996,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 359 "sintatica.y"
+#line 364 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2002,7 +2007,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 365 "sintatica.y"
+#line 370 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2013,7 +2018,7 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 371 "sintatica.y"
+#line 376 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2024,7 +2029,7 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 377 "sintatica.y"
+#line 382 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(4) - (4)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
@@ -2035,7 +2040,7 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 383 "sintatica.y"
+#line 388 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(4) - (4)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
@@ -2046,7 +2051,7 @@ yyreduce:
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 389 "sintatica.y"
+#line 394 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
@@ -2057,7 +2062,7 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 395 "sintatica.y"
+#line 400 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
@@ -2068,7 +2073,7 @@ yyreduce:
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 403 "sintatica.y"
+#line 408 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + "\n" + (yyvsp[(2) - (2)]).traduction;
 			}
@@ -2077,7 +2082,7 @@ yyreduce:
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 407 "sintatica.y"
+#line 412 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -2086,7 +2091,7 @@ yyreduce:
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 414 "sintatica.y"
+#line 419 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (2)]).traduction;;
 			}
@@ -2095,8 +2100,9 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 421 "sintatica.y"
+#line 426 "sintatica.y"
     {
+				string resultOperationType;
 				id_struct* keyOperating;
 				id_struct* weakOperating;
 				id_struct* strongOperating;
@@ -2106,27 +2112,38 @@ yyreduce:
 
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
 
+				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+
+				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
+				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
+			          no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+
+				IDMap[(yyval).label].type = resultOperationType;
+				IDMap[(yyval).label].modifier = ""; /*desconsidera-se os modificadores*/
+
+				declarations += "\t" + resultOperationType + " " + IDMap[(yyval).label].label + ";\n";
+
 				if(IDMap[(yyvsp[(1) - (3)]).label].type == IDMap[(yyvsp[(3) - (3)]).label].type)
 				{
-					IDMap[(yyval).label].type = IDMap[(yyvsp[(1) - (3)]).label].type;
 					(yyval).traduction += "\t" + (yyval).label + " = " + (yyvsp[(1) - (3)]).label + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).label + ";\n";
-					declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
 				}
 				else
 				{
-					keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+					keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label]);
 
 					IDMap[keyOperating->label].label = keyOperating->label;
 					IDMap[keyOperating->label].type = keyOperating->type;
-					IDMap[(yyval).label].type = keyOperating->type;
+					IDMap[keyOperating->label].modifier = keyOperating->modifier;
 
+					string modifier = keyOperating->modifier;
+					modifier += (modifier != "" ? " " : "");
 
 					if(keyOperating->type == IDMap[(yyvsp[(1) - (3)]).label].type)
 					{
 						weakOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
 						strongOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
-	
-						(yyval).traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+
+						(yyval).traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
 						(yyval).traduction += "\t" + (yyval).label + " = " + strongOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + keyOperating->label + ";\n";
 					}
 					else
@@ -2134,12 +2151,11 @@ yyreduce:
 						weakOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
 						strongOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
 
-						(yyval).traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
+						(yyval).traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
 						(yyval).traduction += "\t" + (yyval).label + " = " + keyOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + strongOperating->label + ";\n";
 					}
 
 					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-					declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
 				}
 
 			}
@@ -2148,7 +2164,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 469 "sintatica.y"
+#line 485 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2163,7 +2179,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 479 "sintatica.y"
+#line 495 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2178,7 +2194,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 489 "sintatica.y"
+#line 505 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2193,7 +2209,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 499 "sintatica.y"
+#line 515 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2208,7 +2224,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 509 "sintatica.y"
+#line 525 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2223,7 +2239,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 519 "sintatica.y"
+#line 535 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
@@ -2238,13 +2254,14 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 529 "sintatica.y"
+#line 545 "sintatica.y"
     {
 				if(IDMap.find((yyvsp[(1) - (1)]).label) == IDMap.end())	
 					yyerror("identifier: '" + (yyvsp[(1) - (1)]).label + "' not declared.");
 
-				//$$.label = IDMap[$1.label].label;
-				//$$.type = IDMap[$1.label].type;
+				(yyval).label = IDMap[(yyvsp[(1) - (1)]).label].label;
+				(yyval).type = IDMap[(yyvsp[(1) - (1)]).label].type;
+				(yyval).modifier = IDMap[(yyvsp[(1) - (1)]).label].modifier;
 				(yyval).traduction = "";
 			}
     break;
@@ -2252,7 +2269,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 538 "sintatica.y"
+#line 555 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
 				(yyval).label = (yyvsp[(1) - (1)]).label;
@@ -2262,7 +2279,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 543 "sintatica.y"
+#line 560 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
 				(yyval).label = (yyvsp[(2) - (3)]).label;
@@ -2272,17 +2289,21 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 551 "sintatica.y"
+#line 568 "sintatica.y"
     {
 				if(IDMap.find((yyvsp[(1) - (3)]).label) == IDMap.end())	
 					yyerror("identifier: '" + (yyvsp[(1) - (3)]).label + "' not declared.");
 
 				string cast = "";
 
-				if (IDMap[(yyvsp[(3) - (3)]).label].type != IDMap[(yyvsp[(1) - (3)]).label].type)
+				if (((IDMap[(yyvsp[(3) - (3)]).label].modifier != IDMap[(yyvsp[(1) - (3)]).label].modifier)) || (IDMap[(yyvsp[(3) - (3)]).label].type != IDMap[(yyvsp[(1) - (3)]).label].type))
 				{
+
 					//aqui deve-se verificar quais casts são possíveis
-					cast = "(" + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
+					if(IDMap[(yyvsp[(1) - (3)]).label].modifier != "")
+						cast = "(" + IDMap[(yyvsp[(1) - (3)]).label].modifier + " " + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
+					else
+						cast += "(" + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
 				}
 
 				(yyval).label = IDMap[(yyvsp[(1) - (3)]).label].label;
@@ -2293,69 +2314,81 @@ yyreduce:
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 569 "sintatica.y"
+#line 590 "sintatica.y"
     {
-					id_struct* keyOperating;
-					id_struct* weakOperating;
-					id_struct* strongOperating;
+				string resultOperationType;
+				id_struct* keyOperating;
+				id_struct* weakOperating;
+				id_struct* strongOperating;
 
-					(yyval).label = generateLabel();
-					IDMap[(yyval).label].label = (yyval).label;
+				(yyval).label = generateLabel();
+				IDMap[(yyval).label].label = (yyval).label;
 
-					(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
+				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
 
-					if(IDMap[(yyvsp[(1) - (3)]).label].type == IDMap[(yyvsp[(3) - (3)]).label].type)
+				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+
+				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
+				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
+				  no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+
+				IDMap[(yyval).label].type = resultOperationType;
+				IDMap[(yyval).label].modifier = ""; /*desconsidera-se os modificadores*/
+
+				declarations += "\t" + resultOperationType + " " + IDMap[(yyval).label].label + ";\n";
+
+				if(IDMap[(yyvsp[(1) - (3)]).label].type == IDMap[(yyvsp[(3) - (3)]).label].type)
+				{
+					(yyval).traduction += "\t" + (yyval).label + " = " + (yyvsp[(1) - (3)]).label + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).label + ";\n";
+				}
+				else
+				{
+					keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label]);
+
+					IDMap[keyOperating->label].label = keyOperating->label;
+					IDMap[keyOperating->label].type = keyOperating->type;
+					IDMap[keyOperating->label].modifier = keyOperating->modifier;
+
+					string modifier = keyOperating->modifier;
+					modifier += (modifier != "" ? " " : "");
+
+					if(keyOperating->type == IDMap[(yyvsp[(1) - (3)]).label].type)
 					{
-						IDMap[(yyval).label].type = IDMap[(yyvsp[(1) - (3)]).label].type;
-						(yyval).traduction += "\t" + (yyval).label + " = " + (yyvsp[(1) - (3)]).label + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).label + ";\n";
-						declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+						weakOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
+						strongOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
+
+						(yyval).traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
+						(yyval).traduction += "\t" + (yyval).label + " = " + strongOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + keyOperating->label + ";\n";
 					}
 					else
 					{
-						keyOperating = defineKeyOperating(IDMap[(yyvsp[(1) - (3)]).label], IDMap[(yyvsp[(3) - (3)]).label], (yyvsp[(2) - (3)]).traduction);
+						weakOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
+						strongOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
 
-						IDMap[keyOperating->label].label = keyOperating->label;
-						IDMap[keyOperating->label].type = keyOperating->type;
-						IDMap[(yyval).label].type = keyOperating->type;
-
-
-						if(keyOperating->type == IDMap[(yyvsp[(1) - (3)]).label].type)
-						{
-							weakOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
-							strongOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
-
-							(yyval).traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
-							(yyval).traduction += "\t" + (yyval).label + " = " + strongOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + keyOperating->label + ";\n";
-						}
-						else
-						{
-							weakOperating = &(IDMap[(yyvsp[(1) - (3)]).label]);
-							strongOperating = &(IDMap[(yyvsp[(3) - (3)]).label]);
-
-							(yyval).traduction += "\t" + keyOperating->label + " = (" + keyOperating->type + ") " + weakOperating->label + ";\n";
-							(yyval).traduction += "\t" + (yyval).label + " = " + keyOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + strongOperating->label + ";\n";
-						}
-
-						declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-						declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+						(yyval).traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
+						(yyval).traduction += "\t" + (yyval).label + " = " + keyOperating->label + " " + (yyvsp[(2) - (3)]).traduction + " " + strongOperating->label + ";\n";
 					}
+
+					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
 				}
+
+			}
     break;
 
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 616 "sintatica.y"
+#line 649 "sintatica.y"
     {
-					(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
-					(yyval).label = (yyvsp[(2) - (3)]).label;
-				}
+				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
+				(yyval).label = (yyvsp[(2) - (3)]).label;
+			}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 2359 "y.tab.c"
+#line 2392 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2586,7 +2619,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 656 "sintatica.y"
+#line 689 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -2618,14 +2651,15 @@ string generateLabel()
 	return label.str();
 }					
 
-id_struct* defineKeyOperating(id_struct op1, id_struct op2, string sOperator)
+
+string verifyResultOperation(id_struct op1, id_struct op2, string sOperator)
 {
-	id_struct* keyOperating = new id_struct;
 	operation_struct ops;
 
 	ops.op1Type = op1.type;
 	ops.op2Type = op2.type;
 	ops.sOperator = sOperator;
+
 
 	if(operationsMap.find(ops) == operationsMap.end())
 	{		
@@ -2636,8 +2670,23 @@ id_struct* defineKeyOperating(id_struct op1, id_struct op2, string sOperator)
 			yyerror("operation types: '" + op1.type + " " + sOperator + " " + op2.type + "' not defined.");
 	}
 	
+	return operationsMap[ops];
+}
+
+id_struct* defineKeyOperating(id_struct op1, id_struct op2)
+{
+	id_struct* keyOperating = new id_struct;
+	
 	keyOperating->label = generateLabel();
-	keyOperating->type = operationsMap[ops];
+
+	/*Para determinar o operando chave, podemos fazer uma verificação de uma operação aritmética,
+	como a soma. Por isso, foi utilizado neste caso. Verifique o mapa de operações.*/
+	keyOperating->type = verifyResultOperation(op1, op2, "+");
+
+	if(keyOperating->type == op1.type)
+		keyOperating->modifier = op1.modifier;
+	else
+		keyOperating->modifier = op2.modifier;
 
 	return keyOperating;
 }
@@ -2811,6 +2860,25 @@ void loadOpearationsMap(void)
 	ops->op2Type = "float";
 	ops->sOperator = "/";
 	operationsMap[*ops] = "float";		
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "int";
+	ops->sOperator = "%";
+	operationsMap[*ops] = "int";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "char";
+	ops->sOperator = "%";
+	operationsMap[*ops] = "char";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "char";
+	ops->sOperator = "%";
+	operationsMap[*ops] = "int";
 
 	/*Operações relacionais*/
 	ops = new operation_struct;

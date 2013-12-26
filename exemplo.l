@@ -9,11 +9,12 @@ int main()
 	float z, v = 10;
 	bool x;
 
+
 	k = j = 1 / 1;
 	k = 2;
 	j = (2 - 5.0) * 3;
 
-	//k < j;
+	k < j;
 
 	int p;
 	//int j; //isto ocasiona um erro, esta variável já foi declarada antes
@@ -24,8 +25,6 @@ int main()
 	3 % 3;
 
 	"aa" + 10;
-
-	(i<j);
 
 	return 0;
 }
