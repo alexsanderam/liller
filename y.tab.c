@@ -126,12 +126,13 @@ void yyerror(string);
 string generateLabel();
 string verifyResultOperation(string, string, string);
 id_struct* defineKeyOperating(id_struct, id_struct);
+string 	verifyStrongType(string, string);
 void loadOpearationsMap(void);
 
 
 
 /* Line 268 of yacc.c  */
-#line 135 "y.tab.c"
+#line 136 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -267,7 +268,7 @@ typedef int YYSTYPE;
 
 
 /* Line 343 of yacc.c  */
-#line 271 "y.tab.c"
+#line 272 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -486,16 +487,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   123
+#define YYLAST   168
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  54
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  13
+#define YYNNTS  16
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  65
+#define YYNRULES  77
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  99
+#define YYNSTATES  125
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
@@ -549,9 +550,10 @@ static const yytype_uint8 yyprhs[] =
       38,    41,    46,    48,    50,    52,    54,    56,    58,    60,
       63,    66,    69,    72,    75,    78,    81,    83,    85,    89,
       93,    97,   101,   105,   110,   115,   119,   123,   126,   127,
-     130,   133,   136,   140,   142,   144,   146,   148,   150,   152,
-     154,   156,   160,   164,   168,   172,   174,   176,   178,   180,
-     182,   184,   186,   188,   190,   192
+     130,   133,   136,   139,   142,   146,   148,   150,   152,   154,
+     156,   158,   160,   164,   168,   170,   172,   174,   178,   182,
+     184,   188,   192,   198,   200,   203,   205,   207,   209,   211,
+     213,   215,   217,   219,   221,   223,   225,   227
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
@@ -559,7 +561,7 @@ static const yytype_int8 yyrhs[] =
 {
       55,     0,    -1,    15,    11,    48,    49,    56,    -1,    15,
       11,    48,    16,    49,    56,    -1,    50,    60,    56,    57,
-      51,    -1,    -1,    46,     3,    52,    -1,    -1,    58,    53,
+      51,    -1,    -1,    46,    62,    52,    -1,    -1,    58,    53,
       12,    -1,    58,    53,    12,    45,    62,    -1,    59,    12,
       -1,    59,    12,    45,    62,    -1,    13,    -1,    14,    -1,
       15,    -1,    16,    -1,    17,    -1,    18,    -1,    19,    -1,
@@ -570,25 +572,29 @@ static const yytype_int8 yyrhs[] =
       -1,    23,    23,    15,    -1,    20,    23,    23,    15,    -1,
       21,    23,    23,    15,    -1,    20,    23,    23,    -1,    21,
       23,    23,    -1,    61,    60,    -1,    -1,    62,    52,    -1,
-      64,    52,    -1,    58,    52,    -1,    62,    65,    62,    -1,
-       3,    -1,     4,    -1,     5,    -1,     6,    -1,     7,    -1,
-       8,    -1,    12,    -1,    63,    -1,    48,    62,    49,    -1,
-      12,    45,    62,    -1,    62,    66,    62,    -1,    48,    64,
-      49,    -1,    26,    -1,    27,    -1,    29,    -1,    28,    -1,
-      47,    -1,    30,    -1,    31,    -1,    32,    -1,    33,    -1,
-      34,    -1,    35,    -1
+      64,    52,    -1,    58,    52,    -1,    66,    52,    -1,    63,
+      52,    -1,    62,    67,    62,    -1,     3,    -1,     4,    -1,
+       5,    -1,     6,    -1,     7,    -1,     8,    -1,    12,    -1,
+      48,    62,    49,    -1,    12,    45,    63,    -1,    62,    -1,
+      64,    -1,    66,    -1,    65,    68,    65,    -1,    48,    64,
+      49,    -1,    62,    -1,    48,    63,    49,    -1,    66,    69,
+      66,    -1,    48,    66,    69,    66,    49,    -1,     8,    -1,
+      38,    66,    -1,    26,    -1,    27,    -1,    29,    -1,    28,
+      -1,    47,    -1,    30,    -1,    31,    -1,    32,    -1,    33,
+      -1,    34,    -1,    35,    -1,    37,    -1,    36,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    90,    90,    98,   107,   112,   118,   123,   129,   154,
-     189,   215,   255,   261,   267,   273,   279,   285,   291,   297,
-     303,   309,   315,   321,   327,   333,   339,   345,   351,   357,
-     363,   369,   375,   381,   387,   393,   399,   407,   412,   416,
-     417,   418,   425,   484,   494,   504,   514,   524,   534,   544,
-     554,   559,   567,   589,   648,   670,   670,   670,   670,   670,
-     674,   674,   674,   674,   674,   674
+       0,    93,    93,   101,   110,   115,   121,   126,   132,   159,
+     196,   224,   265,   271,   277,   283,   289,   295,   301,   307,
+     313,   319,   325,   331,   337,   343,   349,   355,   361,   367,
+     373,   379,   385,   391,   397,   403,   409,   417,   422,   426,
+     427,   428,   429,   430,   434,   493,   504,   515,   526,   537,
+     548,   559,   569,   579,   601,   608,   615,   625,   684,   694,
+     701,   712,   726,   739,   752,   768,   768,   768,   768,   768,
+     772,   772,   772,   772,   772,   772,   777,   777
 };
 #endif
 
@@ -610,8 +616,8 @@ static const char *const yytname[] =
   "TK_OP_BIN_SHIFTR", "TK_OP_BIN_SHIFTL", "TK_ASSIGN", "TK_RETURN",
   "TK_OP_MOD", "'('", "')'", "'{'", "'}'", "';'", "','", "$accept",
   "Begin", "BLOCK", "RETURN", "DECLARATION", "TYPE", "COMMANDS", "COMMAND",
-  "E", "ATRIBUITION", "E_RELATIONAL", "ARITHMETIC_OPERATION",
-  "RELATIONAL_OPERATION", 0
+  "E", "ATRIBUITION", "RELATIONAL_E", "OPERAND", "LOGIC_E",
+  "ARITHMETIC_OPERATION", "RELATIONAL_OPERATION", "LOGIC_OPERATION", 0
 };
 #endif
 
@@ -636,9 +642,10 @@ static const yytype_uint8 yyr1[] =
       58,    58,    59,    59,    59,    59,    59,    59,    59,    59,
       59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
       59,    59,    59,    59,    59,    59,    59,    60,    60,    61,
-      61,    61,    62,    62,    62,    62,    62,    62,    62,    62,
-      62,    62,    63,    64,    64,    65,    65,    65,    65,    65,
-      66,    66,    66,    66,    66,    66
+      61,    61,    61,    61,    62,    62,    62,    62,    62,    62,
+      62,    62,    62,    63,    63,    63,    63,    64,    64,    65,
+      65,    66,    66,    66,    66,    67,    67,    67,    67,    67,
+      68,    68,    68,    68,    68,    68,    69,    69
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
@@ -648,9 +655,10 @@ static const yytype_uint8 yyr2[] =
        2,     4,     1,     1,     1,     1,     1,     1,     1,     2,
        2,     2,     2,     2,     2,     2,     1,     1,     3,     3,
        3,     3,     3,     4,     4,     3,     3,     2,     0,     2,
-       2,     2,     3,     1,     1,     1,     1,     1,     1,     1,
-       1,     3,     3,     3,     3,     1,     1,     1,     1,     1,
-       1,     1,     1,     1,     1,     1
+       2,     2,     2,     2,     3,     1,     1,     1,     1,     1,
+       1,     1,     3,     3,     1,     1,     1,     3,     3,     1,
+       3,     3,     5,     1,     2,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1,     1,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -659,90 +667,104 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     0,     1,     0,     0,     5,     5,    38,
-       2,     3,    43,    44,    45,    46,    47,    48,    49,    12,
+       2,     3,    45,    46,    47,    48,    49,    50,    51,    12,
       13,    14,    15,    16,    17,    18,     0,     0,    26,    27,
-       0,     0,     0,     5,    38,     0,    50,     0,     0,    19,
-      21,     0,     0,    20,    22,     0,     0,    23,    24,    25,
-       0,     0,     0,    41,     0,    10,     7,    37,    55,    56,
-      58,    57,    60,    61,    62,    63,    64,    65,    59,    39,
-       0,     0,    40,     0,    52,    28,    30,    35,    29,    31,
-      36,    32,    51,    54,     8,     0,     0,     0,    42,    53,
-       0,    33,    34,     0,    11,     0,     4,     9,     6
+       0,     0,     0,     0,     5,    38,    59,     0,     0,     0,
+       0,     0,    19,    21,     0,     0,    20,    22,     0,     0,
+      23,    24,    25,     0,    63,     0,    64,    59,     0,     0,
+      56,    41,     0,    10,     7,    37,    65,    66,    68,    67,
+      69,    39,     0,    43,    40,    70,    71,    72,    73,    74,
+      75,     0,    77,    76,    42,     0,    59,    53,    55,    56,
+      28,    30,    35,    29,    31,    36,    32,     0,    52,    60,
+      58,     0,     8,     0,     0,     0,    50,    51,     0,    44,
+       0,    59,    57,    61,    33,    34,     0,     0,    11,     0,
+       4,     0,    62,     9,     6
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,    10,    87,    31,    32,    33,    34,    35,    36,
-      37,    70,    71
+      -1,     2,    10,   105,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    72,    81,    85
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -31
-static const yytype_int8 yypact[] =
+#define YYPACT_NINF -56
+static const yytype_int16 yypact[] =
 {
-      -6,    28,    44,    -3,   -31,    12,     2,     3,     3,    -2,
-     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,    20,   -31,
-     -31,   -31,   -31,   -31,   -31,   -31,    34,    37,    33,    86,
-      19,   -23,    52,     3,    -2,    42,   -31,    47,    30,   -31,
-     -31,    88,    39,   -31,   -31,    90,    43,   -31,   -31,   -31,
-      91,    53,    58,   -31,    96,    65,    66,   -31,   -31,   -31,
-     -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,   -31,
-      30,    30,   -31,    30,    69,   -31,   -31,    99,   -31,   -31,
-     100,   -31,   -31,   -31,    72,    30,   115,    68,    69,    69,
-      64,   -31,   -31,    30,    69,    70,   -31,    69,   -31
+      -9,    -3,    13,     3,   -56,     0,     5,     7,     7,    17,
+     -56,   -56,   -56,   -56,   -56,   -56,   -56,   -18,    22,   -56,
+     -56,   -56,   -56,   -56,   -56,   -56,   106,   131,    67,   132,
+      18,    40,    23,    72,     7,    17,    79,    35,    45,   133,
+      33,    40,   -56,   -56,    88,    -8,   -56,   -56,    98,    -6,
+     -56,   -56,   -56,    99,   -56,    18,    59,    89,    74,    75,
+      59,   -56,   115,    26,    91,   -56,   -56,   -56,   -56,   -56,
+     -56,   -56,    56,   -56,   -56,   -56,   -56,   -56,   -56,   -56,
+     -56,    86,   -56,   -56,   -56,    18,    73,   -56,   -56,    59,
+     -56,   -56,   128,   -56,   -56,   134,   -56,    59,   -56,   -56,
+     -56,    18,   103,    56,    56,   100,   -56,   -56,    56,   113,
+      40,   113,   -56,    59,   -56,   -56,    96,    56,   113,    83,
+     -56,    89,   -56,   113,   -56
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -31,   -31,    -1,   -31,   -31,   -31,    87,   -31,   -30,   -31,
-      93,   -31,   -31
+     -56,   -56,    19,   -56,   -56,   -56,   117,   -56,   -31,   -30,
+     -29,    76,   -27,   -56,   -56,   -55
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-#define YYTABLE_NINF -1
-static const yytype_uint8 yytable[] =
+#define YYTABLE_NINF -64
+static const yytype_int8 yytable[] =
 {
-      51,    12,    13,    14,    15,    16,    17,    11,    74,     1,
-      18,    19,    20,    21,    22,    23,    24,    25,    26,    27,
-      28,    29,    12,    13,    14,    15,    16,    17,     6,    53,
-      54,    18,    56,    12,    13,    14,    15,    16,    17,     3,
-      88,    89,    18,    90,     4,     5,    30,    39,    47,    40,
-      43,     8,    44,     9,    76,    94,    41,    42,    79,    45,
-      46,     7,    77,    97,    55,    38,    80,    30,    58,    59,
-      60,    61,    62,    63,    64,    65,    66,    67,    73,    58,
-      59,    60,    61,    62,    63,    64,    65,    66,    67,    68,
-      58,    59,    60,    61,    69,    58,    59,    60,    61,    72,
-      68,    48,    82,    75,    49,    78,    81,    83,    84,    50,
-      85,    68,    86,    82,    91,    92,    68,    93,    95,    96,
-       0,    57,    98,    52
+      57,    58,    59,    56,    60,   101,     1,    91,     3,    94,
+      86,    87,    88,     4,    89,    92,     6,    95,   -63,   -63,
+      12,    13,    14,    15,    16,    17,    54,    11,    97,    18,
+      19,    20,    21,    22,    23,    24,    25,    26,    27,    28,
+      29,   109,   101,    12,    13,    14,    15,    16,    17,     7,
+     111,     5,    18,    64,     8,    30,    30,     9,   113,    12,
+      13,    14,    15,    16,   106,    31,    55,    41,   107,    82,
+      83,   103,   118,   119,   116,    61,    62,   121,    30,    57,
+      58,    88,    50,    89,    63,    84,   123,    73,    31,    12,
+      13,    14,    15,    16,   106,    82,    83,    74,   107,    66,
+      67,    68,    69,    90,   108,    66,    67,    68,    69,    66,
+      67,    68,    69,    93,    96,    66,    67,    68,    69,    42,
+      70,    43,   -54,    99,   100,   -54,    70,   102,    44,    45,
+      70,    71,    82,    83,   110,   124,    70,   104,    98,    66,
+      67,    68,    69,   114,    46,   122,    47,    51,   117,   115,
+      52,   120,    65,    48,    49,    53,     0,   112,     0,     0,
+      70,     0,     0,    75,    76,    77,    78,    79,    80
 };
 
 #define yypact_value_is_default(yystate) \
-  ((yystate) == (-31))
+  ((yystate) == (-56))
 
 #define yytable_value_is_error(yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
 {
-      30,     3,     4,     5,     6,     7,     8,     8,    38,    15,
-      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,     3,     4,     5,     6,     7,     8,    16,    52,
-      53,    12,    33,     3,     4,     5,     6,     7,     8,    11,
-      70,    71,    12,    73,     0,    48,    48,    13,    15,    15,
-      13,    49,    15,    50,    15,    85,    22,    23,    15,    22,
-      23,    49,    23,    93,    12,    45,    23,    48,    26,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    48,    26,
-      27,    28,    29,    30,    31,    32,    33,    34,    35,    47,
-      26,    27,    28,    29,    52,    26,    27,    28,    29,    52,
-      47,    15,    49,    15,    18,    15,    15,    49,    12,    23,
-      45,    47,    46,    49,    15,    15,    47,    45,     3,    51,
-      -1,    34,    52,    30
+      31,    31,    31,    30,    31,    60,    15,    15,    11,    15,
+      41,    41,    41,     0,    41,    23,    16,    23,    36,    37,
+       3,     4,     5,     6,     7,     8,     8,     8,    55,    12,
+      13,    14,    15,    16,    17,    18,    19,    20,    21,    22,
+      23,    72,    97,     3,     4,     5,     6,     7,     8,    49,
+      81,    48,    12,    34,    49,    38,    38,    50,    85,     3,
+       4,     5,     6,     7,     8,    48,    48,    45,    12,    36,
+      37,    45,   103,   104,   101,    52,    53,   108,    38,   110,
+     110,   110,    15,   110,    12,    52,   117,    52,    48,     3,
+       4,     5,     6,     7,     8,    36,    37,    52,    12,    26,
+      27,    28,    29,    15,    48,    26,    27,    28,    29,    26,
+      27,    28,    29,    15,    15,    26,    27,    28,    29,    13,
+      47,    15,    49,    49,    49,    52,    47,    12,    22,    23,
+      47,    52,    36,    37,    48,    52,    47,    46,    49,    26,
+      27,    28,    29,    15,    13,    49,    15,    15,    45,    15,
+      18,    51,    35,    22,    23,    23,    -1,    81,    -1,    -1,
+      47,    -1,    -1,    30,    31,    32,    33,    34,    35
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -752,13 +774,16 @@ static const yytype_uint8 yystos[] =
        0,    15,    55,    11,     0,    48,    16,    49,    49,    50,
       56,    56,     3,     4,     5,     6,     7,     8,    12,    13,
       14,    15,    16,    17,    18,    19,    20,    21,    22,    23,
-      48,    58,    59,    60,    61,    62,    63,    64,    45,    13,
-      15,    22,    23,    13,    15,    22,    23,    15,    15,    18,
-      23,    62,    64,    52,    53,    12,    56,    60,    26,    27,
-      28,    29,    30,    31,    32,    33,    34,    35,    47,    52,
-      65,    66,    52,    48,    62,    15,    15,    23,    15,    15,
-      23,    15,    49,    49,    12,    45,    46,    57,    62,    62,
-      62,    15,    15,    45,    62,     3,    51,    62,    52
+      38,    48,    58,    59,    60,    61,    62,    63,    64,    65,
+      66,    45,    13,    15,    22,    23,    13,    15,    22,    23,
+      15,    15,    18,    23,     8,    48,    66,    62,    63,    64,
+      66,    52,    53,    12,    56,    60,    26,    27,    28,    29,
+      47,    52,    67,    52,    52,    30,    31,    32,    33,    34,
+      35,    68,    36,    37,    52,    69,    62,    63,    64,    66,
+      15,    15,    23,    15,    15,    23,    15,    66,    49,    49,
+      49,    69,    12,    45,    46,    57,     8,    12,    48,    62,
+      48,    62,    65,    66,    15,    15,    66,    45,    62,    62,
+      51,    62,    49,    62,    52
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1595,7 +1620,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 91 "sintatica.y"
+#line 94 "sintatica.y"
     {
 				if(!error)				
 					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main()"  << (yyvsp[(5) - (5)]).traduction << endl; 
@@ -1607,7 +1632,7 @@ yyreduce:
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 99 "sintatica.y"
+#line 102 "sintatica.y"
     {
 				if(!error)
 					cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nint main(void)"  << (yyvsp[(6) - (6)]).traduction << endl;
@@ -1619,7 +1644,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 108 "sintatica.y"
+#line 111 "sintatica.y"
     {
 				(yyval).traduction = "\n{\n" + declarations + (yyvsp[(2) - (5)]).traduction + (yyvsp[(3) - (5)]).traduction + (yyvsp[(4) - (5)]).traduction + "\n}";
 			}
@@ -1628,7 +1653,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 112 "sintatica.y"
+#line 115 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1637,16 +1662,16 @@ yyreduce:
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 119 "sintatica.y"
+#line 122 "sintatica.y"
     {
-				(yyval).traduction = "\n\t" + (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + ";";
+				(yyval).traduction = (yyvsp[(2) - (3)]).traduction + "\n\t" + (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).label + ";";
 			}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 123 "sintatica.y"
+#line 126 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
@@ -1655,7 +1680,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 130 "sintatica.y"
+#line 133 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(3) - (3)]).label) == IDMap.end())
@@ -1679,13 +1704,15 @@ yyreduce:
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction;
 				(yyval).type = IDMap[(yyvsp[(3) - (3)]).label].type;
 				(yyval).modifier = IDMap[(yyvsp[(3) - (3)]).label].modifier;
+
+				IDMap[(yyval).label] = IDMap[(yyvsp[(3) - (3)]).label];
 			}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 155 "sintatica.y"
+#line 160 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1718,6 +1745,8 @@ yyreduce:
 				(yyval).traduction = "\n" + atribuition + "\n";
 				(yyval).type = IDMap[(yyvsp[(3) - (5)]).label].type;	
 				(yyval).modifier = IDMap[(yyvsp[(3) - (5)]).label].modifier;
+
+				IDMap[(yyval).label] = IDMap[(yyvsp[(3) - (5)]).label];
 							
 			}
     break;
@@ -1725,7 +1754,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 190 "sintatica.y"
+#line 197 "sintatica.y"
     {
 
 				if(IDMap.find((yyvsp[(2) - (2)]).label) == IDMap.end())
@@ -1750,13 +1779,15 @@ yyreduce:
 				(yyval).type = IDMap[(yyvsp[(2) - (2)]).label].type;
 				(yyval).modifier = IDMap[(yyvsp[(2) - (2)]).label].modifier;
 
+				IDMap[(yyval).label] = IDMap[(yyvsp[(2) - (2)]).label];
+
 			}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 216 "sintatica.y"
+#line 225 "sintatica.y"
     {
 				string cast = "";
 				string atribuition = "";
@@ -1792,13 +1823,14 @@ yyreduce:
 				(yyval).type = IDMap[(yyvsp[(2) - (4)]).label].type;
 				(yyval).modifier = IDMap[(yyvsp[(2) - (4)]).label].modifier;
 
+				IDMap[(yyval).label] = IDMap[(yyvsp[(2) - (4)]).label];
 			}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 256 "sintatica.y"
+#line 266 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1809,7 +1841,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 262 "sintatica.y"
+#line 272 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1820,7 +1852,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 268 "sintatica.y"
+#line 278 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1831,7 +1863,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 274 "sintatica.y"
+#line 284 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1842,7 +1874,7 @@ yyreduce:
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 280 "sintatica.y"
+#line 290 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1853,7 +1885,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 286 "sintatica.y"
+#line 296 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1864,7 +1896,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 292 "sintatica.y"
+#line 302 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(1) - (1)]).traduction;
 				(yyval).modifier = "";
@@ -1875,7 +1907,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 298 "sintatica.y"
+#line 308 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1886,7 +1918,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 304 "sintatica.y"
+#line 314 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1897,7 +1929,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 310 "sintatica.y"
+#line 320 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1908,7 +1940,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 316 "sintatica.y"
+#line 326 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1919,7 +1951,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 322 "sintatica.y"
+#line 332 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1930,7 +1962,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 328 "sintatica.y"
+#line 338 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1941,7 +1973,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 334 "sintatica.y"
+#line 344 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(2) - (2)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (2)]).traduction;
@@ -1952,7 +1984,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 340 "sintatica.y"
+#line 350 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
@@ -1963,7 +1995,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 346 "sintatica.y"
+#line 356 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (1)]).traduction;
@@ -1974,7 +2006,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 352 "sintatica.y"
+#line 362 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -1985,7 +2017,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 358 "sintatica.y"
+#line 368 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -1996,7 +2028,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 364 "sintatica.y"
+#line 374 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2007,7 +2039,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 370 "sintatica.y"
+#line 380 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2018,7 +2050,7 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 376 "sintatica.y"
+#line 386 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(3) - (3)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction;
@@ -2029,7 +2061,7 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 382 "sintatica.y"
+#line 392 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(4) - (4)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
@@ -2040,7 +2072,7 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 388 "sintatica.y"
+#line 398 "sintatica.y"
     {
 				(yyval).type = (yyvsp[(4) - (4)]).traduction;
 				(yyval).modifier = (yyvsp[(1) - (4)]).traduction + " " + (yyvsp[(2) - (4)]).traduction + " " +  (yyvsp[(3) - (4)]).traduction;
@@ -2051,7 +2083,7 @@ yyreduce:
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 394 "sintatica.y"
+#line 404 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
@@ -2062,7 +2094,7 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 400 "sintatica.y"
+#line 410 "sintatica.y"
     {
 				(yyval).type = "int";
 				(yyval).modifier = (yyvsp[(1) - (3)]).traduction + " " + (yyvsp[(2) - (3)]).traduction + " " +  (yyvsp[(3) - (3)]).traduction;
@@ -2073,7 +2105,7 @@ yyreduce:
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 408 "sintatica.y"
+#line 418 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(1) - (2)]).traduction + "\n" + (yyvsp[(2) - (2)]).traduction;
 			}
@@ -2082,25 +2114,16 @@ yyreduce:
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 412 "sintatica.y"
+#line 422 "sintatica.y"
     {
 				(yyval).traduction = "";
 			}
     break;
 
-  case 41:
+  case 44:
 
 /* Line 1806 of yacc.c  */
-#line 419 "sintatica.y"
-    {
-				(yyval).traduction = (yyvsp[(1) - (2)]).traduction;;
-			}
-    break;
-
-  case 42:
-
-/* Line 1806 of yacc.c  */
-#line 426 "sintatica.y"
+#line 435 "sintatica.y"
     {
 				string resultOperationType;
 				id_struct* keyOperating;
@@ -2161,44 +2184,15 @@ yyreduce:
 			}
     break;
 
-  case 43:
+  case 45:
 
 /* Line 1806 of yacc.c  */
-#line 485 "sintatica.y"
+#line 494 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
 				IDMap[(yyval).label].type = "int";
-
-				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";
-
-				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
-			}
-    break;
-
-  case 44:
-
-/* Line 1806 of yacc.c  */
-#line 495 "sintatica.y"
-    {
-				(yyval).label = generateLabel();
-				IDMap[(yyval).label].label = (yyval).label;
-				IDMap[(yyval).label].type = "float";
-
-				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";
-
-				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
-			}
-    break;
-
-  case 45:
-
-/* Line 1806 of yacc.c  */
-#line 505 "sintatica.y"
-    {
-				(yyval).label = generateLabel();
-				IDMap[(yyval).label].label = (yyval).label;
-				IDMap[(yyval).label].type = "float"; //poderia ser double
+				IDMap[(yyval).label].modifier = "";
 
 				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";
 
@@ -2209,13 +2203,14 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 515 "sintatica.y"
+#line 505 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
-				IDMap[(yyval).label].type = "char";
+				IDMap[(yyval).label].type = "float";
+				IDMap[(yyval).label].modifier = "";
 
-				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
+				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";
 
 				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
 			}
@@ -2224,13 +2219,14 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 525 "sintatica.y"
+#line 516 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
-				IDMap[(yyval).label].type = "string";
+				IDMap[(yyval).label].type = "float"; //poderia ser double
+				IDMap[(yyval).label].modifier = "";
 
-				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
+				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";
 
 				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
 			}
@@ -2239,11 +2235,12 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 535 "sintatica.y"
+#line 527 "sintatica.y"
     {
 				(yyval).label = generateLabel();
 				IDMap[(yyval).label].label = (yyval).label;
-				IDMap[(yyval).label].type = "bool";
+				IDMap[(yyval).label].type = "char";
+				IDMap[(yyval).label].modifier = "";
 
 				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
 
@@ -2254,7 +2251,39 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 545 "sintatica.y"
+#line 538 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = "string";
+				IDMap[(yyval).label].modifier = "";
+
+				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+			}
+    break;
+
+  case 50:
+
+/* Line 1806 of yacc.c  */
+#line 549 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = "bool";
+				IDMap[(yyval).label].modifier = "";
+
+				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+			}
+    break;
+
+  case 51:
+
+/* Line 1806 of yacc.c  */
+#line 560 "sintatica.y"
     {
 				if(IDMap.find((yyvsp[(1) - (1)]).label) == IDMap.end())	
 					yyerror("identifier: '" + (yyvsp[(1) - (1)]).label + "' not declared.");
@@ -2266,55 +2295,85 @@ yyreduce:
 			}
     break;
 
-  case 50:
-
-/* Line 1806 of yacc.c  */
-#line 555 "sintatica.y"
-    {
-				(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
-				(yyval).label = (yyvsp[(1) - (1)]).label;
-			}
-    break;
-
-  case 51:
-
-/* Line 1806 of yacc.c  */
-#line 560 "sintatica.y"
-    {
-				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
-				(yyval).label = (yyvsp[(2) - (3)]).label;
-			}
-    break;
-
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 568 "sintatica.y"
+#line 570 "sintatica.y"
     {
-				if(IDMap.find((yyvsp[(1) - (3)]).label) == IDMap.end())	
-					yyerror("identifier: '" + (yyvsp[(1) - (3)]).label + "' not declared.");
-
-				string cast = "";
-
-				if (((IDMap[(yyvsp[(3) - (3)]).label].modifier != IDMap[(yyvsp[(1) - (3)]).label].modifier)) || (IDMap[(yyvsp[(3) - (3)]).label].type != IDMap[(yyvsp[(1) - (3)]).label].type))
-				{
-
-					//aqui deve-se verificar quais casts são possíveis
-					if(IDMap[(yyvsp[(1) - (3)]).label].modifier != "")
-						cast = "(" + IDMap[(yyvsp[(1) - (3)]).label].modifier + " " + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
-					else
-						cast += "(" + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
-				}
-
-				(yyval).label = IDMap[(yyvsp[(1) - (3)]).label].label;
-				(yyval).traduction = (yyvsp[(3) - (3)]).traduction + "\t" + (yyval).label + " = " + cast + (yyvsp[(3) - (3)]).label + ";\n"; 
+				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
+				(yyval).label = (yyvsp[(2) - (3)]).label;
+				(yyval).type = (yyvsp[(2) - (3)]).type;
+				(yyval).modifier = (yyvsp[(2) - (3)]).modifier;
 			}
     break;
 
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 590 "sintatica.y"
+#line 580 "sintatica.y"
+    {
+			if(IDMap.find((yyvsp[(1) - (3)]).label) == IDMap.end())	
+				yyerror("identifier: '" + (yyvsp[(1) - (3)]).label + "' not declared.");
+
+			string cast = "";
+
+			if (((IDMap[(yyvsp[(3) - (3)]).label].modifier != IDMap[(yyvsp[(1) - (3)]).label].modifier)) || (IDMap[(yyvsp[(3) - (3)]).label].type != IDMap[(yyvsp[(1) - (3)]).label].type))
+			{
+
+				//aqui deve-se verificar quais casts são possíveis
+				if(IDMap[(yyvsp[(1) - (3)]).label].modifier != "")
+					cast = "(" + IDMap[(yyvsp[(1) - (3)]).label].modifier + " " + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
+				else
+					cast += "(" + IDMap[(yyvsp[(1) - (3)]).label].type + ") ";
+			}
+
+			(yyval).label = IDMap[(yyvsp[(1) - (3)]).label].label;
+			(yyval).traduction = (yyvsp[(3) - (3)]).traduction + "\t" + (yyval).label + " = " + cast + (yyvsp[(3) - (3)]).label + ";\n"; 
+			(yyval).type = (yyvsp[(1) - (3)]).type;
+			(yyval).modifier = (yyvsp[(1) - (3)]).modifier;
+		}
+    break;
+
+  case 54:
+
+/* Line 1806 of yacc.c  */
+#line 602 "sintatica.y"
+    {
+			(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
+			(yyval).label = (yyvsp[(1) - (1)]).label;
+			(yyval).type = (yyvsp[(1) - (1)]).type;
+			(yyval).modifier = (yyvsp[(1) - (1)]).modifier;
+		}
+    break;
+
+  case 55:
+
+/* Line 1806 of yacc.c  */
+#line 609 "sintatica.y"
+    {
+			(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
+			(yyval).label = (yyvsp[(1) - (1)]).label;
+			(yyval).type = (yyvsp[(1) - (1)]).type;
+			(yyval).modifier = (yyvsp[(1) - (1)]).modifier;
+		}
+    break;
+
+  case 56:
+
+/* Line 1806 of yacc.c  */
+#line 616 "sintatica.y"
+    {
+			(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
+			(yyval).label = (yyvsp[(1) - (1)]).label;
+			(yyval).type = (yyvsp[(1) - (1)]).type;
+			(yyval).modifier = (yyvsp[(1) - (1)]).modifier;
+		}
+    break;
+
+  case 57:
+
+/* Line 1806 of yacc.c  */
+#line 626 "sintatica.y"
     {
 				string resultOperationType;
 				id_struct* keyOperating;
@@ -2326,7 +2385,7 @@ yyreduce:
 
 				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction;
 
-				resultOperationType = verifyResultOperation((yyvsp[(1) - (3)]).type, (yyvsp[(3) - (3)]).type, (yyvsp[(2) - (3)]).traduction);
+				resultOperationType = verifyResultOperation(IDMap[(yyvsp[(1) - (3)]).label].type, IDMap[(yyvsp[(3) - (3)]).label].type, (yyvsp[(2) - (3)]).traduction);
 
 				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
 				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
@@ -2375,20 +2434,119 @@ yyreduce:
 			}
     break;
 
-  case 54:
+  case 58:
 
 /* Line 1806 of yacc.c  */
-#line 649 "sintatica.y"
+#line 685 "sintatica.y"
     {
 				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
 				(yyval).label = (yyvsp[(2) - (3)]).label;
+				(yyval).type = (yyvsp[(2) - (3)]).type;
+				(yyval).modifier = (yyvsp[(2) - (3)]).modifier;
+			}
+    break;
+
+  case 59:
+
+/* Line 1806 of yacc.c  */
+#line 695 "sintatica.y"
+    {
+				(yyval).traduction = (yyvsp[(1) - (1)]).traduction;
+				(yyval).label = (yyvsp[(1) - (1)]).label;
+				(yyval).type = (yyvsp[(1) - (1)]).type;
+				(yyval).modifier = (yyvsp[(1) - (1)]).modifier;
+			}
+    break;
+
+  case 60:
+
+/* Line 1806 of yacc.c  */
+#line 702 "sintatica.y"
+    {
+				(yyval).traduction = (yyvsp[(2) - (3)]).traduction;
+				(yyval).label = (yyvsp[(2) - (3)]).label;
+				(yyval).type = (yyvsp[(2) - (3)]).type;
+				(yyval).modifier = (yyvsp[(2) - (3)]).modifier;			
+			}
+    break;
+
+  case 61:
+
+/* Line 1806 of yacc.c  */
+#line 713 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				(yyval).type = "bool";
+				(yyval).modifier = "";
+				(yyval).traduction = (yyvsp[(1) - (3)]).traduction + (yyvsp[(3) - (3)]).traduction + "\t" + (yyval).label + " = " + (yyvsp[(1) - (3)]).label + " " + (yyvsp[(2) - (3)]).traduction + " " + (yyvsp[(3) - (3)]).label;
+
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = (yyval).type;
+				IDMap[(yyval).label].type = (yyval).modifier;
+
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+			}
+    break;
+
+  case 62:
+
+/* Line 1806 of yacc.c  */
+#line 727 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				(yyval).type = "bool";
+				(yyval).modifier = "";
+				(yyval).traduction = (yyvsp[(2) - (5)]).traduction + (yyvsp[(4) - (5)]).traduction + "\t" + (yyval).label + " = " + (yyvsp[(2) - (5)]).label + " " + (yyvsp[(3) - (5)]).traduction + " " + (yyvsp[(4) - (5)]).label;
+
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = (yyval).type;
+				IDMap[(yyval).label].type = (yyval).modifier;
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+			}
+    break;
+
+  case 63:
+
+/* Line 1806 of yacc.c  */
+#line 740 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				(yyval).type = "bool";
+				(yyval).modifier = "";
+				(yyval).traduction = "\t" + (yyval).label + " = " + (yyvsp[(1) - (1)]).traduction + ";\n";				
+
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = (yyval).type;
+				IDMap[(yyval).label].type = (yyval).modifier;
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";
+			}
+    break;
+
+  case 64:
+
+/* Line 1806 of yacc.c  */
+#line 753 "sintatica.y"
+    {
+				(yyval).label = generateLabel();
+				(yyval).type = "bool";
+				(yyval).modifier = "";
+				(yyval).traduction = (yyvsp[(2) - (2)]).traduction + "\t" + (yyval).label + " = " + (yyvsp[(1) - (2)]).traduction + " " + (yyvsp[(2) - (2)]).label + ";\n";				
+
+				IDMap[(yyval).label].label = (yyval).label;
+				IDMap[(yyval).label].type = (yyval).type;
+				IDMap[(yyval).label].type = (yyval).modifier;
+
+				declarations += "\t" + IDMap[(yyval).label].type + " " + IDMap[(yyval).label].label + ";\n";				
 			}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 2392 "y.tab.c"
+#line 2550 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2619,7 +2777,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 689 "sintatica.y"
+#line 787 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -2667,7 +2825,7 @@ string verifyResultOperation(string op1Type, string op2Type, string sOperator)
 		ops.op2Type = op1Type;
 
 		if(operationsMap.find(ops) == operationsMap.end())
-			yyerror("operation types: '" + op1Type + " " + sOperator + " " + op2Type + "' not defined.");
+			yyerror("operation of type: '" + op1Type + " " + sOperator + " " + op2Type + "' not is defined.");
 	}
 	
 	return operationsMap[ops];
@@ -2679,9 +2837,7 @@ id_struct* defineKeyOperating(id_struct op1, id_struct op2)
 	
 	keyOperating->label = generateLabel();
 
-	/*Para determinar o operando chave, podemos fazer uma verificação de uma operação aritmética,
-	como a soma. Por isso, foi utilizado neste caso. Verifique o mapa de operações.*/
-	keyOperating->type = verifyResultOperation(op1.type, op2.type, "+");
+	keyOperating->type = verifyStrongType(op1.type, op2.type);
 
 	if(keyOperating->type == op1.type)
 		keyOperating->modifier = op1.modifier;
@@ -2710,6 +2866,12 @@ void loadOpearationsMap(void)
 	operationsMap[*ops] = "float";
 
 	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
 	ops->sOperator = "+";
@@ -2729,6 +2891,12 @@ void loadOpearationsMap(void)
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
 	ops->op2Type = "string";
 	ops->sOperator = "+";
 	operationsMap[*ops] = "string";
@@ -2751,6 +2919,11 @@ void loadOpearationsMap(void)
 	ops->sOperator = "+";
 	operationsMap[*ops] = "float";		
 
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "double";	
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
@@ -2763,6 +2936,12 @@ void loadOpearationsMap(void)
 	ops->op2Type = "float";
 	ops->sOperator = "-";
 	operationsMap[*ops] = "float";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "double";
 
 	ops = new operation_struct;
 	ops->op1Type = "char";
@@ -2778,6 +2957,12 @@ void loadOpearationsMap(void)
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
 	ops->op2Type = "char";
 	ops->sOperator = "-";
 	operationsMap[*ops] = "int";
@@ -2787,6 +2972,12 @@ void loadOpearationsMap(void)
 	ops->op2Type = "float";
 	ops->sOperator = "-";
 	operationsMap[*ops] = "float";		
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "double";	
 
 
 	ops = new operation_struct;
@@ -2802,6 +2993,12 @@ void loadOpearationsMap(void)
 	operationsMap[*ops] = "float";
 
 	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
 	ops->sOperator = "*";
@@ -2815,6 +3012,12 @@ void loadOpearationsMap(void)
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
 	ops->op2Type = "char";
 	ops->sOperator = "*";
 	operationsMap[*ops] = "int";
@@ -2824,6 +3027,12 @@ void loadOpearationsMap(void)
 	ops->op2Type = "float";
 	ops->sOperator = "*";
 	operationsMap[*ops] = "float";		
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "double";	
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
@@ -2838,6 +3047,12 @@ void loadOpearationsMap(void)
 	operationsMap[*ops] = "float";
 
 	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
 	ops->sOperator = "/";
@@ -2851,6 +3066,12 @@ void loadOpearationsMap(void)
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "double";
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
 	ops->op2Type = "char";
 	ops->sOperator = "/";
 	operationsMap[*ops] = "int";
@@ -2861,6 +3082,35 @@ void loadOpearationsMap(void)
 	ops->sOperator = "/";
 	operationsMap[*ops] = "float";		
 
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "double";		
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "double";
+	ops->sOperator = "+";
+	operationsMap[*ops] = "double";		
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "double";
+	ops->sOperator = "-";
+	operationsMap[*ops] = "double";			
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "double";
+	ops->sOperator = "*";
+	operationsMap[*ops] = "double";		
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "double";
+	ops->sOperator = "/";
+	operationsMap[*ops] = "double";		
 
 	ops = new operation_struct;
 	ops->op1Type = "int";
@@ -2900,6 +3150,63 @@ void loadOpearationsMap(void)
 	operationsMap[*ops] = "bool";
 
 	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
+	ops->sOperator = "<";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
 	ops->op1Type = "bool";
 	ops->op2Type = "int";
 	ops->sOperator = "<";
@@ -2932,6 +3239,63 @@ void loadOpearationsMap(void)
 	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = ">";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
 	ops->sOperator = ">";
 	operationsMap[*ops] = "bool";
 
@@ -2969,6 +3333,63 @@ void loadOpearationsMap(void)
 	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "<=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
 	ops->sOperator = "<=";
 	operationsMap[*ops] = "bool";
 
@@ -3005,6 +3426,63 @@ void loadOpearationsMap(void)
 	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = ">=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
 	ops->sOperator = ">=";
 	operationsMap[*ops] = "bool";
 
@@ -3041,6 +3519,63 @@ void loadOpearationsMap(void)
 	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "==";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
 	ops->sOperator = "==";
 	operationsMap[*ops] = "bool";
 
@@ -3078,6 +3613,63 @@ void loadOpearationsMap(void)
 	ops = new operation_struct;
 	ops->op1Type = "char";
 	ops->op2Type = "char";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "float";
+	ops->op2Type = "float";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "double";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "float";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "float";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "float";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "double";
+	ops->op2Type = "float";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+
+	ops = new operation_struct;
+	ops->op1Type = "int";
+	ops->op2Type = "double";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "char";
+	ops->op2Type = "double";
+	ops->sOperator = "!=";
+	operationsMap[*ops] = "bool";
+
+	ops = new operation_struct;
+	ops->op1Type = "bool";
+	ops->op2Type = "double";
 	ops->sOperator = "!=";
 	operationsMap[*ops] = "bool";
 
@@ -3240,6 +3832,62 @@ void loadOpearationsMap(void)
 	ops->op2Type = "bool";
 	ops->sOperator = "||";
 	operationsMap[*ops] = "bool";
+}
+
+string 	verifyStrongType(string op1Type, string op2Type)
+{
+	if(op1Type == "int" && op2Type == "int")
+		return "int";
+	if(op1Type == "float" && op2Type == "float")
+		return "float";
+	if(op1Type == "double" && op2Type == "double")
+		return "double";
+	if(op1Type == "bool" && op2Type == "bool")
+		return "bool";
+	if(op1Type == "char" && op2Type == "char")
+		return "char";
+	if(op1Type == "string" && op2Type == "string")
+		return "string";
+
+
+	if ((op1Type == "int" && op2Type == "float") || (op1Type == "float" && op2Type == "int"))
+		return "float";
+	if ((op1Type == "int" && op2Type == "double") || (op1Type == "double" && op2Type == "int"))
+		return "double";
+	if ((op1Type == "int" && op2Type == "char") || (op1Type == "char" && op2Type == "int"))
+		return "int";
+	if ((op1Type == "int" && op2Type == "string") || (op1Type == "string" && op2Type == "int"))
+		return "string";
+	if ((op1Type == "int" && op2Type == "bool") || (op1Type == "bool" && op2Type == "int"))
+		return "bool";
+
+	if ((op1Type == "char" && op2Type == "float") || (op1Type == "float" && op2Type == "char"))
+		return "float";
+	if ((op1Type == "char" && op2Type == "double") || (op1Type == "double" && op2Type == "char"))
+		return "double";
+	if ((op1Type == "char" && op2Type == "string") || (op1Type == "string" && op2Type == "char"))
+		return "string";
+	if ((op1Type == "char" && op2Type == "bool") || (op1Type == "bool" && op2Type == "char"))
+		return "string";
+
+	if ((op1Type == "float" && op2Type == "string") || (op1Type == "string" && op2Type == "float"))
+		return "string";
+	if ((op1Type == "float" && op2Type == "double") || (op1Type == "double" && op2Type == "float"))
+		return "double";
+	if ((op1Type == "float" && op2Type == "bool") || (op1Type == "bool" && op2Type == "float"))
+		return "string";
+
+	if ((op1Type == "double" && op2Type == "string") || (op1Type == "string" && op2Type == "double"))
+		return "string";
+	if ((op1Type == "double" && op2Type == "bool") || (op1Type == "bool" && op2Type == "double"))
+		return "string";
+
+	if ((op1Type == "bool" && op2Type == "string") || (op1Type == "string" && op2Type == "bool"))
+		return "string";
+
+
+	yyerror("relation between the types: '" + op1Type + "' and '" + op2Type + "' not defined.");
+	return "";
 
 }
 

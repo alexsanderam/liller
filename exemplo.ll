@@ -14,7 +14,7 @@ int main()
 	k = 2;
 	j = (2 - 5.0) * 3;
 
-	k < j;
+	z = k + j < (v = 7);
 
 	int p;
 	//int j; //isto ocasiona um erro, esta variável já foi declarada antes
