@@ -9,7 +9,7 @@ TypeInt "int"
 TypeVoid "void"
 TypeFloat "float"
 TypeDouble "double"
-TypeBoolean "bool"
+TypeBool "bool"
 
 ModifierUnsigned "unsigned"
 ModifierSigned "signed"
@@ -30,9 +30,9 @@ Delim {Space}+
 Int ([-|+])?{Num}
 Float {Int}(\.{Num})
 Scientific ({Int}|{Float})[e|E][+|-]{Num}
-Boolean [{True} | {False}]
 True "true"
 False "false"
+Bool {True}|{False}
 
 Char \'({Letter}|{Num})\'
 ID {Letter}({Letter}|{Num})*
@@ -73,14 +73,12 @@ Assign "="
 <COMMENTS>[^*\n]*	{}
 <COMMENTS>"*"+[^*/\n]*	{}
 <COMMENTS>\n     	{ ++yylineno; }
-<COMMENTS>.		{}
 
 
 "//"			{BEGIN(COMMENTS_2);}
 <COMMENTS_2>[\0] 	{; BEGIN(INITIAL);}
 <COMMENTS_2>[\n] 	{ ++yylineno; BEGIN(INITIAL);}
-<COMMENTS_2>[^*\n]*	{}
-<COMMENTS_2>.		{}
+<COMMENTS_2>[^\n]*	{}
 
 
 {Delim} 	{}
@@ -123,7 +121,7 @@ Assign "="
 {Scientific}	{ yylval.traduction = yytext; return TK_SCIENTIFIC; }
 {Char}		{ yylval.traduction = yytext; return TK_CHAR; }
 {String}	{ yylval.traduction = yytext; return TK_STRING; }
-{Boolean}	{ yylval.traduction = yytext; return TK_BOOL; }
+{Bool}		{ yylval.traduction = yytext; return TK_BOOL; }
 
 {True}		{ yylval.traduction = yytext; return TK_TRUE; }
 {False}		{ yylval.traduction = yytext; return TK_FALSE; }
@@ -134,7 +132,7 @@ Assign "="
 {TypeVoid} 	{ yylval.traduction = yytext; return TK_TYPE_VOID; }
 {TypeFloat} 	{ yylval.traduction = yytext; return TK_TYPE_FLOAT; }
 {TypeDouble} 	{ yylval.traduction = yytext; return TK_TYPE_DOUBLE; }
-{TypeBoolean} 	{ yylval.traduction = yytext; return TK_TYPE_BOOLEAN; }
+{TypeBool} 	{ yylval.traduction = yytext; return TK_TYPE_BOOL; }
 
 {ModifierUnsigned} 	{ yylval.traduction = yytext; return TK_MODIFIER_UNSIGNED; }
 {ModifierSigned} 	{ yylval.traduction = yytext; return TK_MODIFIER_SIGNED; }

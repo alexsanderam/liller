@@ -10,11 +10,14 @@ int main()
 	bool x;
 
 
-	k = j = 1 / 1;
+	k = j = 1 / 1 + (v=20.5);
 	k = 2;
 	j = (2 - 5.0) * 3;
 
-	z = k + j < 7;
+	z = k + j < (v = 7);
+	
+	//x = (v < 7) && (10 != 1) || (5==2);
+	x = true && false || true;
 
 	int p;
 	//int j; //isto ocasiona um erro, esta variável já foi declarada antes
