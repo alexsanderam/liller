@@ -63,7 +63,6 @@ void loadOpearationsMap(void);
 %}
 
 %token TK_INT TK_FLOAT TK_SCIENTIFIC TK_CHAR TK_STRING TK_BOOL
-%token TK_TRUE TK_FALSE
 %token TK_MAIN 
 %token TK_ID 
 %token TK_TYPE_CHAR TK_TYPE_STRING TK_TYPE_INT TK_TYPE_VOID TK_TYPE_FLOAT TK_TYPE_DOUBLE TK_TYPE_BOOL
@@ -608,13 +607,6 @@ ATRIBUITION	: TK_ID TK_ASSIGN ATRIBUITION
 			$$.type = $1.type;
 			$$.modifier = $1.modifier;
 		}
-		| E
-		{
-			$$.traduction = $1.traduction;
-			$$.label = $1.label;
-			$$.type = $1.type;
-			$$.modifier = $1.modifier;
-		}
 		| RELATIONAL_E
 		{
 			$$.traduction = $1.traduction;
@@ -623,13 +615,6 @@ ATRIBUITION	: TK_ID TK_ASSIGN ATRIBUITION
 			$$.modifier = $1.modifier;
 		}
 		| LOGIC_E
-		{
-			$$.traduction = $1.traduction;
-			$$.label = $1.label;
-			$$.type = $1.type;
-			$$.modifier = $1.modifier;
-		}
-		| BIN_E
 		{
 			$$.traduction = $1.traduction;
 			$$.label = $1.label;
@@ -708,21 +693,7 @@ RELATIONAL_E 	: OPERAND RELATIONAL_OPERATION OPERAND
 			;
 
 
-OPERAND			: E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| '(' ATRIBUITION ')'
-			{
-				$$.traduction = $2.traduction;
-				$$.label = $2.label;
-				$$.type = $2.type;
-				$$.modifier = $2.modifier;			
-			}
-			| BIN_E
+OPERAND			: BIN_E
 			{
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
@@ -746,13 +717,6 @@ LOGIC_E			: LOGIC_E LOGIC_OPERATION LOGIC_E
 
 
 				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
-			}
-			| E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
 			}
 			| RELATIONAL_E
 			{
