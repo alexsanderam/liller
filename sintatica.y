@@ -416,83 +416,7 @@ TYPE		: TK_TYPE_CHAR
 			}
 			;
 
-COMMANDS	: COMMAND COMMANDS
-			{
-				$$.traduction = $1.traduction + "\n" + $2.traduction;
-			}
-			| 
-			{
-				$$.traduction = "";
-			}
-
-COMMAND 	: E 	';'	
-			| RELATIONAL_E ';'
-			| DECLARATION ';'
-			| LOGIC_E ';'
-			| ATRIBUITION ';'
-			;
-
-
-E 			: E ARITHMETIC_OPERATION E
-			{
-				string resultOperationType;
-				id_struct* keyOperating;
-				id_struct* weakOperating;
-				id_struct* strongOperating;
-
-				$$.label = generateLabel();
-				IDMap[$$.label].label = $$.label;
-
-				$$.traduction = $1.traduction + $3.traduction;
-
-				resultOperationType = verifyResultOperation(IDMap[$1.label].type, IDMap[$3.label].type, $2.traduction);
-
-				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
-				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-			          no momento da atribuição, que deverá se fazer um cast, caso necessário*/
-
-				IDMap[$$.label].type = resultOperationType;
-				IDMap[$$.label].modifier = ""; /*desconsidera-se os modificadores*/
-
-				declarations += "\t" + resultOperationType + " " + IDMap[$$.label].label + ";\n";
-
-				if(IDMap[$1.label].type == IDMap[$3.label].type)
-				{
-					$$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-				}
-				else
-				{
-					keyOperating = defineKeyOperating(IDMap[$1.label], IDMap[$3.label]);
-
-					IDMap[keyOperating->label].label = keyOperating->label;
-					IDMap[keyOperating->label].type = keyOperating->type;
-					IDMap[keyOperating->label].modifier = keyOperating->modifier;
-
-					string modifier = keyOperating->modifier;
-					modifier += (modifier != "" ? " " : "");
-
-					if(keyOperating->type == IDMap[$1.label].type)
-					{
-						weakOperating = &(IDMap[$3.label]);
-						strongOperating = &(IDMap[$1.label]);
-
-						$$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
-						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
-					}
-					else
-					{
-						weakOperating = &(IDMap[$1.label]);
-						strongOperating = &(IDMap[$3.label]);
-
-						$$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
-						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
-					}
-
-					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-				}
-
-			}
-			| TK_INT
+TERMINAL	: 	TK_INT
 			{
 				$$.label = generateLabel();
 				IDMap[$$.label].label = $$.label;
@@ -568,6 +492,58 @@ E 			: E ARITHMETIC_OPERATION E
 				$$.modifier = IDMap[$1.label].modifier;
 				$$.traduction = "";
 			}
+			;
+
+COMMANDS	: COMMAND COMMANDS
+			{
+				$$.traduction = $1.traduction + "\n" + $2.traduction;
+			}
+			| 
+			{
+				$$.traduction = "";
+			}
+
+COMMAND 	: E 	';'	
+			| ATRIBUITION ';'
+			| DECLARATION ';'
+			;
+
+
+E 			: ARITHMETIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| LOGIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| RELATIONAL_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| BIN_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| TERMINAL
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
 			| '(' ATRIBUITION ')'
 			{
 				$$.traduction = $2.traduction;
@@ -585,46 +561,7 @@ E 			: E ARITHMETIC_OPERATION E
 			;
 
 
-ATRIBUITION	: TK_ID TK_ASSIGN ATRIBUITION
-		{
-			if(IDMap.find($1.label) == IDMap.end())	
-				yyerror("identifier: '" + $1.label + "' not declared.");
-
-			string cast = "";
-
-			if (((IDMap[$3.label].modifier != IDMap[$1.label].modifier)) || (IDMap[$3.label].type != IDMap[$1.label].type))
-			{
-
-				//aqui deve-se verificar quais casts são possíveis
-				if(IDMap[$1.label].modifier != "")
-					cast = "(" + IDMap[$1.label].modifier + " " + IDMap[$1.label].type + ") ";
-				else
-					cast += "(" + IDMap[$1.label].type + ") ";
-			}
-
-			$$.label = IDMap[$1.label].label;
-			$$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n"; 
-			$$.type = $1.type;
-			$$.modifier = $1.modifier;
-		}
-		| RELATIONAL_E
-		{
-			$$.traduction = $1.traduction;
-			$$.label = $1.label;
-			$$.type = $1.type;
-			$$.modifier = $1.modifier;
-		}
-		| LOGIC_E
-		{
-			$$.traduction = $1.traduction;
-			$$.label = $1.label;
-			$$.type = $1.type;
-			$$.modifier = $1.modifier;
-		}
-		;
-
-
-RELATIONAL_E 	: OPERAND RELATIONAL_OPERATION OPERAND
+ARITHMETIC_E	: E ARITHMETIC_OPERATION E
 			{
 				string resultOperationType;
 				id_struct* keyOperating;
@@ -640,7 +577,7 @@ RELATIONAL_E 	: OPERAND RELATIONAL_OPERATION OPERAND
 
 				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
 				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-				  no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+			          no momento da atribuição, que deverá se fazer um cast, caso necessário*/
 
 				IDMap[$$.label].type = resultOperationType;
 				IDMap[$$.label].modifier = ""; /*desconsidera-se os modificadores*/
@@ -681,30 +618,10 @@ RELATIONAL_E 	: OPERAND RELATIONAL_OPERATION OPERAND
 
 					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
 				}
-
 			}
-			| '(' RELATIONAL_E ')'
-			{
-				$$.traduction = $2.traduction;
-				$$.label = $2.label;
-				$$.type = $2.type;
-				$$.modifier = $2.modifier;
-			}
-			;
 
 
-OPERAND			: BIN_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			;
-			
-
-
-LOGIC_E			: LOGIC_E LOGIC_OPERATION LOGIC_E
+LOGIC_E			: E LOGIC_OPERATION E
 			{
 				$$.label = generateLabel();
 				$$.type = "bool";
@@ -717,20 +634,6 @@ LOGIC_E			: LOGIC_E LOGIC_OPERATION LOGIC_E
 
 
 				declarations += "\t" + IDMap[$$.label].type + " " + IDMap[$$.label].label + ";\n";
-			}
-			| RELATIONAL_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| BIN_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
 			}
 			| TK_OP_LOGIC_NOT LOGIC_E
 			{
@@ -754,7 +657,7 @@ LOGIC_E			: LOGIC_E LOGIC_OPERATION LOGIC_E
 			}
 			;
 
-BIN_E			: BIN_E BIN_OPERATION BIN_E
+BIN_E			: E BIN_OPERATION E
 			{
 				string resultOperationType;
 				id_struct* keyOperating;
@@ -832,14 +735,148 @@ BIN_E			: BIN_E BIN_OPERATION BIN_E
 				$$.modifier = $2.modifier;
 				$$.traduction = $2.traduction;
 			}
-			| E
+			;
+
+
+
+RELATIONAL_E 	: RELATIONAL_OPERAND RELATIONAL_OPERATION RELATIONAL_OPERAND
+			{
+				string resultOperationType;
+				id_struct* keyOperating;
+				id_struct* weakOperating;
+				id_struct* strongOperating;
+
+				$$.label = generateLabel();
+				IDMap[$$.label].label = $$.label;
+
+				$$.traduction = $1.traduction + $3.traduction;
+
+				resultOperationType = verifyResultOperation(IDMap[$1.label].type, IDMap[$3.label].type, $2.traduction);
+
+				/*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
+				  mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
+				  no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+
+				IDMap[$$.label].type = resultOperationType;
+				IDMap[$$.label].modifier = ""; /*desconsidera-se os modificadores*/
+
+				declarations += "\t" + resultOperationType + " " + IDMap[$$.label].label + ";\n";
+
+				if(IDMap[$1.label].type == IDMap[$3.label].type)
+				{
+					$$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+				}
+				else
+				{
+					keyOperating = defineKeyOperating(IDMap[$1.label], IDMap[$3.label]);
+
+					IDMap[keyOperating->label].label = keyOperating->label;
+					IDMap[keyOperating->label].type = keyOperating->type;
+					IDMap[keyOperating->label].modifier = keyOperating->modifier;
+
+					string modifier = keyOperating->modifier;
+					modifier += (modifier != "" ? " " : "");
+
+					if(keyOperating->type == IDMap[$1.label].type)
+					{
+						weakOperating = &(IDMap[$3.label]);
+						strongOperating = &(IDMap[$1.label]);
+
+						$$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + strongOperating->label + " " + $2.traduction + " " + keyOperating->label + ";\n";
+					}
+					else
+					{
+						weakOperating = &(IDMap[$1.label]);
+						strongOperating = &(IDMap[$3.label]);
+
+						$$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperating->label + ";\n";
+						$$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperating->label + ";\n";
+					}
+
+					declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+				}
+
+			}
+			| '(' RELATIONAL_E ')'
+			{
+				$$.traduction = $2.traduction;
+				$$.label = $2.label;
+				$$.type = $2.type;
+				$$.modifier = $2.modifier;
+			}
+			;
+
+
+RELATIONAL_OPERAND	: TERMINAL
 			{
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
 				$$.type = $1.type;
 				$$.modifier = $1.modifier;
 			}
+			| BIN_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| LOGIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| ARITHMETIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| '(' ATRIBUITION ')'
+			{
+				$$.traduction = $2.traduction;
+				$$.label = $2.label;
+				$$.type = $2.type;
+				$$.modifier = $2.modifier;			
+			}
 			;
+
+
+ATRIBUITION	: TK_ID TK_ASSIGN ATRIBUITION
+		{
+			if(IDMap.find($1.label) == IDMap.end())	
+				yyerror("identifier: '" + $1.label + "' not declared.");
+
+			string cast = "";
+
+			if (((IDMap[$3.label].modifier != IDMap[$1.label].modifier)) || (IDMap[$3.label].type != IDMap[$1.label].type))
+			{
+
+				//aqui deve-se verificar quais casts são possíveis
+				if(IDMap[$1.label].modifier != "")
+					cast = "(" + IDMap[$1.label].modifier + " " + IDMap[$1.label].type + ") ";
+				else
+					cast += "(" + IDMap[$1.label].type + ") ";
+			}
+
+			$$.label = IDMap[$1.label].label;
+			$$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n"; 
+			$$.type = $1.type;
+			$$.modifier = $1.modifier;
+		}
+		| E
+		{
+			$$.traduction = $1.traduction;
+			$$.label = $1.label;
+			$$.type = $1.type;
+			$$.modifier = $1.modifier;
+		}
+		;	
+
 
 ARITHMETIC_OPERATION	: TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
 				;
@@ -1821,7 +1858,7 @@ void loadOpearationsMap(void)
 	ops->op1Type = "char";
 	ops->op2Type = "int";
 	ops->sOperator = "<<";
-	operationsMap[*ops] = "char";	
+	operationsMap[*ops] = "int";	
 
 	ops = new operation_struct;
 	ops->op1Type = "char";
@@ -1840,7 +1877,7 @@ void loadOpearationsMap(void)
 	ops->op1Type = "char";
 	ops->op2Type = "int";
 	ops->sOperator = ">>";
-	operationsMap[*ops] = "char";	
+	operationsMap[*ops] = "int";	
 
 	ops = new operation_struct;
 	ops->op1Type = "char";
@@ -1858,7 +1895,7 @@ void loadOpearationsMap(void)
 	ops->op1Type = "char";
 	ops->op2Type = "int";
 	ops->sOperator = "&";
-	operationsMap[*ops] = "char";	
+	operationsMap[*ops] = "int";	
 
 	ops = new operation_struct;
 	ops->op1Type = "char";
