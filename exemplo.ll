@@ -10,7 +10,7 @@ int main()
 	bool x;
 
 
-	k = j = 1 / 1 + (v=20.5);
+	k = j = 1 / 1 + (v=20.5); //a primeira operação que ele está realizando é a soma, a não ser que se ponha parênteses
 	k = 2;
 	j = (2 - 5.0) * 3;
 
