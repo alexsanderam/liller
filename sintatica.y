@@ -83,13 +83,15 @@ void loadOpearationsMap(void);
 
 %left TK_ASSIGN
 %right TK_OP_LOGIC_NOT
-%left TK_OP_LOGIC_OR
-%left TK_OP_LOGIC_AND
-%left TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER TK_OP_REL_EQ TK_OP_REL_DIFF
-%right TK_OP_BIN_NOT
+%left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
+%nonassoc TK_OP_REL_EQ TK_OP_REL_DIFF
+%nonassoc TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER
 %left TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
-%left TK_OP_SUM TK_OP_SUB
-%left TK_OP_MUL TK_OP_DIV TK_OP_MOD
+%left TK_OP_SUM 
+%left TK_OP_SUB
+%left TK_OP_MUL TK_OP_DIV
+%left TK_OP_MOD
+%left TK_OP_BIN_NOT
 
 
 %%
@@ -596,6 +598,13 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
+			| BITWISE_E
+			{
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
                         | TERMINAL
                         {
                                 $$.traduction = $1.traduction;
@@ -685,6 +694,13 @@ ARITHMETIC_OPERAND		    : TERMINAL
 		                            $$.type = $1.type;
 		                            $$.modifier = $1.modifier;
 		                    }
+		                    | BITWISE_E
+		                    {
+		                            $$.traduction = $1.traduction;
+		                            $$.label = $1.label;
+		                            $$.type = $1.type;
+		                            $$.modifier = $1.modifier;
+		                    }
 		                    | '(' E ')'
 		                    {
 		                            $$.traduction = $2.traduction;
@@ -742,6 +758,13 @@ LOGIC_OPERAND          : TERMINAL
 		                $$.type = $1.type;
 		                $$.modifier = $1.modifier;
 		        }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
 		        | BIN_E
 		        {
 		                $$.traduction = $1.traduction;
@@ -822,13 +845,6 @@ BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                                         declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
                                 }
                         }
-			| TK_OP_BIN_NOT BIN_OPERAND
-			{
-				$$.traduction = "\t" + $1.traduction + $2.traduction + "\n";
-		                $$.label = $2.label;
-		                $$.type = $2.type;
-		                $$.modifier = $2.modifier;
-			}
 		 	;
 
 
@@ -847,6 +863,13 @@ BIN_OPERAND             : TERMINAL
 		                $$.type = $1.type;
 		                $$.modifier = $1.modifier;
 		        }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
 		        | ARITHMETIC_E
 			{
 				$$.traduction = $1.traduction;
@@ -863,6 +886,47 @@ BIN_OPERAND             : TERMINAL
 		        }
 		        ;
 
+
+
+BITWISE_E		: TK_OP_BIN_NOT BITWISE_OPERAND
+			{
+                                $$.label = generateLabel();
+
+				if(($2.type != "int") && ($2.type != "char"))
+					yyerror("wrong type argument to bit-complement");
+
+                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";
+
+                                $$.type = $2.type;
+                                $$.modifier = $2.type;
+
+                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+			}
+			;
+
+
+BITWISE_OPERAND         : TERMINAL
+		        {
+			     	$$.traduction = $1.traduction;
+			        $$.label = $1.label;
+			        $$.type = $1.type;
+			        $$.modifier = $1.modifier;
+		        }
+			| BITWISE_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+		        | '(' E ')'
+		        {
+		                $$.traduction = $2.traduction;
+		                $$.label = $2.label;
+		                $$.type = $2.type;
+		                $$.modifier = $2.modifier;                        
+		        }
+		        ;
 
 
 
@@ -933,6 +997,13 @@ RELATIONAL_OPERAND      : TERMINAL
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
                         | BIN_E
                         {
                                 $$.traduction = $1.traduction;
@@ -2024,7 +2095,7 @@ void loadOpearationsMap(void)
         ops->op1Type = "char";
         ops->op2Type = "int";
         ops->sOperator = "|";
-        operationsMap[*ops] = "char";        
+        operationsMap[*ops] = "int";        
 
         ops = new operation_struct;
         ops->op1Type = "char";
@@ -2042,7 +2113,7 @@ void loadOpearationsMap(void)
         ops->op1Type = "char";
         ops->op2Type = "int";
         ops->sOperator = "^";
-        operationsMap[*ops] = "char";        
+        operationsMap[*ops] = "int";        
 
         ops = new operation_struct;
         ops->op1Type = "char";
