@@ -123,9 +123,6 @@ Assign "="
 {String}	{ yylval.traduction = yytext; return TK_STRING; }
 {Bool}		{ yylval.traduction = yytext; return TK_BOOL; }
 
-{True}		{ yylval.traduction = yytext; return TK_TRUE; }
-{False}		{ yylval.traduction = yytext; return TK_FALSE; }
-
 {TypeChar} 	{ yylval.traduction = yytext; return TK_TYPE_CHAR; }
 {TypeString} 	{ yylval.traduction = yytext; return TK_TYPE_STRING; }
 {TypeInt} 	{ yylval.traduction = yytext; return TK_TYPE_INT; }

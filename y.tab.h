@@ -62,24 +62,25 @@
      TK_OP_SUB = 280,
      TK_OP_MUL = 281,
      TK_OP_DIV = 282,
-     TK_OP_REL_LESS = 283,
-     TK_OP_REL_GREATER = 284,
-     TK_OP_REL_EQLESS = 285,
-     TK_OP_REL_EQGREATER = 286,
-     TK_OP_REL_EQ = 287,
-     TK_OP_REL_DIFF = 288,
-     TK_OP_LOGIC_AND = 289,
-     TK_OP_LOGIC_OR = 290,
-     TK_OP_LOGIC_NOT = 291,
-     TK_OP_BIN_AND = 292,
-     TK_OP_BIN_OR = 293,
-     TK_OP_BIN_XOR = 294,
-     TK_OP_BIN_NOT = 295,
-     TK_OP_BIN_SHIFTR = 296,
-     TK_OP_BIN_SHIFTL = 297,
-     TK_ASSIGN = 298,
-     TK_RETURN = 299,
-     TK_OP_MOD = 300
+     TK_OP_MOD = 283,
+     TK_OP_REL_LESS = 284,
+     TK_OP_REL_GREATER = 285,
+     TK_OP_REL_EQLESS = 286,
+     TK_OP_REL_EQGREATER = 287,
+     TK_OP_REL_EQ = 288,
+     TK_OP_REL_DIFF = 289,
+     TK_OP_LOGIC_AND = 290,
+     TK_OP_LOGIC_OR = 291,
+     TK_OP_LOGIC_NOT = 292,
+     TK_OP_BIN_AND = 293,
+     TK_OP_BIN_OR = 294,
+     TK_OP_BIN_XOR = 295,
+     TK_OP_BIN_NOT = 296,
+     TK_OP_BIN_SHIFTR = 297,
+     TK_OP_BIN_SHIFTL = 298,
+     TK_ASSIGN = 299,
+     TK_RETURN = 300,
+     TK_COUT = 301
    };
 #endif
 /* Tokens.  */
@@ -108,24 +109,25 @@
 #define TK_OP_SUB 280
 #define TK_OP_MUL 281
 #define TK_OP_DIV 282
-#define TK_OP_REL_LESS 283
-#define TK_OP_REL_GREATER 284
-#define TK_OP_REL_EQLESS 285
-#define TK_OP_REL_EQGREATER 286
-#define TK_OP_REL_EQ 287
-#define TK_OP_REL_DIFF 288
-#define TK_OP_LOGIC_AND 289
-#define TK_OP_LOGIC_OR 290
-#define TK_OP_LOGIC_NOT 291
-#define TK_OP_BIN_AND 292
-#define TK_OP_BIN_OR 293
-#define TK_OP_BIN_XOR 294
-#define TK_OP_BIN_NOT 295
-#define TK_OP_BIN_SHIFTR 296
-#define TK_OP_BIN_SHIFTL 297
-#define TK_ASSIGN 298
-#define TK_RETURN 299
-#define TK_OP_MOD 300
+#define TK_OP_MOD 283
+#define TK_OP_REL_LESS 284
+#define TK_OP_REL_GREATER 285
+#define TK_OP_REL_EQLESS 286
+#define TK_OP_REL_EQGREATER 287
+#define TK_OP_REL_EQ 288
+#define TK_OP_REL_DIFF 289
+#define TK_OP_LOGIC_AND 290
+#define TK_OP_LOGIC_OR 291
+#define TK_OP_LOGIC_NOT 292
+#define TK_OP_BIN_AND 293
+#define TK_OP_BIN_OR 294
+#define TK_OP_BIN_XOR 295
+#define TK_OP_BIN_NOT 296
+#define TK_OP_BIN_SHIFTR 297
+#define TK_OP_BIN_SHIFTL 298
+#define TK_ASSIGN 299
+#define TK_RETURN 300
+#define TK_COUT 301
 
 
 

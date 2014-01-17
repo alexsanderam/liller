@@ -16,7 +16,7 @@ int main()
 
 	z = k + j < (v = 7);
 	
-	x = (v < 7) && (10 != 1) || (5==2);
+	x = v < 7 && 10 != 1 || 5==2;
 	x = true && false || true;
 
 	int p;
@@ -27,7 +27,9 @@ int main()
 	1 - 50;
 	3 % 3;
 
-	"aa" + 10;
+	//"aa" + 10;
+
+	cout(x);
 
 	return 0;
 }

@@ -17,17 +17,16 @@ ModifierShort "short"
 ModifierLong "long"
 
 Return "return"
+Cout	"cout"
 
 Space [ \t]
+Delim {Space}+
+Line [\n]
+
 Digit [0-9]
 Num {Digit}+
 Letter [A-Za-z_]
-Line [\n]
-
-
-Delim {Space}+
-
-Int ([-|+])?{Num}
+Int {Num}
 Float {Int}(\.{Num})
 Scientific ({Int}|{Float})[e|E][+|-]{Num}
 True "true"
@@ -138,9 +137,10 @@ Assign "="
 
 {Return} 	{ yylval.traduction = yytext; return TK_RETURN; }
 
+{Cout}		{ yylval.traduction = yytext; return TK_COUT; }
 
 {ID}		{ yylval.label = yytext; return TK_ID; }
 
-.				{ *yytext; }
+.			{ *yytext; }
 
 %%
