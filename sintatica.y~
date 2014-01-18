@@ -43,11 +43,20 @@ typedef struct opStruct
 
 } operation_struct;
 
+typedef struct
+{
+        string dIType; /*tipo com modificador das variáveis intermediárias*/
+        //string label;
+	unsigned int size; /*nos casos de string*/
+} variables_declaratinos_struct;
+
 
 map<string, id_struct> IDMap;
+map<string, variables_declaratinos_struct> declarationsMap;
+
 map<operation_struct, string> operationsMap;
 
-string declarations = "";
+//string declarations = "";
 
 bool error = false; /*utilizado para identificar se tem algum erro de compilação ou não*/
 
@@ -55,6 +64,7 @@ int yylex(void);
 void yyerror(string);
 
 string generateLabel();
+string declarations();
 string verifyResultOperation(string, string, string);
 id_struct* defineKeyOperating(string, string, string, string);
 string verifyStrongType(string, string);
@@ -116,7 +126,7 @@ Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 
 BLOCK                : '{' COMMANDS BLOCK RETURN '}'
                         {
-                                $$.traduction = "\n{\n" + declarations + $2.traduction + $3.traduction + $4.traduction + "\n}";
+                                $$.traduction = "\n{\n" + declarations() + $2.traduction + $3.traduction + $4.traduction + "\n}";
                         }
                         |
                         {
@@ -140,8 +150,8 @@ RETURN                : TK_RETURN E ';'
 
 DECLARATION        : DECLARATION ',' TK_ID
                         {
-
-                                if(IDMap.find($3.label) == IDMap.end())
+				
+				if(IDMap.find($3.label) == IDMap.end())
                                 {
                                         IDMap[$3.label].label = generateLabel();
                                         IDMap[$3.label].type = $1.type;
@@ -149,19 +159,24 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 }
                                 else
                                         yyerror("identifier: '" + $3.label + "' already declared.");
-        
-                                
-                                if(IDMap[$3.label].modifier != "")
+
+
+                                /*if(IDMap[$3.label].modifier != "")
                                         declarations += "\t" + IDMap[$3.label].modifier + " ";
                                 else
                                         declarations += "\t";
 
-                                declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
-
+                                declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";*/
+                                
                                 $$.label = IDMap[$3.label].label;
                                 $$.traduction = $1.traduction;
                                 $$.type = IDMap[$3.label].type;
                                 $$.modifier = IDMap[$3.label].modifier;
+
+				if ($$.modifier != "")
+					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+				else
+					declarationsMap[$$.label] = {$$.type, 1};
 
                         }
                         | DECLARATION ',' TK_ID TK_ASSIGN E
@@ -186,17 +201,22 @@ DECLARATION        : DECLARATION ',' TK_ID
 
                                 atribuition = $5.traduction + "\t" + IDMap[$3.label].label + " = " + cast + $5.label + ";\n";
 
-                                if(IDMap[$3.label].modifier != "")
-                                        declarations += "\t" + IDMap[$3.label].modifier + " ";
+                                /*if(IDMap[$3.label].modifier != "")
+                                        //declarations += "\t" + IDMap[$3.label].modifier + " ";
                                 else
-                                        declarations += "\t";
+                                        //declarations += "\t";
 
-                                declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
+                                declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";*/
 
                                 $$.label = IDMap[$3.label].label;
                                 $$.traduction = "\n" + atribuition + "\n";
                                 $$.type = IDMap[$3.label].type;        
                                 $$.modifier = IDMap[$3.label].modifier;
+
+				if ($$.modifier != "")
+					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+				else
+					declarationsMap[$$.label] = {$$.type, 1};
                                                         
                         }
                         | TYPE TK_ID
@@ -211,18 +231,24 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $2.label + "' already declared.");
 
-                                if(IDMap[$2.label].modifier != "")
+                                /*if(IDMap[$2.label].modifier != "")
                                         declarations += "\t" + IDMap[$2.label].modifier + " ";
                                 else
                                         declarations += "\t";
 
 
-                                declarations += IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
+                                declarations += IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";*/
 
                                 $$.label = IDMap[$2.label].label;
                                 $$.traduction = "";
                                 $$.type = IDMap[$2.label].type;
                                 $$.modifier = IDMap[$2.label].modifier;
+
+
+				if ($$.modifier != "")
+					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+				else
+					declarationsMap[$$.label] = {$$.type, 1};
 
                         }
                         | TYPE TK_ID TK_ASSIGN E
@@ -248,24 +274,30 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";
 
 
-                                if(IDMap[$2.label].modifier != "")
+                               /* if(IDMap[$2.label].modifier != "")
                                         declarations += "\t" + IDMap[$2.label].modifier + " ";
                                 else
                                         declarations += "\t";
 
 
-                                declarations += IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";
+                                declarations += IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";*/
 
                                 $$.label = IDMap[$2.label].label;
                                 $$.traduction = "\n" + atribuition + "\n";
                                 $$.type = IDMap[$2.label].type;
                                 $$.modifier = IDMap[$2.label].modifier;
 
+
+				if ($$.modifier != "")
+					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+				else
+					declarationsMap[$$.label] = {$$.type, 1};
+
                         }
                         ;
 
                         
-TYPE                : TK_TYPE_CHAR
+TYPE                	: TK_TYPE_CHAR
                         {
                                 $$.type = $1.traduction;
                                 $$.modifier = "";
@@ -428,7 +460,8 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | TK_FLOAT
                         {
@@ -438,7 +471,8 @@ TERMINAL        :       TK_INT
   
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | TK_SCIENTIFIC
                         {
@@ -449,7 +483,8 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | TK_CHAR
                         {
@@ -460,10 +495,9 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";                                
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
-
-
 			| SIGNAL TK_INT
                         {
                                 $$.label = generateLabel();
@@ -473,7 +507,8 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                               // declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | SIGNAL TK_FLOAT
                         {
@@ -483,7 +518,8 @@ TERMINAL        :       TK_INT
   
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | SIGNAL TK_SCIENTIFIC
                         {
@@ -494,7 +530,8 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | SIGNAL TK_CHAR
                         {
@@ -505,10 +542,9 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";                                
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
-
-
                         | TK_STRING
                         {
                                 $$.label = generateLabel();
@@ -517,7 +553,8 @@ TERMINAL        :       TK_INT
 
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";                                
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
                         | TK_BOOL
                         {
@@ -525,9 +562,13 @@ TERMINAL        :       TK_INT
                                 $$.type = "bool";
                                 $$.modifier = "";
 
-                                $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";                                
+				if ($1.traduction == "true")			
+	                                $$.traduction = "\t" + $$.label + " = 1;\n"; /*true*/
+				else
+	                                $$.traduction = "\t" + $$.label + " = 0;\n"; /*false*/
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {"unsigned short int", 1};
                         }
                         | TK_ID
                         {
@@ -584,6 +625,13 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
+			| NOT_LOGIC_E
+			{
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
                         | RELATIONAL_E
                         {
                                 $$.traduction = $1.traduction;
@@ -642,7 +690,8 @@ ARITHMETIC_E        : ARITHMETIC_OPERAND ARITHMETIC_OPERATION ARITHMETIC_OPERAND
 			        $$.type = resultOperationType;
 			        $$.modifier = ""; /*desconsidera-se os modificadores*/
 
-			        declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+			        //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
 
 			        if($1.type == $3.type)
 			        {
@@ -674,7 +723,8 @@ ARITHMETIC_E        : ARITHMETIC_OPERAND ARITHMETIC_OPERATION ARITHMETIC_OPERAND
 			                        $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
 			                }
 
-			                declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+			                //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
 			        }
 			}
 			;
@@ -719,22 +769,10 @@ LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
                                 $$.modifier = "";
                                 $$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
 
-
-
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
                         }
-                        | TK_OP_LOGIC_NOT LOGIC_E
-                        {
-                                $$.label = generateLabel();
-                                $$.type = "bool";
-                                $$.modifier = "";
-                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
-
-
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";                                
-                        }
-                        ;
-
+			;
 
 
 LOGIC_OPERAND          : TERMINAL
@@ -789,6 +827,19 @@ LOGIC_OPERAND          : TERMINAL
 		        ;
 
 
+NOT_LOGIC_E		: TK_OP_LOGIC_NOT E
+                        {
+                                $$.label = generateLabel();
+                                $$.type = "bool";
+                                $$.modifier = "";
+                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
+
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";                                
+				declarationsMap[$$.label] = {$$.type, 1};
+                        }
+                        ;
+
+
 BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                         {
                                 string resultOperationType;
@@ -811,7 +862,8 @@ BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                                 $$.modifier = ""; /*desconsidera-se os modificadores*/
 
 
-                                declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+                                //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
 
                                 if($1.type == $3.type)
                                 {
@@ -842,7 +894,8 @@ BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                                                 $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
                                         }
 
-                                        declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+                                        //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
                                 }
                         }
 		 	;
@@ -900,7 +953,8 @@ BITWISE_E		: TK_OP_BIN_NOT BITWISE_OPERAND
                                 $$.type = $2.type;
                                 $$.modifier = $2.type;
 
-                                declarations += "\t" + $$.type + " " + $$.label + ";\n";
+                                //declarations += "\t" + $$.type + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
 			}
 			;
 
@@ -951,7 +1005,8 @@ RELATIONAL_E         : RELATIONAL_OPERAND RELATIONAL_OPERATION RELATIONAL_OPERAN
                                 $$.modifier = ""; /*desconsidera-se os modificadores*/
 
 
-                                declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+                                //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+				declarationsMap[$$.label] = {$$.type, 1};
 
                                 if($1.type == $3.type)
                                 {
@@ -982,7 +1037,8 @@ RELATIONAL_E         : RELATIONAL_OPERAND RELATIONAL_OPERATION RELATIONAL_OPERAN
                                                 $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
                                         }
 
-                                        declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+                                        //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
                                 }
 
                         }
@@ -1073,7 +1129,7 @@ BIN_OPERATION           : TK_OP_BIN_AND | TK_OP_BIN_OR | TK_OP_BIN_XOR | TK_OP_B
                         ;
 
 
-COUT				: TK_COUT '(' E ')' // ')' //E ')'
+COUT				: TK_COUT '(' E ')'
 				{
 					$$.traduction = "\t" + $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
 				}
@@ -1108,7 +1164,26 @@ string generateLabel()
         label << "_temp" << counter++;
 
         return label.str();
-}                                        
+}           
+
+string declarations()
+{
+	stringstream declarations;
+
+	for (auto iterator : declarationsMap)
+	{
+		declarations << "\t" + iterator.second.dIType; /*tipo com modificadores*/
+
+		declarations << " " + iterator.first; /*label*/
+		
+		if (iterator.second.size > 1)
+			declarations << "[" + iterator.second.size << "]"; /*tamanho*/
+
+		declarations << ";\n";
+	}
+
+	return declarations.str();
+}
 
 
 string verifyResultOperation(string op1Type, string op2Type, string sOperator)

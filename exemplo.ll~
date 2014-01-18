@@ -7,7 +7,7 @@ int main()
 	int j;
 
 	//j = (j=-3)+1;
-	j = ~5 + 2 - 5.0 + 3;
+	j = !5 + 2;
 	cout(j);
 
 	return 0;

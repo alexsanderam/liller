@@ -43,8 +43,17 @@ typedef struct opStruct
 
 } operation_struct;
 
+typedef struct
+{
+        string dType; /*tipo com modificador*/
+        //string label;
+	unsigned int size; /*nos casos de string*/
+} variables_declaratinos_struct;
+
 
 map<string, id_struct> IDMap;
+map<string, variables_declaratinos_struct> declarationsMap;
+
 map<operation_struct, string> operationsMap;
 
 string declarations = "";
@@ -103,7 +112,7 @@ Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
                                 else
                                         exit(1);
                         }
-                        | TK_TYPE_INT TK_MAIN '(' ')' BLOCK
+			| TK_TYPE_INT TK_MAIN '(' ')' BLOCK
                         {
                                 if(!error)                                
                                         cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include <string.h>\n#include <stdio.h>\nusing namespace std;\nint main()" << $5.traduction << endl;
@@ -141,7 +150,9 @@ RETURN                : TK_RETURN E ';'
 DECLARATION        : DECLARATION ',' TK_ID
                         {
 
-                                if(IDMap.find($3.label) == IDMap.end())
+				string modifier = "";
+				
+				if(IDMap.find($3.label) == IDMap.end())
                                 {
                                         IDMap[$3.label].label = generateLabel();
                                         IDMap[$3.label].type = $1.type;
@@ -151,17 +162,20 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         yyerror("identifier: '" + $3.label + "' already declared.");
         
                                 
-                                if(IDMap[$3.label].modifier != "")
+                                $$.label = IDMap[$3.label].label;
+                                $$.traduction = $1.traduction;
+                                $$.type = IDMap[$3.label].type;
+                                $$.modifier = IDMap[$3.label].modifier;
+
+				if($$.modifier != "")
+					modifier = 
+					declarationsMap[IDMap[$3.label].label] = {IDMap[$3.label].modifier + " " + IDMap[$3.label].type, 1};
                                         declarations += "\t" + IDMap[$3.label].modifier + " ";
                                 else
                                         declarations += "\t";
 
                                 declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";
-
-                                $$.label = IDMap[$3.label].label;
-                                $$.traduction = $1.traduction;
-                                $$.type = IDMap[$3.label].type;
-                                $$.modifier = IDMap[$3.label].modifier;
+				
 
                         }
                         | DECLARATION ',' TK_ID TK_ASSIGN E
@@ -462,9 +476,7 @@ TERMINAL        :       TK_INT
 
                                 declarations += "\t" + $$.type + " " + $$.label + ";\n";
                         }
-
-
-                        | SIGNAL TK_INT
+			| SIGNAL TK_INT
                         {
                                 $$.label = generateLabel();
                                 $$.type = "int";
@@ -507,8 +519,6 @@ TERMINAL        :       TK_INT
 
                                 declarations += "\t" + $$.type + " " + $$.label + ";\n";
                         }
-
-
                         | TK_STRING
                         {
                                 $$.label = generateLabel();
@@ -542,11 +552,11 @@ TERMINAL        :       TK_INT
                         ;
 
 
-SIGNAL                :        TK_OP_SUM | TK_OP_SUB
-                        ;
+SIGNAL		:	TK_OP_SUM | TK_OP_SUB
+			;
 
 
-COMMANDS        :         COMMAND COMMANDS
+COMMANDS        : 	COMMAND COMMANDS
                         {
                                 $$.traduction = $1.traduction + "\n" + $2.traduction;
                         }
@@ -554,23 +564,23 @@ COMMANDS        :         COMMAND COMMANDS
                         {
                                 $$.traduction = "";
                         }
-                        ;
+			;
 
 
-COMMAND         :         E ';'        
+COMMAND         : 	E ';'        
                         | DECLARATION ';'
-                        | COUT ';'
+			| COUT ';'
                         ;
 
 
 E                       :'(' E ')'
-                        {
-                                     $$.traduction = $2.traduction;
+			{
+                             	$$.traduction = $2.traduction;
                                 $$.label = $2.label;
                                 $$.type = $2.type;
-                                $$.modifier = $2.modifier;                
-                        }
-                        | ARITHMETIC_E
+                                $$.modifier = $2.modifier;        	
+			}
+			| ARITHMETIC_E
                         {
                                 $$.traduction = $1.traduction;
                                 $$.label = $1.label;
@@ -584,6 +594,13 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
+			| NOT_LOGIC_E
+			{
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
                         | RELATIONAL_E
                         {
                                 $$.traduction = $1.traduction;
@@ -598,13 +615,13 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-                        | BITWISE_E
-                        {
+			| BITWISE_E
+			{
                                 $$.traduction = $1.traduction;
                                 $$.label = $1.label;
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
-                        }
+			}
                         | TERMINAL
                         {
                                 $$.traduction = $1.traduction;
@@ -612,103 +629,103 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-                        | ATRIBUITION
-                        {
-                                    $$.traduction = $1.traduction;
+			| ATRIBUITION
+			{
+                            	$$.traduction = $1.traduction;
                                 $$.label = $1.label;
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
-                        }
-                        ;
+			}
+			;
 
 
 ARITHMETIC_E        : ARITHMETIC_OPERAND ARITHMETIC_OPERATION ARITHMETIC_OPERAND
-                          {
-                                string resultOperationType;
-                                id_struct* keyOperating;
-                                string weakOperatingLabel;
-                                string strongOperatingLabel;
+			  {
+			        string resultOperationType;
+			        id_struct* keyOperating;
+			        string weakOperatingLabel;
+			        string strongOperatingLabel;
 
-                                $$.label = generateLabel();
+			        $$.label = generateLabel();
 
-                                $$.traduction = $1.traduction + $3.traduction;
+			        $$.traduction = $1.traduction + $3.traduction;
 
-                                resultOperationType = verifyResultOperation($1.type, $3.type, $2.traduction);
+			        resultOperationType = verifyResultOperation($1.type, $3.type, $2.traduction);
 
-                                /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
-                                 mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-                                 no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+			        /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
+			         mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
+			         no momento da atribuição, que deverá se fazer um cast, caso necessário*/
 
-                                $$.type = resultOperationType;
-                                $$.modifier = ""; /*desconsidera-se os modificadores*/
+			        $$.type = resultOperationType;
+			        $$.modifier = ""; /*desconsidera-se os modificadores*/
 
-                                declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
+			        declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
 
-                                if($1.type == $3.type)
-                                {
-                                        $$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-                                }
-                                else
-                                {
-                                        keyOperating = defineKeyOperating($1.type, $1.modifier, $3.type, $3.modifier);
-
-
-
-                                        string modifier = keyOperating->modifier;
-                                        modifier += (modifier != "" ? " " : "");
-
-                                        if(keyOperating->type == $1.type)
-                                        {
-                                                weakOperatingLabel = $3.label;
-                                                strongOperatingLabel = $1.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + strongOperatingLabel + " " + $2.traduction + " " + keyOperating->label + ";\n";
-                                        }
-                                        else
-                                        {
-                                                weakOperatingLabel = $1.label;
-                                                strongOperatingLabel = $3.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
-                                        }
-
-                                        declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-                                }
-                        }
-                        ;
+			        if($1.type == $3.type)
+			        {
+			                $$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
+			        }
+			        else
+			        {
+			                keyOperating = defineKeyOperating($1.type, $1.modifier, $3.type, $3.modifier);
 
 
-ARITHMETIC_OPERAND                    : TERMINAL
-                                    {
-                                            $$.traduction = $1.traduction;
-                                            $$.label = $1.label;
-                                            $$.type = $1.type;
-                                            $$.modifier = $1.modifier;
-                                    }
-                                    | ARITHMETIC_E
-                                    {
-                                            $$.traduction = $1.traduction;
-                                            $$.label = $1.label;
-                                            $$.type = $1.type;
-                                            $$.modifier = $1.modifier;
-                                    }
-                                    | BITWISE_E
-                                    {
-                                            $$.traduction = $1.traduction;
-                                            $$.label = $1.label;
-                                            $$.type = $1.type;
-                                            $$.modifier = $1.modifier;
-                                    }
-                                    | '(' E ')'
-                                    {
-                                            $$.traduction = $2.traduction;
-                                            $$.label = $2.label;
-                                            $$.type = $2.type;
-                                            $$.modifier = $2.modifier;                        
-                                    }  
-                                    ;
+
+			                string modifier = keyOperating->modifier;
+			                modifier += (modifier != "" ? " " : "");
+
+			                if(keyOperating->type == $1.type)
+			                {
+			                        weakOperatingLabel = $3.label;
+			                        strongOperatingLabel = $1.label;
+
+			                        $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
+			                        $$.traduction += "\t" + $$.label + " = " + strongOperatingLabel + " " + $2.traduction + " " + keyOperating->label + ";\n";
+			                }
+			                else
+			                {
+			                        weakOperatingLabel = $1.label;
+			                        strongOperatingLabel = $3.label;
+
+			                        $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
+			                        $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
+			                }
+
+			                declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+			        }
+			}
+			;
+
+
+ARITHMETIC_OPERAND		    : TERMINAL
+		                    {
+		                            $$.traduction = $1.traduction;
+		                            $$.label = $1.label;
+		                            $$.type = $1.type;
+		                            $$.modifier = $1.modifier;
+		                    }
+		                    | ARITHMETIC_E
+		                    {
+		                            $$.traduction = $1.traduction;
+		                            $$.label = $1.label;
+		                            $$.type = $1.type;
+		                            $$.modifier = $1.modifier;
+		                    }
+		                    | BITWISE_E
+		                    {
+		                            $$.traduction = $1.traduction;
+		                            $$.label = $1.label;
+		                            $$.type = $1.type;
+		                            $$.modifier = $1.modifier;
+		                    }
+		                    | '(' E ')'
+		                    {
+		                            $$.traduction = $2.traduction;
+		                            $$.label = $2.label;
+		                            $$.type = $2.type;
+		                            $$.modifier = $2.modifier;                        
+		                    }  
+		                    ;
 
 
 
@@ -723,68 +740,69 @@ LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
 
                                 declarations += "\t" + $$.type + " " + $$.label + ";\n";
                         }
-                        | TK_OP_LOGIC_NOT LOGIC_E
+			;
+
+
+LOGIC_OPERAND          : TERMINAL
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+		        | LOGIC_E
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+		        | RELATIONAL_E
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
+		        | BIN_E
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+			| ARITHMETIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+		        | '(' E ')'
+		        {
+		                $$.traduction = $2.traduction;
+		                $$.label = $2.label;
+		                $$.type = $2.type;
+		                $$.modifier = $2.modifier;                        
+		        }
+		        ;
+
+
+NOT_LOGIC_E		: TK_OP_LOGIC_NOT E
                         {
                                 $$.label = generateLabel();
                                 $$.type = "bool";
                                 $$.modifier = "";
                                 $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
 
-
                                 declarations += "\t" + $$.type + " " + $$.label + ";\n";                                
-                        }
-                        ;
-
-
-
-LOGIC_OPERAND          : TERMINAL
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | LOGIC_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | RELATIONAL_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | BITWISE_E
-                        {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                        }
-                        | BIN_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | ARITHMETIC_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | '(' E ')'
-                        {
-                                $$.traduction = $2.traduction;
-                                $$.label = $2.label;
-                                $$.type = $2.type;
-                                $$.modifier = $2.modifier;                        
                         }
                         ;
 
@@ -845,55 +863,55 @@ BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                                         declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
                                 }
                         }
-                         ;
+		 	;
 
 
 
 BIN_OPERAND             : TERMINAL
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | BIN_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | BITWISE_E
-                        {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                        }
-                        | ARITHMETIC_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | '(' E ')'
-                        {
-                                $$.traduction = $2.traduction;
-                                $$.label = $2.label;
-                                $$.type = $2.type;
-                                $$.modifier = $2.modifier;                        
-                        }
-                        ;
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+		        | BIN_E
+		        {
+		                $$.traduction = $1.traduction;
+		                $$.label = $1.label;
+		                $$.type = $1.type;
+		                $$.modifier = $1.modifier;
+		        }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
+		        | ARITHMETIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+		        | '(' E ')'
+		        {
+		                $$.traduction = $2.traduction;
+		                $$.label = $2.label;
+		                $$.type = $2.type;
+		                $$.modifier = $2.modifier;                        
+		        }
+		        ;
 
 
 
-BITWISE_E                : TK_OP_BIN_NOT BITWISE_OPERAND
-                        {
+BITWISE_E		: TK_OP_BIN_NOT BITWISE_OPERAND
+			{
                                 $$.label = generateLabel();
 
-                                if(($2.type != "int") && ($2.type != "char"))
-                                        yyerror("wrong type argument to bit-complement");
+				if(($2.type != "int") && ($2.type != "char"))
+					yyerror("wrong type argument to bit-complement");
 
                                 $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";
 
@@ -901,32 +919,32 @@ BITWISE_E                : TK_OP_BIN_NOT BITWISE_OPERAND
                                 $$.modifier = $2.type;
 
                                 declarations += "\t" + $$.type + " " + $$.label + ";\n";
-                        }
-                        ;
+			}
+			;
 
 
 BITWISE_OPERAND         : TERMINAL
-                        {
-                                     $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | BITWISE_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | '(' E ')'
-                        {
-                                $$.traduction = $2.traduction;
-                                $$.label = $2.label;
-                                $$.type = $2.type;
-                                $$.modifier = $2.modifier;                        
-                        }
-                        ;
+		        {
+			     	$$.traduction = $1.traduction;
+			        $$.label = $1.label;
+			        $$.type = $1.type;
+			        $$.modifier = $1.modifier;
+		        }
+			| BITWISE_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+		        | '(' E ')'
+		        {
+		                $$.traduction = $2.traduction;
+		                $$.label = $2.label;
+		                $$.type = $2.type;
+		                $$.modifier = $2.modifier;                        
+		        }
+		        ;
 
 
 
@@ -997,13 +1015,13 @@ RELATIONAL_OPERAND      : TERMINAL
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-                        | BITWISE_E
-                        {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                        }
+			| BITWISE_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
                         | BIN_E
                         {
                                 $$.traduction = $1.traduction;
@@ -1012,12 +1030,12 @@ RELATIONAL_OPERAND      : TERMINAL
                                 $$.modifier = $1.modifier;
                         }
                         | ARITHMETIC_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
                         | '(' E ')'
                         {
                                 $$.traduction = $2.traduction;
@@ -1056,7 +1074,7 @@ ATRIBUITION        : TK_ID TK_ASSIGN E
 
 
 ARITHMETIC_OPERATION      : TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
-                                        ;
+	                                ;
 
 
 RELATIONAL_OPERATION        : TK_OP_REL_LESS | TK_OP_REL_GREATER | TK_OP_REL_EQLESS | TK_OP_REL_EQGREATER | TK_OP_REL_EQ | TK_OP_REL_DIFF
@@ -1073,11 +1091,11 @@ BIN_OPERATION           : TK_OP_BIN_AND | TK_OP_BIN_OR | TK_OP_BIN_XOR | TK_OP_B
                         ;
 
 
-COUT                                : TK_COUT '(' E ')' // ')' //E ')'
-                                {
-                                        $$.traduction = "\t" + $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
-                                }
-                                ;
+COUT				: TK_COUT '(' E ')' // ')' //E ')'
+				{
+					$$.traduction = "\t" + $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
+				}
+				;
 
 %%
 
@@ -2191,3 +2209,5 @@ string   verifyStrongType(string op1Type, string op2Type)
         return "";
 
 }
+
+
