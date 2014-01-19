@@ -57,6 +57,7 @@ map<string, variable_declaratino_struct> declarationsMap;
 map<operation_struct, string> operationsMap;
 
 //string declarations = "";
+string voidStr = "";
 
 bool error = false; /*flag utilizado para identificar se tem algum erro de compilação ou não*/
 
@@ -64,7 +65,7 @@ int yylex(void);
 void yyerror(string);
 
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
-YYSTYPE assigns(YYSTYPE, YYSTYPE);
+YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
 string generateLabel();
 string normalizedType(string);
 void declare(string, string, unsigned int);
@@ -129,7 +130,7 @@ Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 
 BLOCK                : '{' COMMANDS BLOCK RETURN '}'
                         {
-                                $$.traduction = "\n{\n" + declarations() + $2.traduction + $3.traduction + $4.traduction + "\n}";
+                                $$.traduction = "\n{\n" + declarations() + "\n" + $2.traduction + $3.traduction + $4.traduction + "\n}";
                         }
                         |
                         {
@@ -196,11 +197,11 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $3.label + "'  previously declared here.");
 
-                                if (($5.modifier != IDMap[$3.label].modifier) || ($5.type != IDMap[$3.label].type))
+                                /*if (($5.modifier != IDMap[$3.label].modifier) || ($5.type != IDMap[$3.label].type))
                                 {
                                         //aqui deve se verificar quais casts são possíveis.
                                         cast = "(" + IDMap[$3.label].modifier + (IDMap[$3.label].modifier != "" ? " " : "") + IDMap[$3.label].type + ") ";
-                                }
+                                }*/
 
                                 atribuition = $5.traduction + "\t" + IDMap[$3.label].label + " = " + cast + $5.label + ";\n";
 
@@ -211,10 +212,13 @@ DECLARATION        : DECLARATION ',' TK_ID
 
                                 declarations += IDMap[$3.label].type + " " + IDMap[$3.label].label + ";\n";*/
 
-                                $$.label = IDMap[$3.label].label;
+                                /*$$.label = IDMap[$3.label].label;
                                 $$.traduction = "\n" + atribuition + "\n";
                                 $$.type = IDMap[$3.label].type;        
-                                $$.modifier = IDMap[$3.label].modifier;
+                                $$.modifier = IDMap[$3.label].modifier;*/
+			
+
+				$$ = assigns($1.traduction, $3, $5);
 
 				if ($$.modifier != "")
 					declare($$.label, $$.modifier + " " + $$.type, 1);
@@ -290,7 +294,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 $$.type = IDMap[$2.label].type;
                                 $$.modifier = IDMap[$2.label].modifier;*/
 
-				$$ = assigns($2, $4);
+				$$ = assigns(voidStr, $2, $4);
 
 
 				if ($$.modifier != "")
@@ -1136,24 +1140,7 @@ ATRIBUITION        : TK_ID TK_ASSIGN E
                                 if(IDMap.find($1.label) == IDMap.end())        
                                         yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
 
-
-				$$ = assigns($1, $3);
-                                /*string cast = "";
-
-                                if ((($3.modifier != IDMap[$1.label].modifier)) || ($3.type != IDMap[$1.label].type))
-                                {
-
-                                        //aqui deve-se verificar quais casts são possíveis
-                                        if($1.modifier != "")
-                                                cast = "(" + IDMap[$1.label].modifier + " " + IDMap[$1.label].type + ") ";
-                                        else
-                                                cast += "(" + IDMap[$1.label].type + ") ";
-                                }
-
-                                $$.label = IDMap[$1.label].label;
-                                $$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n";
-                                $$.type = IDMap[$1.label].type;
-                                $$.modifier = IDMap[$1.label].modifier;*/
+				$$ = assigns(voidStr, $1, $3);
                         }
                         ;        
 
@@ -1173,7 +1160,7 @@ BIN_OPERATION           : TK_OP_BIN_AND | TK_OP_BIN_OR | TK_OP_BIN_XOR | TK_OP_B
 
 COUT				: TK_COUT '(' E ')'
 				{
-					$$.traduction = "\t" + $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
+					$$.traduction = $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
 				}
 				;
 
@@ -1260,7 +1247,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
 	return *res;
 }
 
-YYSTYPE assigns(YYSTYPE id, YYSTYPE exp)
+YYSTYPE assigns(string addTraduction, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res;	
 
@@ -1276,7 +1263,7 @@ YYSTYPE assigns(YYSTYPE id, YYSTYPE exp)
         }
 
         res->label = IDMap[id.label].label;
-        res->traduction = exp.traduction + "\t" + res->label + " = " + cast + exp.label + ";\n";
+        res->traduction = addTraduction + exp.traduction + "\t" + res->label + " = " + cast + exp.label + ";\n";
         res->type = IDMap[id.label].type;
         res->modifier = IDMap[id.label].modifier;
 

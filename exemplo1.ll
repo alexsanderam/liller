@@ -6,7 +6,7 @@ int main()
 	
 	unsigned short int k;
 	int j;
-	float z, v = 10;
+	float z = -9.0, v = 10;
 	bool x;
 
 
