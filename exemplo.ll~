@@ -5,8 +5,12 @@ int main()
 	e do Compilador prescot-liller.*/
 
 	int r = 1, j = 10;
+	bool x = true;
+	
+	x = x + j;
 
 	cout(j + r);
+	cout (x);
 
 	return 0;
 }
