@@ -4,11 +4,14 @@ int main()
 	Este arquivo é de exemplo da Linguagem Liller
 	e do Compilador prescot-liller.*/
 
-	int j;
+	float f = 10.0;
+	int x = 20;
+	//bool r = true;
+	int res = x + f*1.5 - 5 + 10 - 2;
 
-	//j = (j=-3)+1;
-	j = !5 + 2;
-	cout(j);
+	//r = f + 10 < x;
+
+	cout(res);
 
 	return 0;
 }

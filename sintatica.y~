@@ -48,22 +48,26 @@ typedef struct
         string dIType; /*tipo com modificador das variáveis intermediárias*/
         //string label;
 	unsigned int size; /*nos casos de string*/
-} variables_declaratinos_struct;
+} variable_declaratino_struct;
 
 
 map<string, id_struct> IDMap;
-map<string, variables_declaratinos_struct> declarationsMap;
+map<string, variable_declaratino_struct> declarationsMap;
 
 map<operation_struct, string> operationsMap;
 
 //string declarations = "";
 
-bool error = false; /*utilizado para identificar se tem algum erro de compilação ou não*/
+bool error = false; /*flag utilizado para identificar se tem algum erro de compilação ou não*/
 
 int yylex(void);
 void yyerror(string);
 
+YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
+YYSTYPE assigns(YYSTYPE, YYSTYPE);
 string generateLabel();
+string normalizedType(string);
+void declare(string, string, unsigned int);
 string declarations();
 string verifyResultOperation(string, string, string);
 id_struct* defineKeyOperating(string, string, string, string);
@@ -92,15 +96,14 @@ void loadOpearationsMap(void);
 %start Begin
 
 %left TK_ASSIGN
-%right TK_OP_LOGIC_NOT
 %left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
 %nonassoc TK_OP_REL_EQ TK_OP_REL_DIFF
 %nonassoc TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER
 %left TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
 %left TK_OP_SUM 
 %left TK_OP_SUB
-%left TK_OP_MUL TK_OP_DIV
-%left TK_OP_MOD
+%left TK_OP_MUL TK_OP_DIV TK_OP_MOD
+%left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
 
 
@@ -109,14 +112,14 @@ void loadOpearationsMap(void);
 Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
                         {
                                 if(!error)
-                                        cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nusing namespace std;\n int main(void)" << $6.traduction << endl;
+                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nusing namespace std;\n int main(void)" << $6.traduction << endl;
                                 else
                                         exit(1);
                         }
 			| TK_TYPE_INT TK_MAIN '(' ')' BLOCK
                         {
                                 if(!error)                                
-                                        cout << "/*Compiler prescot-liller*/\n" << "#include <iostream>\n#include <string.h>\n#include <stdio.h>\nusing namespace std;\nint main()" << $5.traduction << endl;
+                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include <string.h>\n#include <stdio.h>\nusing namespace std;\nint main()" << $5.traduction << endl;
                                 else
                                         exit(1);
                         }
@@ -158,7 +161,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         IDMap[$3.label].modifier = $1.modifier;
                                 }
                                 else
-                                        yyerror("identifier: '" + $3.label + "' already declared.");
+                                        yyerror("identifier: '" + $3.label + "'  previously declared here.");
 
 
                                 /*if(IDMap[$3.label].modifier != "")
@@ -174,9 +177,9 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 $$.modifier = IDMap[$3.label].modifier;
 
 				if ($$.modifier != "")
-					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+					declare($$.label, $$.modifier + " " + $$.type, 1);
 				else
-					declarationsMap[$$.label] = {$$.type, 1};
+					declare($$.label, $$.type, 1);
 
                         }
                         | DECLARATION ',' TK_ID TK_ASSIGN E
@@ -191,7 +194,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         IDMap[$3.label].modifier = $1.modifier;
                                 }
                                 else
-                                        yyerror("identifier: '" + $3.label + "' already declared.");
+                                        yyerror("identifier: '" + $3.label + "'  previously declared here.");
 
                                 if (($5.modifier != IDMap[$3.label].modifier) || ($5.type != IDMap[$3.label].type))
                                 {
@@ -214,9 +217,9 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 $$.modifier = IDMap[$3.label].modifier;
 
 				if ($$.modifier != "")
-					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+					declare($$.label, $$.modifier + " " + $$.type, 1);
 				else
-					declarationsMap[$$.label] = {$$.type, 1};
+					declare($$.label, $$.type, 1);
                                                         
                         }
                         | TYPE TK_ID
@@ -229,7 +232,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         IDMap[$2.label].modifier = $1.modifier;
                                 }
                                 else
-                                        yyerror("identifier: '" + $2.label + "' already declared.");
+                                        yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
                                 /*if(IDMap[$2.label].modifier != "")
                                         declarations += "\t" + IDMap[$2.label].modifier + " ";
@@ -246,15 +249,15 @@ DECLARATION        : DECLARATION ',' TK_ID
 
 
 				if ($$.modifier != "")
-					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+					declare($$.label, $$.modifier + " " + $$.type, 1);
 				else
-					declarationsMap[$$.label] = {$$.type, 1};
+					declare($$.label, $$.type, 1);
 
                         }
                         | TYPE TK_ID TK_ASSIGN E
                         {
-                                string cast = "";
-                                string atribuition = "";
+                                //string cast = "";
+                                //string atribuition = "";
 
                                 if(IDMap.find($2.label) == IDMap.end())
                                 {
@@ -263,15 +266,15 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         IDMap[$2.label].modifier = $1.modifier;
                                 }
                                 else
-                                        yyerror("identifier: '" + $2.label + "' already declared.");
+                                        yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
-                                if (($4.modifier != IDMap[$2.label].modifier) || ($4.type != IDMap[$2.label].type))
+                                /*if (($4.modifier != IDMap[$2.label].modifier) || ($4.type != IDMap[$2.label].type))
                                 {
                                         //aqui deve se verificar quais casts são possíveis.
                                         cast = "(" + IDMap[$2.label].modifier + (IDMap[$2.label].modifier != "" ? " " : "") + IDMap[$2.label].type + ") ";
                                 }
 
-                                atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";
+                                atribuition = $4.traduction + "\t" + IDMap[$2.label].label + " = " + cast + $4.label + ";\n";*/
 
 
                                /* if(IDMap[$2.label].modifier != "")
@@ -282,16 +285,18 @@ DECLARATION        : DECLARATION ',' TK_ID
 
                                 declarations += IDMap[$2.label].type + " " + IDMap[$2.label].label + ";\n";*/
 
-                                $$.label = IDMap[$2.label].label;
+                                /*$$.label = IDMap[$2.label].label;
                                 $$.traduction = "\n" + atribuition + "\n";
                                 $$.type = IDMap[$2.label].type;
-                                $$.modifier = IDMap[$2.label].modifier;
+                                $$.modifier = IDMap[$2.label].modifier;*/
+
+				$$ = assigns($2, $4);
 
 
 				if ($$.modifier != "")
-					declarationsMap[$$.label] = {$$.modifier + " " + $$.type, 1};
+					declare($$.label, $$.modifier + " " + $$.type, 1);
 				else
-					declarationsMap[$$.label] = {$$.type, 1};
+					declare($$.label, $$.type, 1);
 
                         }
                         ;
@@ -461,7 +466,8 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
+
                         }
                         | TK_FLOAT
                         {
@@ -472,7 +478,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | TK_SCIENTIFIC
                         {
@@ -484,7 +490,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | TK_CHAR
                         {
@@ -496,7 +502,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";                                
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
 			| SIGNAL TK_INT
                         {
@@ -508,7 +514,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
                                // declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | SIGNAL TK_FLOAT
                         {
@@ -519,7 +525,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | SIGNAL TK_SCIENTIFIC
                         {
@@ -531,7 +537,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | SIGNAL TK_CHAR
                         {
@@ -543,7 +549,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + $2.traduction + ";\n";                                
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | TK_STRING
                         {
@@ -554,7 +560,7 @@ TERMINAL        :       TK_INT
                                 $$.traduction = "\t" + $$.label + " = " + $1.traduction + ";\n";                                
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
                         }
                         | TK_BOOL
                         {
@@ -568,12 +574,12 @@ TERMINAL        :       TK_INT
 	                                $$.traduction = "\t" + $$.label + " = 0;\n"; /*false*/
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {"unsigned short int", 1};
+				declare($$.label, $$.type, 1);
                         }
                         | TK_ID
                         {
                                 if(IDMap.find($1.label) == IDMap.end())        
-                                        yyerror("identifier: '" + $1.label + "' not declared.");
+                                        yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
 
                                 $$.label = IDMap[$1.label].label;
                                 $$.type = IDMap[$1.label].type;
@@ -611,7 +617,21 @@ E                       :'(' E ')'
                                 $$.type = $2.type;
                                 $$.modifier = $2.modifier;        	
 			}
-			| ARITHMETIC_E
+			| SUM_E
+                        {
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+                        }
+			| SUB_E
+                        {
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+                        }
+			| MUL_DIV_E
                         {
                                 $$.traduction = $1.traduction;
                                 $$.label = $1.label;
@@ -670,74 +690,148 @@ E                       :'(' E ')'
 			;
 
 
-ARITHMETIC_E        : ARITHMETIC_OPERAND ARITHMETIC_OPERATION ARITHMETIC_OPERAND
-			  {
-			        string resultOperationType;
-			        id_struct* keyOperating;
-			        string weakOperatingLabel;
-			        string strongOperatingLabel;
-
-			        $$.label = generateLabel();
-
-			        $$.traduction = $1.traduction + $3.traduction;
-
-			        resultOperationType = verifyResultOperation($1.type, $3.type, $2.traduction);
-
-			        /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
-			         mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-			         no momento da atribuição, que deverá se fazer um cast, caso necessário*/
-
-			        $$.type = resultOperationType;
-			        $$.modifier = ""; /*desconsidera-se os modificadores*/
-
-			        //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
-
-			        if($1.type == $3.type)
-			        {
-			                $$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-			        }
-			        else
-			        {
-			                keyOperating = defineKeyOperating($1.type, $1.modifier, $3.type, $3.modifier);
+SUM_E        : SUM_OPERAND TK_OP_SUM SUM_OPERAND
+		{
+			$$ = runBasicOperation($1, $3, $2);
+		}
+		;
 
 
+SUM_OPERAND	   : TERMINAL
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | SUM_E
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | SUB_E
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | MUL_DIV_E
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | NOT_LOGIC_E
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | BITWISE_E
+		    {
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+		    }
+		    | '(' E ')'
+		    {
+			    $$.traduction = $2.traduction;
+			    $$.label = $2.label;
+			    $$.type = $2.type;
+			    $$.modifier = $2.modifier;                        
+		    }  
+		    ;
 
-			                string modifier = keyOperating->modifier;
-			                modifier += (modifier != "" ? " " : "");
 
-			                if(keyOperating->type == $1.type)
-			                {
-			                        weakOperatingLabel = $3.label;
-			                        strongOperatingLabel = $1.label;
+SUB_E	        : SUB_OPERAND TK_OP_SUB SUB_OPERAND
+		{
+			$$ = runBasicOperation($1, $3, $2);
+		}
+		;
 
-			                        $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-			                        $$.traduction += "\t" + $$.label + " = " + strongOperatingLabel + " " + $2.traduction + " " + keyOperating->label + ";\n";
-			                }
-			                else
-			                {
-			                        weakOperatingLabel = $1.label;
-			                        strongOperatingLabel = $3.label;
+		
 
-			                        $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-			                        $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
-			                }
+SUB_OPERAND	   : TERMINAL
+                    {
+                            $$.traduction = $1.traduction;
+                            $$.label = $1.label;
+                            $$.type = $1.type;
+                            $$.modifier = $1.modifier;
+                    }
+                    | SUB_E
+                    {
+                            $$.traduction = $1.traduction;
+                            $$.label = $1.label;
+                            $$.type = $1.type;
+                            $$.modifier = $1.modifier;
+                    }
+                    | MUL_DIV_E
+                    {
+                            $$.traduction = $1.traduction;
+                            $$.label = $1.label;
+                            $$.type = $1.type;
+                            $$.modifier = $1.modifier;
+                    }
+                    | NOT_LOGIC_E
+                    {
+                            $$.traduction = $1.traduction;
+                            $$.label = $1.label;
+                            $$.type = $1.type;
+                            $$.modifier = $1.modifier;
+                    }
+                    | BITWISE_E
+                    {
+                            $$.traduction = $1.traduction;
+                            $$.label = $1.label;
+                            $$.type = $1.type;
+                            $$.modifier = $1.modifier;
+                    }
+                    | '(' E ')'
+                    {
+                            $$.traduction = $2.traduction;
+                            $$.label = $2.label;
+                            $$.type = $2.type;
+                            $$.modifier = $2.modifier;                        
+                    }  
+                    ;
 
-			                //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
-			        }
-			}
-			;
+
+MUL_DIV_E			: MUL_DIV_OPERAND TK_OP_MUL MUL_DIV_OPERAND
+				{
+					$$ = runBasicOperation($1, $3, $2);
+				}
+				| MUL_DIV_OPERAND TK_OP_DIV MUL_DIV_OPERAND
+				{
+					$$ = runBasicOperation($1, $3, $2);
+				}
+				| MUL_DIV_OPERAND TK_OP_MOD MUL_DIV_OPERAND
+				{
+					$$ = runBasicOperation($1, $3, $2);
+				}
+				;
 
 
-ARITHMETIC_OPERAND		    : TERMINAL
+MUL_DIV_OPERAND		    	   : TERMINAL
 		                    {
 		                            $$.traduction = $1.traduction;
 		                            $$.label = $1.label;
 		                            $$.type = $1.type;
 		                            $$.modifier = $1.modifier;
 		                    }
-		                    | ARITHMETIC_E
+		                    | MUL_DIV_E
+		                    {
+		                            $$.traduction = $1.traduction;
+		                            $$.label = $1.label;
+		                            $$.type = $1.type;
+		                            $$.modifier = $1.modifier;
+		                    }
+		                    | NOT_LOGIC_E
 		                    {
 		                            $$.traduction = $1.traduction;
 		                            $$.label = $1.label;
@@ -770,7 +864,8 @@ LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
                                 $$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
+				//$$ = runBasicOperation($1, $2, $2);
                         }
 			;
 
@@ -796,6 +891,13 @@ LOGIC_OPERAND          : TERMINAL
 		                $$.type = $1.type;
 		                $$.modifier = $1.modifier;
 		        }
+			| NOT_LOGIC_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
 			| BITWISE_E
 			{
 			    $$.traduction = $1.traduction;
@@ -810,7 +912,7 @@ LOGIC_OPERAND          : TERMINAL
 		                $$.type = $1.type;
 		                $$.modifier = $1.modifier;
 		        }
-			| ARITHMETIC_E
+			| SUM_E
 			{
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
@@ -827,76 +929,53 @@ LOGIC_OPERAND          : TERMINAL
 		        ;
 
 
-NOT_LOGIC_E		: TK_OP_LOGIC_NOT E
-                        {
+NOT_LOGIC_E		: TK_OP_LOGIC_NOT NOT_LOGIC_OPERAND
+			{
                                 $$.label = generateLabel();
                                 $$.type = "bool";
                                 $$.modifier = "";
                                 $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";                                
-				declarationsMap[$$.label] = {$$.type, 1};
-                        }
+				declare($$.label, $$.type, 1);
+			}
                         ;
+
+
+NOT_LOGIC_OPERAND	: TERMINAL
+                        {
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+                        }
+			| NOT_LOGIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| BITWISE_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
+			| '(' E ')'
+                        {
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+                        }
+			;
 
 
 BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
                         {
-                                string resultOperationType;
-                                id_struct* keyOperating;
-                                string weakOperatingLabel;
-                                string strongOperatingLabel;
-
-                                $$.label = generateLabel();
-
-                                $$.traduction = $1.traduction + $3.traduction;
-
-                                resultOperationType = verifyResultOperation($1.type, $3.type, $2.traduction);
-
-                                /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
-                                 mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-                                 no momento da atribuição, que deverá se fazer um cast, caso necessário*/
-
-      
-                                $$.type = resultOperationType;
-                                $$.modifier = ""; /*desconsidera-se os modificadores*/
-
-
-                                //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
-
-                                if($1.type == $3.type)
-                                {
-                                        $$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-                                }
-                                else
-                                {
-                                        keyOperating = defineKeyOperating($1.type, $1.modifier, $3.type, $3.modifier);
-
-                       
-                                        string modifier = keyOperating->modifier;
-                                        modifier += (modifier != "" ? " " : "");
-
-                                        if(keyOperating->type == $1.type)
-                                        {
-                                                weakOperatingLabel = $3.label;
-                                                strongOperatingLabel = $1.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + strongOperatingLabel + " " + $2.traduction + " " + keyOperating->label + ";\n";
-                                        }
-                                        else
-                                        {
-                                                weakOperatingLabel = $1.label;
-                                                strongOperatingLabel = $3.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
-                                        }
-
-                                        //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
-                                }
+				$$ = runBasicOperation($1, $3, $2);
                         }
 		 	;
 
@@ -916,6 +995,13 @@ BIN_OPERAND             : TERMINAL
 		                $$.type = $1.type;
 		                $$.modifier = $1.modifier;
 		        }
+			| NOT_LOGIC_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
 			| BITWISE_E
 			{
 			    $$.traduction = $1.traduction;
@@ -923,7 +1009,7 @@ BIN_OPERAND             : TERMINAL
 			    $$.type = $1.type;
 			    $$.modifier = $1.modifier;
 			}
-		        | ARITHMETIC_E
+		        | SUM_E
 			{
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
@@ -954,7 +1040,7 @@ BITWISE_E		: TK_OP_BIN_NOT BITWISE_OPERAND
                                 $$.modifier = $2.type;
 
                                 //declarations += "\t" + $$.type + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
+				declare($$.label, $$.type, 1);
 			}
 			;
 
@@ -966,6 +1052,13 @@ BITWISE_OPERAND         : TERMINAL
 			        $$.type = $1.type;
 			        $$.modifier = $1.modifier;
 		        }
+			| NOT_LOGIC_E
+			{
+				$$.traduction = $1.traduction;
+				$$.label = $1.label;
+				$$.type = $1.type;
+				$$.modifier = $1.modifier;
+			}
 			| BITWISE_E
 			{
 				$$.traduction = $1.traduction;
@@ -986,61 +1079,7 @@ BITWISE_OPERAND         : TERMINAL
 
 RELATIONAL_E         : RELATIONAL_OPERAND RELATIONAL_OPERATION RELATIONAL_OPERAND
                         {
-                                string resultOperationType;
-                                id_struct* keyOperating;
-                                string weakOperatingLabel;
-                                string strongOperatingLabel;
-
-                                $$.label = generateLabel();
-
-                                $$.traduction = $1.traduction + $3.traduction;
-
-                                resultOperationType = verifyResultOperation($1.type, $3.type, $2.traduction);
-
-                                /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
-                                 mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
-                                 no momento da atribuição, que deverá se fazer um cast, caso necessário*/
-
-                                $$.type = resultOperationType;
-                                $$.modifier = ""; /*desconsidera-se os modificadores*/
-
-
-                                //declarations += "\t" + resultOperationType + " " + $$.label + ";\n";
-				declarationsMap[$$.label] = {$$.type, 1};
-
-                                if($1.type == $3.type)
-                                {
-                                        $$.traduction += "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-                                }
-                                else
-                                {
-                                        keyOperating = defineKeyOperating($1.type, $1.modifier, $3.type, $3.modifier);
-
-
-                                        string modifier = keyOperating->modifier;
-                                        modifier += (modifier != "" ? " " : "");
-
-                                        if(keyOperating->type == $1.type)
-                                        {
-                                                weakOperatingLabel = $3.label;
-                                                strongOperatingLabel = $1.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + strongOperatingLabel + " " + $2.traduction + " " + keyOperating->label + ";\n";
-                                        }
-                                        else
-                                        {
-                                                weakOperatingLabel = $1.label;
-                                                strongOperatingLabel = $3.label;
-
-                                                $$.traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                                                $$.traduction += "\t" + $$.label + " = " + keyOperating->label + " " + $2.traduction + " " + strongOperatingLabel + ";\n";
-                                        }
-
-                                        //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
-					declarationsMap[keyOperating->label] = {keyOperating->type, 1};
-                                }
-
+				$$ = runBasicOperation($1, $3, $2);
                         }
                         ;
 
@@ -1053,6 +1092,13 @@ RELATIONAL_OPERAND      : TERMINAL
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
+			| NOT_LOGIC_E
+			{
+			    $$.traduction = $1.traduction;
+			    $$.label = $1.label;
+			    $$.type = $1.type;
+			    $$.modifier = $1.modifier;
+			}
 			| BITWISE_E
 			{
 			    $$.traduction = $1.traduction;
@@ -1067,7 +1113,7 @@ RELATIONAL_OPERAND      : TERMINAL
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-                        | ARITHMETIC_E
+                        | SUM_E
 			{
 				$$.traduction = $1.traduction;
 				$$.label = $1.label;
@@ -1088,9 +1134,11 @@ RELATIONAL_OPERAND      : TERMINAL
 ATRIBUITION        : TK_ID TK_ASSIGN E
                         {
                                 if(IDMap.find($1.label) == IDMap.end())        
-                                        yyerror("identifier: '" + $1.label + "' not declared.");
+                                        yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
 
-                                string cast = "";
+
+				$$ = assigns($1, $3);
+                                /*string cast = "";
 
                                 if ((($3.modifier != IDMap[$1.label].modifier)) || ($3.type != IDMap[$1.label].type))
                                 {
@@ -1105,15 +1153,9 @@ ATRIBUITION        : TK_ID TK_ASSIGN E
                                 $$.label = IDMap[$1.label].label;
                                 $$.traduction = $3.traduction + "\t" + $$.label + " = " + cast + $3.label + ";\n";
                                 $$.type = IDMap[$1.label].type;
-                                $$.modifier = IDMap[$1.label].modifier;
+                                $$.modifier = IDMap[$1.label].modifier;*/
                         }
                         ;        
-
-
-
-ARITHMETIC_OPERATION      : TK_OP_SUM | TK_OP_SUB | TK_OP_DIV | TK_OP_MUL | TK_OP_MOD
-	                                ;
-
 
 RELATIONAL_OPERATION        : TK_OP_REL_LESS | TK_OP_REL_GREATER | TK_OP_REL_EQLESS | TK_OP_REL_EQGREATER | TK_OP_REL_EQ | TK_OP_REL_DIFF
                                 ;
@@ -1156,6 +1198,92 @@ void yyerror(string MSG)
         //exit(0);
 }
 
+YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
+{
+	YYSTYPE* res;
+	
+	string resultOperationType;
+        id_struct* keyOperating;
+        string weakOperatingLabel;
+        string strongOperatingLabel;
+
+        res->label = generateLabel();
+
+        res->traduction = operand1.traduction + operand2.traduction;
+
+        resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation.traduction);
+
+        /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
+         mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
+         no momento da atribuição, que deverá se fazer um cast, caso necessário*/
+
+        res->type = resultOperationType;
+        res->modifier = ""; /*desconsidera-se os modificadores*/
+
+
+        //declarations += "\t" + resultOperationType + " " + res->label + ";\n";
+	declare(res->label, res->type, 1);
+
+        if(normalizedType(operand1.type) == normalizedType(operand2.type))
+        {
+                res->traduction += "\t" + res->label + " = " + operand1.label + " " + operation.traduction + " " + operand2.label + ";\n";
+        }
+        else
+        {
+                keyOperating = defineKeyOperating(operand1.type, operand1.modifier, operand2.type, operand2.modifier);
+
+
+                string modifier = keyOperating->modifier;
+                modifier += (modifier != "" ? " " : "");
+
+                if(keyOperating->type == operand1.type)
+                {
+                        weakOperatingLabel = operand2.label;
+                        strongOperatingLabel = operand1.label;
+
+                        res->traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
+                        res->traduction += "\t" + res->label + " = " + strongOperatingLabel + " " + operation.traduction + " " + keyOperating->label + ";\n";
+                }
+                else
+                {
+                        weakOperatingLabel = operand1.label;
+                        strongOperatingLabel = operand2.label;
+
+                        res->traduction += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
+                        res->traduction += "\t" + res->label + " = " + keyOperating->label + " " + operation.traduction + " " + strongOperatingLabel + ";\n";
+                }
+
+                //declarations += "\t" + keyOperating->type + " " + keyOperating->label + ";\n";
+		declare(keyOperating->label, modifier + keyOperating->type, 1);
+        }
+
+	return *res;
+}
+
+YYSTYPE assigns(YYSTYPE id, YYSTYPE exp)
+{
+	YYSTYPE* res;	
+
+        string cast = "";
+
+        if (((exp.modifier != IDMap[id.label].modifier)) || (exp.type != IDMap[id.label].type))
+        {
+                //aqui deve-se verificar quais casts são possíveis
+                if(id.modifier != "")
+                        cast = "(" + IDMap[id.label].modifier + " " + IDMap[id.label].type + ") ";
+                else
+                        cast += "(" + IDMap[id.label].type + ") ";
+        }
+
+        res->label = IDMap[id.label].label;
+        res->traduction = exp.traduction + "\t" + res->label + " = " + cast + exp.label + ";\n";
+        res->type = IDMap[id.label].type;
+        res->modifier = IDMap[id.label].modifier;
+
+	return *res;
+
+}
+
 string generateLabel()
 {
         static int counter = 0;
@@ -1164,7 +1292,29 @@ string generateLabel()
         label << "_temp" << counter++;
 
         return label.str();
-}           
+}          
+
+
+string normalizedType(string type)
+{
+	if (type == "bool")
+		return "int";
+	else
+		return type;
+	
+}
+
+void declare(string label, string dIType, unsigned int size)
+{
+	string finalType = dIType;
+
+	if (dIType == "bool")
+		finalType = "unsigned short int";
+	else if (dIType == "string")
+		finalType = "char";
+
+	 declarationsMap[label] = {finalType, size};
+} 
 
 string declarations()
 {
@@ -1201,7 +1351,7 @@ string verifyResultOperation(string op1Type, string op2Type, string sOperator)
                 ops.op2Type = op1Type;
 
                 if(operationsMap.find(ops) == operationsMap.end())
-                        yyerror("operation of type: '" + op1Type + " " + sOperator + " " + op2Type + "' not is defined.");
+                        yyerror("operation of type: '" + op1Type + " " + sOperator + " " + op2Type + "' not defined.");
         }
         
         return operationsMap[ops];
@@ -1260,6 +1410,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "string";
 
         ops = new operation_struct;
+        ops->op1Type = "bool";
+        ops->op2Type = "bool";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
         ops->sOperator = "+";
@@ -1284,6 +1440,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "int";
 
         ops = new operation_struct;
+        ops->op1Type = "int";
+        ops->op2Type = "bool";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
         ops->op1Type = "char";
         ops->op2Type = "string";
         ops->sOperator = "+";
@@ -1302,6 +1464,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "double";        
 
         ops = new operation_struct;
+        ops->op1Type = "char";
+        ops->op2Type = "bool";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "char";       
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
         ops->sOperator = "-";
@@ -1326,6 +1494,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "char";
 
         ops = new operation_struct;
+        ops->op1Type = "bool";
+        ops->op2Type = "bool";
+        ops->sOperator = "-";
+        operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
         ops->sOperator = "-";
@@ -1340,6 +1514,12 @@ void loadOpearationsMap(void)
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "char";
+        ops->sOperator = "-";
+        operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
+        ops->op1Type = "int";
+        ops->op2Type = "bool";
         ops->sOperator = "-";
         operationsMap[*ops] = "int";
 
@@ -1355,6 +1535,11 @@ void loadOpearationsMap(void)
         ops->sOperator = "-";
         operationsMap[*ops] = "double";        
 
+        ops = new operation_struct;
+        ops->op1Type = "char";
+        ops->op2Type = "bool";
+        ops->sOperator = "-";
+        operationsMap[*ops] = "char";      
 
         ops = new operation_struct;
         ops->op1Type = "int";
@@ -1381,6 +1566,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "char";
 
         ops = new operation_struct;
+        ops->op1Type = "bool";
+        ops->op2Type = "bool";
+        ops->sOperator = "*";
+        operationsMap[*ops] = "bool";
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
         ops->sOperator = "*";
@@ -1395,6 +1586,12 @@ void loadOpearationsMap(void)
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "char";
+        ops->sOperator = "*";
+        operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
+        ops->op1Type = "int";
+        ops->op2Type = "bool";
         ops->sOperator = "*";
         operationsMap[*ops] = "int";
 
@@ -1411,6 +1608,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "double";        
 
         ops = new operation_struct;
+        ops->op1Type = "char";
+        ops->op2Type = "bool";
+        ops->sOperator = "*";
+        operationsMap[*ops] = "bool";    
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
         ops->sOperator = "/";
@@ -1435,6 +1638,12 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "char";
 
         ops = new operation_struct;
+        ops->op1Type = "bool";
+        ops->op2Type = "bool";
+        ops->sOperator = "/";
+        operationsMap[*ops] = "bool";
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
         ops->sOperator = "/";
@@ -1453,22 +1662,46 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "int";
 
         ops = new operation_struct;
+        ops->op1Type = "int";
+        ops->op2Type = "bool";
+        ops->sOperator = "/";
+        operationsMap[*ops] = "bool";
+
+        ops = new operation_struct;
         ops->op1Type = "char";
         ops->op2Type = "float";
         ops->sOperator = "/";
-        operationsMap[*ops] = "float";                
+        operationsMap[*ops] = "float";
 
         ops = new operation_struct;
         ops->op1Type = "char";
         ops->op2Type = "double";
         ops->sOperator = "/";
         operationsMap[*ops] = "double";                
+
+        ops = new operation_struct;
+        ops->op1Type = "char";
+        ops->op2Type = "bool";
+        ops->sOperator = "/";
+        operationsMap[*ops] = "bool";         
 
         ops = new operation_struct;
         ops->op1Type = "float";
         ops->op2Type = "double";
         ops->sOperator = "+";
-        operationsMap[*ops] = "double";                
+        operationsMap[*ops] = "double";          
+
+        ops = new operation_struct;
+        ops->op1Type = "float";
+        ops->op2Type = "bool";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "float";
+
+        ops = new operation_struct;
+        ops->op1Type = "double";
+        ops->op2Type = "bool";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "double";
 
         ops = new operation_struct;
         ops->op1Type = "float";
@@ -1478,9 +1711,33 @@ void loadOpearationsMap(void)
 
         ops = new operation_struct;
         ops->op1Type = "float";
+        ops->op2Type = "bool";
+        ops->sOperator = "-";
+        operationsMap[*ops] = "float";
+
+        ops = new operation_struct;
+        ops->op1Type = "double";
+        ops->op2Type = "bool";
+        ops->sOperator = "-";
+        operationsMap[*ops] = "double";
+
+        ops = new operation_struct;
+        ops->op1Type = "float";
         ops->op2Type = "double";
         ops->sOperator = "*";
         operationsMap[*ops] = "double";                
+
+        ops = new operation_struct;
+        ops->op1Type = "float";
+        ops->op2Type = "bool";
+        ops->sOperator = "*";
+        operationsMap[*ops] = "bool";                
+
+        ops = new operation_struct;
+        ops->op1Type = "double";
+        ops->op2Type = "bool";
+        ops->sOperator = "*";
+        operationsMap[*ops] = "bool";    
 
         ops = new operation_struct;
         ops->op1Type = "float";
@@ -1489,10 +1746,28 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "double";                
 
         ops = new operation_struct;
+        ops->op1Type = "float";
+        ops->op2Type = "bool";
+        ops->sOperator = "/";
+        operationsMap[*ops] = "bool";                
+
+        ops = new operation_struct;
+        ops->op1Type = "double";
+        ops->op2Type = "bool";
+        ops->sOperator = "/";
+        operationsMap[*ops] = "bool";  
+
+        ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
         ops->sOperator = "%";
         operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
+        ops->op1Type = "bool";
+        ops->op2Type = "bool";
+        ops->sOperator = "%";
+        operationsMap[*ops] = "bool";
 
         ops = new operation_struct;
         ops->op1Type = "char";
@@ -1502,9 +1777,22 @@ void loadOpearationsMap(void)
 
         ops = new operation_struct;
         ops->op1Type = "int";
+        ops->op2Type = "bool";
+        ops->sOperator = "%";
+        operationsMap[*ops] = "bool";
+
+        ops = new operation_struct;
+        ops->op1Type = "int";
         ops->op2Type = "char";
         ops->sOperator = "%";
         operationsMap[*ops] = "int";
+
+        ops = new operation_struct;
+        ops->op1Type = "char";
+        ops->op2Type = "bool";
+        ops->sOperator = "%";
+        operationsMap[*ops] = "bool";
+
 
         /*Operações relacionais*/
         ops = new operation_struct;
@@ -2235,7 +2523,7 @@ string   verifyStrongType(string op1Type, string op2Type)
         if ((op1Type == "int" && op2Type == "string") || (op1Type == "string" && op2Type == "int"))
                 return "string";
         if ((op1Type == "int" && op2Type == "bool") || (op1Type == "bool" && op2Type == "int"))
-                return "bool";
+                return "int";
 
         if ((op1Type == "char" && op2Type == "float") || (op1Type == "float" && op2Type == "char"))
                 return "float";
@@ -2244,19 +2532,19 @@ string   verifyStrongType(string op1Type, string op2Type)
         if ((op1Type == "char" && op2Type == "string") || (op1Type == "string" && op2Type == "char"))
                 return "string";
         if ((op1Type == "char" && op2Type == "bool") || (op1Type == "bool" && op2Type == "char"))
-                return "string";
+                return "char";
 
         if ((op1Type == "float" && op2Type == "string") || (op1Type == "string" && op2Type == "float"))
                 return "string";
         if ((op1Type == "float" && op2Type == "double") || (op1Type == "double" && op2Type == "float"))
                 return "double";
         if ((op1Type == "float" && op2Type == "bool") || (op1Type == "bool" && op2Type == "float"))
-                return "string";
+                return "float";
 
         if ((op1Type == "double" && op2Type == "string") || (op1Type == "string" && op2Type == "double"))
                 return "string";
         if ((op1Type == "double" && op2Type == "bool") || (op1Type == "bool" && op2Type == "double"))
-                return "string";
+                return "double";
 
         if ((op1Type == "bool" && op2Type == "string") || (op1Type == "string" && op2Type == "bool"))
                 return "string";
