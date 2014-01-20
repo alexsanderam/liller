@@ -56,7 +56,6 @@ map<string, variable_declaratino_struct> declarationsMap;
 
 map<operation_struct, string> operationsMap;
 
-//string declarations = "";
 string voidStr = "";
 
 bool error = false; /*flag utilizado para identificar se tem algum erro de compilação ou não*/
@@ -66,7 +65,6 @@ void yyerror(string);
 
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
 YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
-//string normalizedType(string);
 string generateLabel();
 void declare(string, string, unsigned int);
 string declarations();
@@ -152,7 +150,7 @@ RETURN                : TK_RETURN E ';'
 
 
 
-DECLARATION        : DECLARATION ',' TK_ID
+DECLARATION        : /*DECLARATION ',' TK_ID
                         {
 				
 				if(IDMap.find($3.label) == IDMap.end())
@@ -198,7 +196,7 @@ DECLARATION        : DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
                                                         
-                        }
+                        }*/
                         | TYPE TK_ID
                         {
 
@@ -223,7 +221,7 @@ DECLARATION        : DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
 
-                        }
+                        }/*
                         | TYPE TK_ID TK_ASSIGN E
                         {
 
@@ -244,7 +242,7 @@ DECLARATION        : DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
 
-                        }
+                        }*/
                         ;
 
                         
@@ -286,13 +284,10 @@ TYPE                	: TK_TYPE_CHAR
                         }
                         | TK_TYPE_BOOL
                         {
-                                /*$$.type = $1.traduction;
-                                $$.modifier = "";
-                                $$.traduction = "";*/
 				$$.type = "int";
                                 $$.modifier = "unsigned short";
                                 $$.traduction = "";
-                        }
+                        }/*
                         | TK_MODIFIER_UNSIGNED TK_TYPE_CHAR
                         {
                                 $$.type = $2.traduction;
@@ -400,7 +395,7 @@ TYPE                	: TK_TYPE_CHAR
                                 $$.type = "int";
                                 $$.modifier = $1.traduction + " " + $2.traduction + " " + $3.traduction;
                                 $$.traduction = "";
-                        }
+                        }*/
                         ;
 
 
@@ -505,8 +500,6 @@ TERMINAL        :       TK_INT
                         | TK_BOOL
                         {
                                 $$.label = generateLabel();
-                                /*$$.type = "bool";
-                                $$.modifier = "";*/
                                 $$.type = "int";
                                 $$.modifier = "unsigned short";
 
@@ -580,13 +573,13 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-                        | LOGIC_E
+                        /*| LOGIC_E
                         {
                                 $$.traduction = $1.traduction;
                                 $$.label = $1.label;
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
-                        }
+                        }*/
 			| NOT_LOGIC_E
 			{
                                 $$.traduction = $1.traduction;
@@ -798,14 +791,8 @@ MUL_DIV_OPERAND		    	   : TERMINAL
 
 
 
-LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
+/*LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
                         {
-                                /*$$.label = generateLabel();
-                                $$.type = "bool";
-                                $$.modifier = "";
-                                $$.traduction = $1.traduction + $3.traduction + "\t" + $$.label + " = " + $1.label + " " + $2.traduction + " " + $3.label + ";\n";
-
-				declare($$.label, $$.type, 1);*/
 				$$ = runBasicOperation($1, $3, $2);
                         }
 			;
@@ -881,14 +868,12 @@ LOGIC_OPERAND          : TERMINAL
 		                $$.type = $2.type;
 		                $$.modifier = $2.modifier;                        
 		        }
-		        ;
+		        ;*/
 
 
 NOT_LOGIC_E		: TK_OP_LOGIC_NOT NOT_LOGIC_OPERAND
 			{
                                 $$.label = generateLabel();
-                                /*$$.type = "bool";
-                                $$.modifier = "";*/
                                 $$.type = "int";
                                 $$.modifier = "unsigned short";
 
@@ -1129,8 +1114,8 @@ RELATIONAL_OPERATION        : TK_OP_REL_LESS | TK_OP_REL_GREATER | TK_OP_REL_EQL
                                                 
 
 
-LOGIC_OPERATION         : TK_OP_LOGIC_OR | TK_OP_LOGIC_AND
-                        ;
+/*LOGIC_OPERATION         : TK_OP_LOGIC_OR | TK_OP_LOGIC_AND
+                        ;*/
 
 
 
@@ -1263,22 +1248,11 @@ string generateLabel()
 }          
 
 
-/*string normalizedType(string type)
-{
-	if (type == "bool")
-		return "int";
-	else
-		return type;	
-}*/
-
-
 void declare(string label, string dIType, unsigned int size)
 {
 	string finalType = dIType;
 
-	/*if (dIType == "bool")
-		finalType = "unsigned short int";
-	else*/ if (dIType == "string")
+	if (dIType == "string")
 		finalType = "char";
 
 	 declarationsMap[label] = {finalType, size};
@@ -1377,12 +1351,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "+";
         operationsMap[*ops] = "string";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "+";
-        operationsMap[*ops] = "int";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
@@ -1407,12 +1375,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "+";
         operationsMap[*ops] = "int";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "int";
-        ops->op2Type = "bool";
-        ops->sOperator = "+";
-        operationsMap[*ops] = "int";*/
-
         ops = new operation_struct;
         ops->op1Type = "char";
         ops->op2Type = "string";
@@ -1431,12 +1393,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "+";
         operationsMap[*ops] = "double";        
 
-        /*ops = new operation_struct;
-        ops->op1Type = "char";
-        ops->op2Type = "bool";
-        ops->sOperator = "+";
-        operationsMap[*ops] = "char";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
@@ -1461,12 +1417,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "-";
         operationsMap[*ops] = "char";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "-";
-        operationsMap[*ops] = "int";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
@@ -1484,12 +1434,6 @@ void loadOpearationsMap(void)
         ops->op2Type = "char";
         ops->sOperator = "-";
         operationsMap[*ops] = "int";
-
-        /*ops = new operation_struct;
-        ops->op1Type = "int";
-        ops->op2Type = "bool";
-        ops->sOperator = "-";
-        operationsMap[*ops] = "int";*/
 
         ops = new operation_struct;
         ops->op1Type = "char";
@@ -1503,12 +1447,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "-";
         operationsMap[*ops] = "double";        
 
-        /*ops = new operation_struct;
-        ops->op1Type = "char";
-        ops->op2Type = "bool";
-        ops->sOperator = "-";
-        operationsMap[*ops] = "char";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
@@ -1533,12 +1471,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "*";
         operationsMap[*ops] = "char";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "*";
-        operationsMap[*ops] = "bool";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
@@ -1556,12 +1488,6 @@ void loadOpearationsMap(void)
         ops->op2Type = "char";
         ops->sOperator = "*";
         operationsMap[*ops] = "int";
-
-        /*ops = new operation_struct;
-        ops->op1Type = "int";
-        ops->op2Type = "bool";
-        ops->sOperator = "*";
-        operationsMap[*ops] = "int";*/
 
         ops = new operation_struct;
         ops->op1Type = "char";
@@ -1573,13 +1499,7 @@ void loadOpearationsMap(void)
         ops->op1Type = "char";
         ops->op2Type = "double";
         ops->sOperator = "*";
-        operationsMap[*ops] = "double";        
-
-        /*ops = new operation_struct;
-        ops->op1Type = "char";
-        ops->op2Type = "bool";
-        ops->sOperator = "*";
-        operationsMap[*ops] = "bool"; */   
+        operationsMap[*ops] = "double";          
 
         ops = new operation_struct;
         ops->op1Type = "int";
@@ -1605,12 +1525,6 @@ void loadOpearationsMap(void)
         ops->sOperator = "/";
         operationsMap[*ops] = "char";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "/";
-        operationsMap[*ops] = "bool";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "float";
@@ -1628,12 +1542,6 @@ void loadOpearationsMap(void)
         ops->op2Type = "char";
         ops->sOperator = "/";
         operationsMap[*ops] = "int";
-
-        /*ops = new operation_struct;
-        ops->op1Type = "int";
-        ops->op2Type = "bool";
-        ops->sOperator = "/";
-        operationsMap[*ops] = "bool";*/
 
         ops = new operation_struct;
         ops->op1Type = "char";
@@ -1646,12 +1554,6 @@ void loadOpearationsMap(void)
         ops->op2Type = "double";
         ops->sOperator = "/";
         operationsMap[*ops] = "double";                
-
-        /*ops = new operation_struct;
-        ops->op1Type = "char";
-        ops->op2Type = "bool";
-        ops->sOperator = "/";
-        operationsMap[*ops] = "bool";*/
 
         ops = new operation_struct;
         ops->op1Type = "float";
@@ -1659,71 +1561,23 @@ void loadOpearationsMap(void)
         ops->sOperator = "+";
         operationsMap[*ops] = "double";          
 
-        /*ops = new operation_struct;
-        ops->op1Type = "float";
-        ops->op2Type = "bool";
-        ops->sOperator = "+";
-        operationsMap[*ops] = "float";*/
-
-        /*ops = new operation_struct;
-        ops->op1Type = "double";
-        ops->op2Type = "bool";
-        ops->sOperator = "+";
-        operationsMap[*ops] = "double";*/
-
         ops = new operation_struct;
         ops->op1Type = "float";
         ops->op2Type = "double";
         ops->sOperator = "-";
         operationsMap[*ops] = "double";                        
 
-        /*ops = new operation_struct;
-        ops->op1Type = "float";
-        ops->op2Type = "bool";
-        ops->sOperator = "-";
-        operationsMap[*ops] = "float";*/
-
-        /*ops = new operation_struct;
-        ops->op1Type = "double";
-        ops->op2Type = "bool";
-        ops->sOperator = "-";
-        operationsMap[*ops] = "double";*/
-
         ops = new operation_struct;
         ops->op1Type = "float";
         ops->op2Type = "double";
         ops->sOperator = "*";
         operationsMap[*ops] = "double";                
 
-        /*ops = new operation_struct;
-        ops->op1Type = "float";
-        ops->op2Type = "bool";
-        ops->sOperator = "*";
-        operationsMap[*ops] = "bool";*/                
-
-        /*ops = new operation_struct;
-        ops->op1Type = "double";
-        ops->op2Type = "bool";
-        ops->sOperator = "*";
-        operationsMap[*ops] = "bool";*/
-
         ops = new operation_struct;
         ops->op1Type = "float";
         ops->op2Type = "double";
         ops->sOperator = "/";
         operationsMap[*ops] = "double";                
-
-        /*ops = new operation_struct;
-        ops->op1Type = "float";
-        ops->op2Type = "bool";
-        ops->sOperator = "/";
-        operationsMap[*ops] = "bool";*/
-
-        /*ops = new operation_struct;
-        ops->op1Type = "double";
-        ops->op2Type = "bool";
-        ops->sOperator = "/";
-        operationsMap[*ops] = "bool";*/  
 
         ops = new operation_struct;
         ops->op1Type = "int";
@@ -1731,35 +1585,17 @@ void loadOpearationsMap(void)
         ops->sOperator = "%";
         operationsMap[*ops] = "int";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "%";
-        operationsMap[*ops] = "bool";*/
-
         ops = new operation_struct;
         ops->op1Type = "char";
         ops->op2Type = "char";
         ops->sOperator = "%";
         operationsMap[*ops] = "char";
 
-        /*ops = new operation_struct;
-        ops->op1Type = "int";
-        ops->op2Type = "bool";
-        ops->sOperator = "%";
-        operationsMap[*ops] = "bool";*/
-
         ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "char";
         ops->sOperator = "%";
         operationsMap[*ops] = "int";
-
-        /*ops = new operation_struct;
-        ops->op1Type = "char";
-        ops->op2Type = "bool";
-        ops->sOperator = "%";
-        operationsMap[*ops] = "bool";*/
 
 
         /*Operações relacionais*/
@@ -2279,18 +2115,6 @@ void loadOpearationsMap(void)
         operationsMap[*ops] = "char";
 
         /*Operações lógicas*/
-        /*ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "&&";
-        operationsMap[*ops] = "bool";
-
-        ops = new operation_struct;
-        ops->op1Type = "bool";
-        ops->op2Type = "bool";
-        ops->sOperator = "||";
-        operationsMap[*ops] = "bool";*/
-
 	ops = new operation_struct;
         ops->op1Type = "int";
         ops->op2Type = "int";
@@ -2312,8 +2136,7 @@ string   verifyStrongType(string op1Type, string op2Type)
                 return "float";
         if(op1Type == "double" && op2Type == "double")
                 return "double";
-        /*if(op1Type == "bool" && op2Type == "bool")
-                return "bool";*/
+
         if(op1Type == "char" && op2Type == "char")
                 return "char";
         if(op1Type == "string" && op2Type == "string")
@@ -2328,8 +2151,6 @@ string   verifyStrongType(string op1Type, string op2Type)
                 return "int";
         if ((op1Type == "int" && op2Type == "string") || (op1Type == "string" && op2Type == "int"))
                 return "string";
-        /*if ((op1Type == "int" && op2Type == "bool") || (op1Type == "bool" && op2Type == "int"))
-                return "int";*/
 
         if ((op1Type == "char" && op2Type == "float") || (op1Type == "float" && op2Type == "char"))
                 return "float";
@@ -2337,23 +2158,17 @@ string   verifyStrongType(string op1Type, string op2Type)
                 return "double";
         if ((op1Type == "char" && op2Type == "string") || (op1Type == "string" && op2Type == "char"))
                 return "string";
-        /*if ((op1Type == "char" && op2Type == "bool") || (op1Type == "bool" && op2Type == "char"))
-                return "char";*/
+
 
         if ((op1Type == "float" && op2Type == "string") || (op1Type == "string" && op2Type == "float"))
                 return "string";
         if ((op1Type == "float" && op2Type == "double") || (op1Type == "double" && op2Type == "float"))
                 return "double";
-        /*if ((op1Type == "float" && op2Type == "bool") || (op1Type == "bool" && op2Type == "float"))
-                return "float";*/
+
 
         if ((op1Type == "double" && op2Type == "string") || (op1Type == "string" && op2Type == "double"))
                 return "string";
-        /*if ((op1Type == "double" && op2Type == "bool") || (op1Type == "bool" && op2Type == "double"))
-                return "double";*/
 
-        /*if ((op1Type == "bool" && op2Type == "string") || (op1Type == "string" && op2Type == "bool"))
-                return "string";*/
 
 
         yyerror("relation between the types: '" + op1Type + "' and '" + op2Type + "' not defined.");
