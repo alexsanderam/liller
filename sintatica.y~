@@ -62,6 +62,8 @@ string voidStr = "";
 bool error = false;
 bool warning = false;
 
+unsigned int relationalCounter = 0;
+
 int yylex(void);
 void yyerror(string);
 void yywarning(string);
@@ -69,6 +71,7 @@ void yywarning(string);
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
 YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
 string generateID();
+void relationalControl(YYSTYPE);
 void declare(string, string, unsigned int);
 string declarations();
 string verifyResultOperation(string, string, string);
@@ -99,8 +102,8 @@ void loadOpearationsMap(void);
 
 %nonassoc TK_ASSIGN
 %left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
-%nonassoc TK_OP_REL_EQ TK_OP_REL_DIFF
-%nonassoc TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER
+%left TK_OP_REL_EQ TK_OP_REL_DIFF
+%left TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER
 %left TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
 %left TK_OP_SUM
 %left TK_OP_SUB
@@ -129,27 +132,6 @@ Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
                         }
                         ;
 
-
-
-/*
-
-BLOCKS			: '{' BLOCKS '}' BLOCKS
-			{
-                                $$.traduction = "\n{\n" + declarations() + "\n" + $2.traduction + "\n}";
-			}
-			| COMMANDS BLOCKS
-			{
-				$$.traduction = $1.traduction + $2.traduction;
-			}
-			|
-			{
-				$$.traduction = "";
-			}
-			;
-
-*/
-
-
 COMMANDS        : 	COMMAND COMMANDS
                         {
                                 $$.traduction = $1.traduction + "\n" + $2.traduction;
@@ -162,6 +144,10 @@ COMMANDS        : 	COMMAND COMMANDS
 
 
 COMMAND         	: E ';'
+			{
+				$$.traduction = $1.traduction;
+				relationalCounter = 0; /*controle para alertar a recursão de operações relacionais*/
+			}
 			| RETURN ';'  
                         | DECLARATION ';'
 			| COUT ';'
@@ -233,26 +219,32 @@ E                       :'(' E ')'
                         }
                         | E TK_OP_REL_EQ E
                         {
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_REL_DIFF E
                         {
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_REL_LESS E
                         {				
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_REL_GREATER E
                         {
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_REL_EQLESS E
                         {
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_REL_EQGREATER E
                         {
+				relationalControl($2);
 				$$ = runBasicOperation($1, $3, $2);
                         }
                         | E TK_OP_BIN_AND E
@@ -725,6 +717,33 @@ void yywarning(string MSG)
 {
         warning = true;
         cerr << ":" << yylineno << ": warning: " + MSG << endl;
+}
+
+void relationalControl(YYSTYPE operation)
+{
+	static string lastOp = "";
+	string MSG;
+	
+	if(relationalCounter > 0)
+	{
+		if ((operation.traduction == "==") || (operation.traduction == "!=") || (lastOp == "==") || (lastOp == "!="))
+		{
+			lastOp = operation.traduction;
+			MSG = "suggest parentheses around comparison in operand of '" + operation.traduction + "'";
+		}
+		else
+			MSG = "comparisons like ‘X<=Y<=Z’ do not have their mathematical meaning";
+
+		yywarning(MSG);
+		relationalCounter --;
+	}
+
+	if(relationalCounter == 0)
+		lastOp = operation.traduction;
+
+	relationalCounter++;
+
+			
 }
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)

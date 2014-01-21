@@ -1,26 +1,8 @@
 int main()
 {	
-
-	int x;
-	bool k;
-
-	x = k = true + true;
-
-	cout(k);
-
-	{
-		int j;
-		j = j + 1;
-		cout(j);
-		{
-			cout(k);
-		}
-	}
-
 	
-	{
-		cout(j);
-	}
+	1 <= 2 == 0 < 8;
+	1 < 2;
 
 	return 0;
 }
