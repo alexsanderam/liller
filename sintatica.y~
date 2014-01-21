@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <stack>
 
 #define YYSTYPE args
 
@@ -53,19 +54,21 @@ typedef struct
 
 map<string, id_struct> IDMap;
 map<string, variable_declaratino_struct> declarationsMap;
-
 map<operation_struct, string> operationsMap;
+
 
 string voidStr = "";
 
-bool error = false; /*flag utilizado para identificar se tem algum erro de compilação ou não*/
+bool error = false;
+bool warning = false;
 
 int yylex(void);
 void yyerror(string);
+void yywarning(string);
 
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
 YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
-string generateLabel();
+string generateID();
 void declare(string, string, unsigned int);
 string declarations();
 string verifyResultOperation(string, string, string);
@@ -101,21 +104,23 @@ void loadOpearationsMap(void);
 %left TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
 %left TK_OP_SUM
 %left TK_OP_SUB
-%left TK_OP_MUL TK_OP_DIV TK_OP_MOD
+%left TK_OP_MUL 
+%left TK_OP_DIV
+%left TK_OP_MOD
 %left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
 
 
 %%
 
-Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
+Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
                         {
                                 if(!error)
                                         cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\nusing namespace std;\n int main(void)" << $6.traduction << endl;
                                 else
                                         exit(1);
                         }
-			| TK_TYPE_INT TK_MAIN '(' ')' BLOCK
+			| TK_TYPE_INT TK_MAIN '(' ')' SCOPE
                         {
                                 if(!error)                                
                                         cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include <string.h>\n#include <stdio.h>\nusing namespace std;\nint main()" << $5.traduction << endl;
@@ -126,36 +131,202 @@ Begin                 : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' BLOCK
 
 
 
-BLOCK                : '{' COMMANDS BLOCK RETURN '}'
+/*
+
+BLOCKS			: '{' BLOCKS '}' BLOCKS
+			{
+                                $$.traduction = "\n{\n" + declarations() + "\n" + $2.traduction + "\n}";
+			}
+			| COMMANDS BLOCKS
+			{
+				$$.traduction = $1.traduction + $2.traduction;
+			}
+			|
+			{
+				$$.traduction = "";
+			}
+			;
+
+*/
+
+
+COMMANDS        : 	COMMAND COMMANDS
                         {
-                                $$.traduction = "\n{\n" + declarations() + "\n" + $2.traduction + $3.traduction + $4.traduction + "\n}";
+                                $$.traduction = $1.traduction + "\n" + $2.traduction;
                         }
                         |
                         {
                                 $$.traduction = "";
                         }
+			;
+
+
+COMMAND         	: E ';'
+			| RETURN ';'  
+                        | DECLARATION ';'
+			| COUT ';'
+			| SCOPE
                         ;
 
+SCOPE			: '{' COMMANDS '}'
+			{
+				$$.traduction = "\n{\n" + declarations() + "\n" + $2.traduction + "\n}";
+			}
+			;
 
 
-RETURN                : TK_RETURN E ';'
+RETURN                	: TK_RETURN E 
                         {
                                 $$.traduction = $2.traduction + "\n\t" + $1.traduction + " " + $2.label + ";";
                         }
-                        |
-                        {
-                                $$.traduction = "";
-                        }
                         ;
 
 
+E                       :'(' E ')'
+			{
+                             	$$.traduction = $2.traduction;
+                                $$.label = $2.label;
+                                $$.type = $2.type;
+                                $$.modifier = $2.modifier;        	
+			}
+                       	| TERMINAL
+                        {
+                                $$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+                        }
+			| ATRIBUITION
+			{
+                            	$$.traduction = $1.traduction;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
+			| E TK_OP_SUM E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+			| E TK_OP_SUB E
+                        {
+ 				$$ = runBasicOperation($1, $3, $2);
+                        }
+			| E TK_OP_MUL E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+			| E TK_OP_DIV E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_MOD E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_LOGIC_OR E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_LOGIC_AND E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_EQ E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_DIFF E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_LESS E
+                        {				
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_GREATER E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_EQLESS E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_REL_EQGREATER E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_BIN_AND E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_BIN_OR E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_BIN_XOR E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_BIN_SHIFTR E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+                        | E TK_OP_BIN_SHIFTL E
+                        {
+				$$ = runBasicOperation($1, $3, $2);
+                        }
+			| TK_OP_LOGIC_NOT E
+			{
+                                $$.label = generateID();
+                                $$.type = "int";
+                                $$.modifier = "unsigned short";
 
-DECLARATION        : /*DECLARATION ',' TK_ID
+                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
+
+                                declare($$.label, $$.type, 1);
+			}
+			| TK_OP_BIN_NOT E
+			{
+ 				$$.label = generateID();
+
+                                if(($2.type != "int") && ($2.type != "char"))
+                                        yyerror("wrong type argument to bit-complement");
+
+                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";
+
+                                $$.type = $2.type;
+                                $$.modifier = $2.type;
+
+                                declare($$.label, $$.type, 1);
+			}
+			;
+
+
+
+
+ATRIBUITION        : TK_ID TK_ASSIGN E
+                        {
+                                if(IDMap.find($1.label) == IDMap.end())        
+                                        yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
+
+				$$ = assigns(voidStr, $1, $3);
+                        }
+                        ;        
+
+
+COUT			: TK_COUT '(' E ')'
+			{
+				$$.traduction = $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
+			}
+			;
+
+
+DECLARATION        : DECLARATION ',' TK_ID
                         {
 				
 				if(IDMap.find($3.label) == IDMap.end())
                                 {
-                                        IDMap[$3.label].label = generateLabel();
+                                        IDMap[$3.label].label = generateID();
                                         IDMap[$3.label].type = $1.type;
                                         IDMap[$3.label].modifier = $1.modifier;
                                 }
@@ -181,7 +352,7 @@ DECLARATION        : /*DECLARATION ',' TK_ID
 
                                 if(IDMap.find($3.label) == IDMap.end())
                                 {
-                                        IDMap[$3.label].label = generateLabel();
+                                        IDMap[$3.label].label = generateID();
                                         IDMap[$3.label].type = $1.type;
                                         IDMap[$3.label].modifier = $1.modifier;
                                 }
@@ -196,13 +367,13 @@ DECLARATION        : /*DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
                                                         
-                        }*/
+                        }
                         | TYPE TK_ID
                         {
 
                                 if(IDMap.find($2.label) == IDMap.end())
                                 {
-                                        IDMap[$2.label].label = generateLabel();
+                                        IDMap[$2.label].label = generateID();
                                         IDMap[$2.label].type = $1.type;
                                         IDMap[$2.label].modifier = $1.modifier;
                                 }
@@ -221,13 +392,13 @@ DECLARATION        : /*DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
 
-                        }/*
+                        }
                         | TYPE TK_ID TK_ASSIGN E
                         {
 
                                 if(IDMap.find($2.label) == IDMap.end())
                                 {
-                                        IDMap[$2.label].label = generateLabel();
+                                        IDMap[$2.label].label = generateID();
                                         IDMap[$2.label].type = $1.type;
                                         IDMap[$2.label].modifier = $1.modifier;
                                 }
@@ -242,7 +413,7 @@ DECLARATION        : /*DECLARATION ',' TK_ID
 				else
 					declare($$.label, $$.type, 1);
 
-                        }*/
+                        }
                         ;
 
                         
@@ -287,7 +458,7 @@ TYPE                	: TK_TYPE_CHAR
 				$$.type = "int";
                                 $$.modifier = "unsigned short";
                                 $$.traduction = "";
-                        }/*
+                        }
                         | TK_MODIFIER_UNSIGNED TK_TYPE_CHAR
                         {
                                 $$.type = $2.traduction;
@@ -395,14 +566,14 @@ TYPE                	: TK_TYPE_CHAR
                                 $$.type = "int";
                                 $$.modifier = $1.traduction + " " + $2.traduction + " " + $3.traduction;
                                 $$.traduction = "";
-                        }*/
+                        }
                         ;
 
 
 
 TERMINAL        :       TK_INT
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "";
  
@@ -414,7 +585,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_FLOAT
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "float";
                                 $$.modifier = "";
   
@@ -424,7 +595,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_SCIENTIFIC
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "float"; //poderia ser double
                                 $$.modifier = "";
           
@@ -435,7 +606,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_CHAR
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "char";
                                 $$.modifier = "";
               
@@ -446,7 +617,7 @@ TERMINAL        :       TK_INT
                         }
 			| SIGNAL TK_INT
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "";
  
@@ -457,7 +628,7 @@ TERMINAL        :       TK_INT
                         }
                         | SIGNAL TK_FLOAT
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "float";
                                 $$.modifier = "";
   
@@ -467,7 +638,7 @@ TERMINAL        :       TK_INT
                         }
                         | SIGNAL TK_SCIENTIFIC
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "float"; //poderia ser double
                                 $$.modifier = "";
           
@@ -478,7 +649,7 @@ TERMINAL        :       TK_INT
                         }
                         | SIGNAL TK_CHAR
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "char";
                                 $$.modifier = "";
               
@@ -489,7 +660,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_STRING
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "string";
                                 $$.modifier = "";
 
@@ -499,7 +670,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_BOOL
                         {
-                                $$.label = generateLabel();
+                                $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "unsigned short";
 
@@ -528,606 +699,6 @@ SIGNAL		:	TK_OP_SUM | TK_OP_SUB
 			;
 
 
-COMMANDS        : 	COMMAND COMMANDS
-                        {
-                                $$.traduction = $1.traduction + "\n" + $2.traduction;
-                        }
-                        |
-                        {
-                                $$.traduction = "";
-                        }
-			;
-
-
-COMMAND         : 	E ';'        
-                        | DECLARATION ';'
-			| COUT ';'
-                        ;
-
-
-E                       :'(' E ')'
-			{
-                             	$$.traduction = $2.traduction;
-                                $$.label = $2.label;
-                                $$.type = $2.type;
-                                $$.modifier = $2.modifier;        	
-			}
-			| SUM_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-			| SUB_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-			| MUL_DIV_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        /*| LOGIC_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }*/
-			| NOT_LOGIC_E
-			{
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-			}
-                        | RELATIONAL_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | BIN_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-			| BITWISE_E
-			{
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-			}
-                        | TERMINAL
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-			| ATRIBUITION
-			{
-                            	$$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-			}
-			;
-
-
-SUM_E        : SUM_OPERAND TK_OP_SUM SUM_OPERAND
-		{
-			$$ = runBasicOperation($1, $3, $2);
-		}
-		;
-
-
-SUM_OPERAND	   : TERMINAL
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | SUM_E
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | SUB_E
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | MUL_DIV_E
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | NOT_LOGIC_E
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | BITWISE_E
-		    {
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-		    }
-		    | '(' E ')'
-		    {
-			    $$.traduction = $2.traduction;
-			    $$.label = $2.label;
-			    $$.type = $2.type;
-			    $$.modifier = $2.modifier;                        
-		    }  
-		    ;
-
-
-SUB_E	        : SUB_OPERAND TK_OP_SUB SUB_OPERAND
-		{
-			$$ = runBasicOperation($1, $3, $2);
-		}
-		;
-
-		
-
-SUB_OPERAND	   : TERMINAL
-                    {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                    }
-                    | SUB_E
-                    {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                    }
-                    | MUL_DIV_E
-                    {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                    }
-                    | NOT_LOGIC_E
-                    {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                    }
-                    | BITWISE_E
-                    {
-                            $$.traduction = $1.traduction;
-                            $$.label = $1.label;
-                            $$.type = $1.type;
-                            $$.modifier = $1.modifier;
-                    }
-                    | '(' E ')'
-                    {
-                            $$.traduction = $2.traduction;
-                            $$.label = $2.label;
-                            $$.type = $2.type;
-                            $$.modifier = $2.modifier;                        
-                    }  
-                    ;
-
-
-MUL_DIV_E			: MUL_DIV_OPERAND TK_OP_MUL MUL_DIV_OPERAND
-				{
-					$$ = runBasicOperation($1, $3, $2);
-				}
-				| MUL_DIV_OPERAND TK_OP_DIV MUL_DIV_OPERAND
-				{
-					$$ = runBasicOperation($1, $3, $2);
-				}
-				| MUL_DIV_OPERAND TK_OP_MOD MUL_DIV_OPERAND
-				{
-					$$ = runBasicOperation($1, $3, $2);
-				}
-				;
-
-
-MUL_DIV_OPERAND		    	   : TERMINAL
-		                    {
-		                            $$.traduction = $1.traduction;
-		                            $$.label = $1.label;
-		                            $$.type = $1.type;
-		                            $$.modifier = $1.modifier;
-		                    }
-		                    | MUL_DIV_E
-		                    {
-		                            $$.traduction = $1.traduction;
-		                            $$.label = $1.label;
-		                            $$.type = $1.type;
-		                            $$.modifier = $1.modifier;
-		                    }
-		                    | NOT_LOGIC_E
-		                    {
-		                            $$.traduction = $1.traduction;
-		                            $$.label = $1.label;
-		                            $$.type = $1.type;
-		                            $$.modifier = $1.modifier;
-		                    }
-		                    | BITWISE_E
-		                    {
-		                            $$.traduction = $1.traduction;
-		                            $$.label = $1.label;
-		                            $$.type = $1.type;
-		                            $$.modifier = $1.modifier;
-		                    }
-		                    | '(' E ')'
-		                    {
-		                            $$.traduction = $2.traduction;
-		                            $$.label = $2.label;
-		                            $$.type = $2.type;
-		                            $$.modifier = $2.modifier;                        
-		                    }  
-		                    ;
-
-
-
-/*LOGIC_E                : LOGIC_OPERAND LOGIC_OPERATION LOGIC_OPERAND
-                        {
-				$$ = runBasicOperation($1, $3, $2);
-                        }
-			;
-
-
-LOGIC_OPERAND          : TERMINAL
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-		        | LOGIC_E
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-		        | RELATIONAL_E
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-			| NOT_LOGIC_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-			| BITWISE_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-		        | BIN_E
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-			| SUM_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| SUB_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| MUL_DIV_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-		        | '(' E ')'
-		        {
-		                $$.traduction = $2.traduction;
-		                $$.label = $2.label;
-		                $$.type = $2.type;
-		                $$.modifier = $2.modifier;                        
-		        }
-		        ;*/
-
-
-NOT_LOGIC_E		: TK_OP_LOGIC_NOT NOT_LOGIC_OPERAND
-			{
-                                $$.label = generateLabel();
-                                $$.type = "int";
-                                $$.modifier = "unsigned short";
-
-                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";                                
-
-				declare($$.label, $$.type, 1);
-			}
-                        ;
-
-
-NOT_LOGIC_OPERAND	: TERMINAL
-                        {
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-                        }
-			| NOT_LOGIC_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| BITWISE_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| '(' E ')'
-                        {
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-                        }
-			;
-
-
-BIN_E                : BIN_OPERAND BIN_OPERATION BIN_OPERAND
-                        {
-				$$ = runBasicOperation($1, $3, $2);
-                        }
-		 	;
-
-
-
-BIN_OPERAND             : TERMINAL
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-		        | BIN_E
-		        {
-		                $$.traduction = $1.traduction;
-		                $$.label = $1.label;
-		                $$.type = $1.type;
-		                $$.modifier = $1.modifier;
-		        }
-			| NOT_LOGIC_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-			| BITWISE_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-		        | SUM_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-		        | SUB_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| MUL_DIV_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-		        | '(' E ')'
-		        {
-		                $$.traduction = $2.traduction;
-		                $$.label = $2.label;
-		                $$.type = $2.type;
-		                $$.modifier = $2.modifier;                        
-		        }
-		        ;
-
-
-
-BITWISE_E		: TK_OP_BIN_NOT BITWISE_OPERAND
-			{
-                                $$.label = generateLabel();
-
-				if(($2.type != "int") && ($2.type != "char"))
-					yyerror("wrong type argument to bit-complement");
-
-                                $$.traduction = $2.traduction + "\t" + $$.label + " = " + $1.traduction + " " + $2.label + ";\n";
-
-                                $$.type = $2.type;
-                                $$.modifier = $2.type;
-
-				declare($$.label, $$.type, 1);
-			}
-			;
-
-
-BITWISE_OPERAND         : TERMINAL
-		        {
-			     	$$.traduction = $1.traduction;
-			        $$.label = $1.label;
-			        $$.type = $1.type;
-			        $$.modifier = $1.modifier;
-		        }
-			| NOT_LOGIC_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| BITWISE_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-		        | '(' E ')'
-		        {
-		                $$.traduction = $2.traduction;
-		                $$.label = $2.label;
-		                $$.type = $2.type;
-		                $$.modifier = $2.modifier;                        
-		        }
-		        ;
-
-
-
-RELATIONAL_E         : RELATIONAL_OPERAND RELATIONAL_OPERATION RELATIONAL_OPERAND
-                        {
-				$$ = runBasicOperation($1, $3, $2);
-                        }
-                        ;
-
-
-
-RELATIONAL_OPERAND      : TERMINAL
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-			| NOT_LOGIC_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-			| BITWISE_E
-			{
-			    $$.traduction = $1.traduction;
-			    $$.label = $1.label;
-			    $$.type = $1.type;
-			    $$.modifier = $1.modifier;
-			}
-                        | BIN_E
-                        {
-                                $$.traduction = $1.traduction;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
-                        | SUM_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-                        | SUB_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-			| MUL_DIV_E
-			{
-				$$.traduction = $1.traduction;
-				$$.label = $1.label;
-				$$.type = $1.type;
-				$$.modifier = $1.modifier;
-			}
-                        | '(' E ')'
-                        {
-                                $$.traduction = $2.traduction;
-                                $$.label = $2.label;
-                                $$.type = $2.type;
-                                $$.modifier = $2.modifier;                        
-                        }
-                        ;
-
-
-
-ATRIBUITION        : TK_ID TK_ASSIGN E
-                        {
-                                if(IDMap.find($1.label) == IDMap.end())        
-                                        yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
-
-				$$ = assigns(voidStr, $1, $3);
-                        }
-                        ;        
-
-RELATIONAL_OPERATION        : TK_OP_REL_LESS | TK_OP_REL_GREATER | TK_OP_REL_EQLESS | TK_OP_REL_EQGREATER | TK_OP_REL_EQ | TK_OP_REL_DIFF
-                                ;
-                                                
-
-
-LOGIC_OPERATION         : TK_OP_LOGIC_OR | TK_OP_LOGIC_AND
-                        ;
-
-
-
-BIN_OPERATION           : TK_OP_BIN_AND | TK_OP_BIN_OR | TK_OP_BIN_XOR | TK_OP_BIN_SHIFTR | TK_OP_BIN_SHIFTL
-                        ;
-
-
-COUT				: TK_COUT '(' E ')'
-				{
-					$$.traduction = $3.traduction + "\n\tcout << " + $3.label + " << endl;\n";
-				}
-				;
 
 %%
 
@@ -1150,6 +721,12 @@ void yyerror(string MSG)
         //exit(0);
 }
 
+void yywarning(string MSG)
+{
+        warning = true;
+        cerr << ":" << yylineno << ": warning: " + MSG << endl;
+}
+
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
 {
 	YYSTYPE* res;
@@ -1161,7 +738,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
         string weakOperatingLabel;
         string strongOperatingLabel;
 
-        res->label = generateLabel();
+        res->label = generateID();
 
         res->traduction = operand1.traduction + operand2.traduction;
 
@@ -1237,7 +814,7 @@ YYSTYPE assigns(string addTraduction, YYSTYPE id, YYSTYPE exp)
 
 }
 
-string generateLabel()
+string generateID()
 {
         static int counter = 0;
         stringstream label;
@@ -1303,7 +880,7 @@ id_struct* defineKeyOperating(string op1Type, string op1Modifier, string op2Type
 {
         id_struct* keyOperating = new id_struct;
         
-        keyOperating->label = generateLabel();
+        keyOperating->label = generateID();
 
         keyOperating->type = verifyStrongType(op1Type, op2Type);
 

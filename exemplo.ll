@@ -1,14 +1,26 @@
 int main()
 {	
-	/*Aqui é um comentário
-	Este arquivo é de exemplo da Linguagem Liller
-	e do Compilador prescot-liller.*/
 
 	int x;
+	bool k;
 
-	x = 10;
+	x = k = true + true;
 
-	cout (x);
+	cout(k);
+
+	{
+		int j = 0;
+		j = j + 1;
+		cout(j);
+		{
+			cout(k);
+		}
+	}
+
+	
+	{
+		cout(j);
+	}
 
 	return 0;
 }
