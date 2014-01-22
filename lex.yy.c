@@ -919,102 +919,102 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 90 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_SUM; }
+{yylval.translation = yytext; return TK_OP_SUM; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 91 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_SUB; }
+{yylval.translation = yytext; return TK_OP_SUB; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 92 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_MUL; }
+{yylval.translation = yytext; return TK_OP_MUL; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 93 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_DIV; }
+{yylval.translation = yytext; return TK_OP_DIV; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 94 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_MOD; }
+{yylval.translation = yytext; return TK_OP_MOD; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 97 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_LESS; }
+{yylval.translation = yytext; return TK_OP_REL_LESS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 98 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_GREATER; }
+{yylval.translation = yytext; return TK_OP_REL_GREATER; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 99 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_EQLESS; }
+{yylval.translation = yytext; return TK_OP_REL_EQLESS; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 100 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_EQGREATER; }
+{yylval.translation = yytext; return TK_OP_REL_EQGREATER; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 101 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_EQ; }
+{yylval.translation = yytext; return TK_OP_REL_EQ; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 102 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_REL_DIFF; }
+{yylval.translation = yytext; return TK_OP_REL_DIFF; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 104 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_LOGIC_AND; }
+{yylval.translation = yytext; return TK_OP_LOGIC_AND; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 105 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_LOGIC_OR; }	
+{yylval.translation = yytext; return TK_OP_LOGIC_OR; }	
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 106 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_LOGIC_NOT; }
+{yylval.translation = yytext; return TK_OP_LOGIC_NOT; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 108 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_AND; }
+{yylval.translation = yytext; return TK_OP_BIN_AND; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 109 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_OR; }
+{yylval.translation = yytext; return TK_OP_BIN_OR; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 110 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_XOR; }
+{yylval.translation = yytext; return TK_OP_BIN_XOR; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 111 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_NOT; }
+{yylval.translation = yytext; return TK_OP_BIN_NOT; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 112 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_SHIFTR; }
+{yylval.translation = yytext; return TK_OP_BIN_SHIFTR; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 113 "lexica.l"
-{yylval.traduction = yytext; return TK_OP_BIN_SHIFTL; }
+{yylval.translation = yytext; return TK_OP_BIN_SHIFTL; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
@@ -1024,98 +1024,98 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 #line 118 "lexica.l"
-{ yylval.traduction = yytext; return TK_INT; }
+{ yylval.translation = yytext; return TK_INT; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 119 "lexica.l"
-{ yylval.traduction = yytext; return TK_FLOAT; }
+{ yylval.translation = yytext; return TK_FLOAT; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 120 "lexica.l"
-{ yylval.traduction = yytext; return TK_SCIENTIFIC; }
+{ yylval.translation = yytext; return TK_SCIENTIFIC; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 121 "lexica.l"
-{ yylval.traduction = yytext; return TK_CHAR; }
+{ yylval.translation = yytext; return TK_CHAR; }
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
 #line 122 "lexica.l"
-{ yylval.traduction = yytext; return TK_STRING; }
+{ yylval.translation = yytext; return TK_STRING; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 123 "lexica.l"
-{ yylval.traduction = yytext; return TK_BOOL; }
+{ yylval.translation = yytext; return TK_BOOL; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 125 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_CHAR; }
+{ yylval.translation = yytext; return TK_TYPE_CHAR; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 126 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_STRING; }
+{ yylval.translation = yytext; return TK_TYPE_STRING; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 127 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_INT; }
+{ yylval.translation = yytext; return TK_TYPE_INT; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 128 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_VOID; }
+{ yylval.translation = yytext; return TK_TYPE_VOID; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 #line 129 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_FLOAT; }
+{ yylval.translation = yytext; return TK_TYPE_FLOAT; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 #line 130 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_DOUBLE; }
+{ yylval.translation = yytext; return TK_TYPE_DOUBLE; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 #line 131 "lexica.l"
-{ yylval.traduction = yytext; return TK_TYPE_BOOL; }
+{ yylval.translation = yytext; return TK_TYPE_BOOL; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 #line 133 "lexica.l"
-{ yylval.traduction = yytext; return TK_MODIFIER_UNSIGNED; }
+{ yylval.translation = yytext; return TK_MODIFIER_UNSIGNED; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
 #line 134 "lexica.l"
-{ yylval.traduction = yytext; return TK_MODIFIER_SIGNED; }
+{ yylval.translation = yytext; return TK_MODIFIER_SIGNED; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 135 "lexica.l"
-{ yylval.traduction = yytext; return TK_MODIFIER_SHORT; }
+{ yylval.translation = yytext; return TK_MODIFIER_SHORT; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 136 "lexica.l"
-{ yylval.traduction = yytext; return TK_MODIFIER_LONG; }
+{ yylval.translation = yytext; return TK_MODIFIER_LONG; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
 #line 138 "lexica.l"
-{ yylval.traduction = yytext; return TK_RETURN; }
+{ yylval.translation = yytext; return TK_RETURN; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
 #line 140 "lexica.l"
-{ yylval.traduction = yytext; return TK_COUT; }
+{ yylval.translation = yytext; return TK_COUT; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
