@@ -978,8 +978,6 @@ void declare(string label, string dIType, unsigned int size)
 		finalType = "char";
 
 	 declarationsMap->insert(declarations_map::value_type(label, {finalType, size}));
-
-	cout << "// size(declarationsMap): " << declarationsMap->size() << endl;
 	 //(*declarationsMap)[label] = {finalType, size};
 } 
 

@@ -185,9 +185,6 @@ BEGIN_SCOPE		: '{'
 
 END_SCOPE		: '}'
 			{
-				identifiers_map *IDMap = stackIDMap.front();
-				declarations_map *declarationsMap = stackDeclarationsMap.front();					
-
 				$$.translation = $1.translation;
 			}
 			;
