@@ -132,15 +132,12 @@ void loadOpearationsMap(void);
 
 BEGIN                 	: START DECLARATIONS MAIN SCOPE
 			{
-
 				if(!error)
 				{
 					cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
-					closeCurrentScope();
 				}
 				else
 				{
-					closeCurrentScope();
 					exit(1);
 				}
 			}
@@ -168,7 +165,7 @@ MAIN			: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')'
 
 SCOPE			: BEGIN_SCOPE COMMANDS END_SCOPE
 			{
-				$$.translation +=  $1.translation + $2.translation + $3.translation;
+				$$.translation =  $1.translation + $2.translation + $3.translation;
 			}
 			;
 
@@ -753,15 +750,17 @@ TERMINAL        :       TK_INT
                         }
                         | TK_ID
                         {
-                               	identifiers_map* IDMap = stackIDMap.front();
+                               	id_struct* id;
 			
-				if(findID($1.label) == NULL)       
+				if((id = findID($1.label)) == NULL)       
                                         yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
-
-                                $$.label = (*IDMap)[$1.label].label;
-                                $$.type = (*IDMap)[$1.label].type;
-                                $$.modifier = (*IDMap)[$1.label].modifier;
-                                $$.translation = "";
+				else
+				{
+		                        $$.label = id->label;
+		                        $$.type = id->type;
+		                        $$.modifier = id->modifier;
+		                        $$.translation = "";
+				}
                         }
                         ;
 
@@ -978,7 +977,6 @@ void declare(string label, string dIType, unsigned int size)
 		finalType = "char";
 
 	 declarationsMap->insert(declarations_map::value_type(label, {finalType, size}));
-	 //(*declarationsMap)[label] = {finalType, size};
 } 
 
 string getDeclarations()

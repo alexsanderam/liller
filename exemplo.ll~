@@ -1,4 +1,4 @@
-int k = 150;
+int k = 150 + 1;
 
 int main()
 {	
@@ -9,17 +9,25 @@ int main()
 
 	int j;
 
+	cout(k);
 	{
 		int k = 20;		
 		j = 10;
+		cout(k);
 	}
 
-	//k;
+	cout(k);
+	k = 333333;// * k;
+
+	j = k + j;
+	cout(k);
 	
 	{
 
 		int z = 100;
 	}
+
+	//z;
 
 	return 0;
 }
