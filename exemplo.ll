@@ -27,7 +27,7 @@ int main()
 		int z = 100;
 	}
 
-	z;
+	//z;
 
 	return 0;
 }

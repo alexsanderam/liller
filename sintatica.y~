@@ -193,6 +193,10 @@ COMMANDS        : 	COMMAND COMMANDS
                         {
                                 $$.translation = $1.translation + "\n" + $2.translation;
                         }
+			| SCOPE COMMANDS
+			{
+				$$.translation = $1.translation + $2.translation;
+			}
                         |
                         {
                                 $$.translation = "";
@@ -209,7 +213,6 @@ COMMAND         	: E ';'
 			| RETURN ';'  
 			| COUT ';'
                         | DECLARATION ';'
-			| SCOPE
                         ;
 
 
