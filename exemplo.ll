@@ -1,3 +1,5 @@
+int k = 150 + 1;
+
 int main()
 {	
 	
@@ -12,7 +14,12 @@ int main()
 		j = 10;
 	}
 
-	k;
+	//k;
+	
+	{
+
+		int z = 100;
+	}
 
 	return 0;
 }

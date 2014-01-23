@@ -1,20 +1,44 @@
-// size(declarationsMap): 1
-// size(declarationsMap): 1
-// size(declarationsMap)<out>: 1
-// size(declarationsMap): 2
-// size(declarationsMap): 3
-// size(declarationsMap)<out>: 3
+/*Compiler prescot-liller*/
+
+#include <iostream>
+#include<string.h>
+#include<stdio.h>
+
+using namespace std;
+
+int main()
+{
+	int _temp0;
+	int _temp1;
+	int _temp2;
+	int _temp3;
+	int _temp5;
+	int _temp6;
+	int _temp7;
+	int _temp8;
+	int _temp9;
+	int _temp10;
+	int _temp4;
+
+	_temp0 = 150;
+	_temp1 = 1;
+	_temp2 = _temp0 + _temp1;
+	_temp3 = _temp2;
 
 
-//size(pilha de ids):3
-//size(mapa de ids atual):1
-//size(pilha de declarações):3
-//size(mapa de declarações atual):3
-// size(declarationsMap): 2
-// size(declarationsMap)<out>: 2
+	_temp5 = 20;
+	_temp6 = _temp5;
+
+	_temp7 = 10;
+	_temp4 = _temp7;
 
 
-//size(pilha de ids):2
-//size(mapa de ids atual):2
-//size(pilha de declarações):2
-//size(mapa de declarações atual):2
+	_temp8 = 100;
+	_temp9 = _temp8;
+
+
+	_temp10 = 0;
+
+	return _temp10;
+}
+

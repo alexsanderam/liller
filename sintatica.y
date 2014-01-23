@@ -63,10 +63,12 @@ map<string, variable_declaratino_struct> declarationsMap;*/
 
 map<operation_struct, string> operationsMap;
 
-string voidStr = "";
+const string voidStr = "";
 
 bool error = false;
 bool warning = false;
+
+string declarations = "";
 
 /*controle para alertar a recursão de operações relacionais*/
 unsigned int relationalCounter = 0;
@@ -128,12 +130,12 @@ void loadOpearationsMap(void);
 
 %%
 
-BEGIN                 	: START MAIN
+BEGIN                 	: START DECLARATIONS MAIN SCOPE
 			{
 
 				if(!error)
 				{
-					cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + getDeclarations() + "\n" + $2.translation + "\n" << endl;
+					cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
 					closeCurrentScope();
 				}
 				else
@@ -152,23 +154,21 @@ START			:
 			;
 
 
-MAIN			: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
+MAIN			: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')'
                         {
-                               $$.translation = "int main(void)" + $6.translation;
+                               $$.translation = "int main(void)\n";
 
                         }
-			| TK_TYPE_INT TK_MAIN '(' ')' SCOPE
+			| TK_TYPE_INT TK_MAIN '(' ')'
                         {
-                               $$.translation = "int main()" + $5.translation;
+                               $$.translation = "int main()\n";
                         }
                         ;
 
 
-
 SCOPE			: BEGIN_SCOPE COMMANDS END_SCOPE
 			{
-				$$.translation = "\n{\n" + getDeclarations() + "\n" + $2.translation + "\n }";
-				closeCurrentScope(); /*desempilha*/
+				$$.translation +=  $1.translation + $2.translation + $3.translation;
 			}
 			;
 
@@ -177,7 +177,7 @@ SCOPE			: BEGIN_SCOPE COMMANDS END_SCOPE
 BEGIN_SCOPE		: '{'
 			{
 				openNewScope();			
-				$$.translation = $1.translation;
+				$$.translation = "";
 			}
 			;
 			
@@ -185,7 +185,9 @@ BEGIN_SCOPE		: '{'
 
 END_SCOPE		: '}'
 			{
-				$$.translation = $1.translation;
+				declarations += getDeclarations();
+				closeCurrentScope(); /*desempilha*/				
+				$$.translation = "";
 			}
 			;
 
@@ -367,9 +369,10 @@ COUT			: TK_COUT '(' E ')'
 
 
 
-/*DECLARATIONS		: DECLARATION ';' DECLARATIONS
+DECLARATIONS		: DECLARATIONS DECLARATION ';' 
 			{
 				$$.translation = $1.translation + $2.translation;
+				declarations += getDeclarations();
 			}
 			|
 			{
@@ -377,7 +380,7 @@ COUT			: TK_COUT '(' E ')'
 			}
 			;
 
-*/
+
 
 DECLARATION        : DECLARATION ',' TK_ID
                         {
