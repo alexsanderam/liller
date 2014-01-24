@@ -1,33 +1,20 @@
-int k = 150 + 1;
+//int k = 150 + 1;
 
 int main()
 {	
+	int i = 0;
+
+
+		//6
+	int j = 1 + 2 + i++ + 3;
+	cout(j);
 	
-	//1 <= 2 < 3;
-	//int i = 50;
-	//1 < 2;
+	cout(i);
 
-	int j;
-
-	cout(k);
-	{
-		int k = 20;		
-		j = 10;
-		cout(k);
-	}
-
-	cout(k);
-	k = 333333;// * k;
-
-	j = k + j;
-	cout(k);
-	
-	{
-
-		int z = 100;
-	}
-
-	//z;
+	i = 0;
+		//7
+	int z = 1 + 2 + ++i + 3;
+	cout(z);
 
 	return 0;
 }

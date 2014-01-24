@@ -80,7 +80,24 @@
      TK_OP_BIN_SHIFTL = 298,
      TK_ASSIGN = 299,
      TK_RETURN = 300,
-     TK_COUT = 301
+     TK_COUT = 301,
+     TK_IF = 302,
+     TK_ELSE = 303,
+     TK_SWITCH = 304,
+     TK_CASE = 305,
+     TK_FOR = 306,
+     TK_EACH = 307,
+     TK_WHILE = 308,
+     TK_BREAK = 309,
+     TK_CONTINUE = 310,
+     TK_GOTO = 311,
+     TK_OP_INCREASE = 312,
+     TK_OP_LESS_LESS = 313,
+     TK_OP_SUM_ASSIGN = 314,
+     TK_OP_LESS_ASSIGN = 315,
+     TK_OP_MUL_ASSIGN = 316,
+     TK_OP_DIV_ASSIGN = 317,
+     TK_OP_MOD_ASSIGN = 318
    };
 #endif
 /* Tokens.  */
@@ -128,6 +145,23 @@
 #define TK_ASSIGN 299
 #define TK_RETURN 300
 #define TK_COUT 301
+#define TK_IF 302
+#define TK_ELSE 303
+#define TK_SWITCH 304
+#define TK_CASE 305
+#define TK_FOR 306
+#define TK_EACH 307
+#define TK_WHILE 308
+#define TK_BREAK 309
+#define TK_CONTINUE 310
+#define TK_GOTO 311
+#define TK_OP_INCREASE 312
+#define TK_OP_LESS_LESS 313
+#define TK_OP_SUM_ASSIGN 314
+#define TK_OP_LESS_ASSIGN 315
+#define TK_OP_MUL_ASSIGN 316
+#define TK_OP_DIV_ASSIGN 317
+#define TK_OP_MOD_ASSIGN 318
 
 
 

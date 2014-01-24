@@ -47,7 +47,6 @@ typedef struct opStruct
 typedef struct
 {
         string dIType; /*tipo com modificador das variáveis intermediárias*/
-        //string label;
 	unsigned int size; /*nos casos de string*/
 } variable_declarations_struct;
 
@@ -58,8 +57,6 @@ typedef map<string, variable_declarations_struct> declarations_map;
 list<identifiers_map*> stackIDMap;
 list<declarations_map*> stackDeclarationsMap;
 
-/*map<string, id_struct> IDMap;
-map<string, variable_declaratino_struct> declarationsMap;*/
 
 map<operation_struct, string> operationsMap;
 
@@ -74,14 +71,20 @@ string declarations = "";
 unsigned int relationalCounter = 0;
 
 
+/*variáveis auxiliares para o controle da tradução do incremento/decremento*/
+string auxIncreaseTranslation = "";
+bool flagIncreaseTranslation = false;
+
+
 int yylex(void);
 void yyerror(string);
 void yywarning(string);
 
 void openNewScope();
 void closeCurrentScope();
-YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, YYSTYPE);
+YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
+YYSTYPE generateIntValue(int);
 string generateID();
 void relationalControl(YYSTYPE);
 id_struct* findID(string);
@@ -105,16 +108,23 @@ void loadOpearationsMap(void);
 %token TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER TK_OP_REL_EQ TK_OP_REL_DIFF
 %token TK_OP_LOGIC_AND TK_OP_LOGIC_OR TK_OP_LOGIC_NOT
 %token TK_OP_BIN_AND TK_OP_BIN_OR TK_OP_BIN_XOR TK_OP_BIN_NOT TK_OP_BIN_SHIFTR TK_OP_BIN_SHIFTL
-
 %token TK_ASSIGN
 %token TK_RETURN
 %token TK_COUT
-
+%token TK_IF TK_ELSE
+%token TK_SWITCH TK_CASE
+%token TK_FOR TK_EACH TK_WHILE
+%token TK_BREAK TK_CONTINUE
+%token TK_GOTO
+%token TK_OP_INCREASE TK_OP_LESS_LESS 
+%token TK_OP_SUM_ASSIGN TK_OP_LESS_ASSIGN TK_OP_MUL_ASSIGN TK_OP_DIV_ASSIGN TK_OP_MOD_ASSIGN
 
 
 %start BEGIN
 
 %nonassoc TK_ASSIGN
+%left TK_OP_INCREASE TK_OP_LESS_LESS 
+%nonassoc TK_OP_SUM_ASSIGN TK_OP_LESS_ASSIGN TK_OP_MUL_ASSIGN TK_OP_DIV_ASSIGN TK_OP_MOD_ASSIGN
 %left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
 %left TK_OP_REL_EQ TK_OP_REL_DIFF
 %left TK_OP_REL_LESS TK_OP_REL_GREATER TK_OP_REL_EQLESS TK_OP_REL_EQGREATER
@@ -126,20 +136,17 @@ void loadOpearationsMap(void);
 %left TK_OP_MOD
 %left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
-
+%nonassoc TK_IF
+%nonassoc TK_ELSE
 
 %%
 
 BEGIN                 	: START DECLARATIONS MAIN SCOPE
 			{
 				if(!error)
-				{
 					cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
-				}
 				else
-				{
 					exit(1);
-				}
 			}
 			;
 
@@ -189,30 +196,41 @@ END_SCOPE		: '}'
 			;
 
 
-COMMANDS        : 	COMMAND COMMANDS
+COMMANDS        : 	CONTROL_COMMAND COMMANDS
                         {
                                 $$.translation = $1.translation + "\n" + $2.translation;
                         }
-			| SCOPE COMMANDS
-			{
-				$$.translation = $1.translation + $2.translation;
-			}
-                        |
+                        | 
                         {
                                 $$.translation = "";
                         }
 			;
 
 
+CONTROL_COMMAND		: COMMAND
+			{
+				/*controle da tradução do incremento/decremento*/
+				if(flagIncreaseTranslation)
+				{
+					$$.translation += auxIncreaseTranslation;
+					flagIncreaseTranslation = false;
+					auxIncreaseTranslation = "";
+				}
+			}
+			;
+
 
 COMMAND         	: E ';'
 			{
 				$$.translation = $1.translation;
-				relationalCounter = 0; /*controle para alertar a recursão de operações relacionais*/
+
+				/*controle para alertar a recursão de operações relacionais*/
+				relationalCounter = 0;			
 			}
 			| RETURN ';'  
 			| COUT ';'
                         | DECLARATION ';'
+			| SCOPE
                         ;
 
 
@@ -221,6 +239,19 @@ RETURN                	: TK_RETURN E
                                 $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
                         }
                         ;
+
+
+
+/*IF			: TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
+			{
+				
+			}
+			| TK_IF '(' E ')' COMMAND
+			{
+				
+			}
+			;
+*/
 
 
 E                       :'(' E ')'
@@ -237,7 +268,7 @@ E                       :'(' E ')'
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
                         }
-			| ATRIBUITION
+			| ATTRIBUITION
 			{
                             	$$.translation = $1.translation;
                                 $$.label = $1.label;
@@ -246,81 +277,81 @@ E                       :'(' E ')'
 			}
 			| E TK_OP_SUM E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
 			| E TK_OP_SUB E
                         {
- 				$$ = runBasicOperation($1, $3, $2);
+ 				$$ = runBasicOperation($1, $3, $2.translation);
                         }
 			| E TK_OP_MUL E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
 			| E TK_OP_DIV E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_MOD E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_LOGIC_OR E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_LOGIC_AND E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQ E
                         {
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_DIFF E
                         {
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_LESS E
                         {				
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_GREATER E
                         {
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQLESS E
                         {
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQGREATER E
                         {
 				relationalControl($2);
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_AND E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_OR E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_XOR E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_SHIFTR E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_SHIFTL E
                         {
-				$$ = runBasicOperation($1, $3, $2);
+				$$ = runBasicOperation($1, $3, $2.translation);
                         }
 			| TK_OP_LOGIC_NOT E
 			{
@@ -346,12 +377,107 @@ E                       :'(' E ')'
 
                                 declare($$.label, $$.type, 1);
 			}
+			| INCREASE
+			{
+                               	$$.translation = $1.translation;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
+			| PREV_INCREASE
+			{
+                               	$$.translation = $1.translation;
+                                $$.label = $1.label;
+                                $$.type = $1.type;
+                                $$.modifier = $1.modifier;
+			}
 			;
 
 
 
+INCREASE		: TK_ID TK_OP_INCREASE
+			{
+			       	id_struct* id;
+				string operation;
 
-ATRIBUITION        : TK_ID TK_ASSIGN E
+				YYSTYPE ass;
+				YYSTYPE op;
+				YYSTYPE op_id;
+				YYSTYPE value;
+			
+				if((id = findID($1.label)) == NULL)       
+                                        yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
+				else
+				{
+					$1.translation = "";
+					$1.type = id->type;
+					$1.modifier = id->modifier;
+
+					$$.translation = $1.translation;
+					$$.label = id->label;
+					$$.type = $1.type;
+					$$.modifier = $1.modifier;
+				
+					/*Realiza as operações referentes ao incremento*/
+
+					op_id = $1;
+					op_id.label = id->label;
+
+					value = generateIntValue(1);
+
+					operation = ($2.translation == "++" ? "+" : "-");
+	
+					op = runBasicOperation(op_id, value, operation);
+					ass = assigns(voidStr, $1, op);
+
+					auxIncreaseTranslation = ass.translation;
+					flagIncreaseTranslation = true;
+				}
+			}
+			;
+
+
+PREV_INCREASE		: TK_OP_INCREASE TK_ID
+			{
+				id_struct* id;
+				string operation;
+
+				YYSTYPE ass;
+				YYSTYPE op;
+				YYSTYPE op_id;
+				YYSTYPE value;
+			
+				if((id = findID($2.label)) == NULL)       
+                                        yyerror("identifier: '" + $2.label + "'  was not declared in this scope.");
+				else
+				{
+					$2.translation = "";
+					$2.type = id->type;
+					$2.modifier = id->modifier;
+				
+					/*Realiza as operações referentes ao incremento*/
+
+					op_id = $2;
+					op_id.label = id->label;
+
+					value = generateIntValue(1);
+
+					operation = ($1.translation == "++" ? "+" : "-");
+	
+					op = runBasicOperation(op_id, value, operation);
+					ass = assigns(voidStr, $2, op);
+					
+					$$.translation = ass.translation;
+					$$.label = ass.label;
+					$$.type = ass.type;
+					$$.modifier = ass.modifier;
+				}
+			}
+			;
+
+
+
+ATTRIBUITION        : TK_ID TK_ASSIGN E
                         {
 				if(findID($1.label) == NULL)
 					yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
@@ -411,7 +537,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                         | DECLARATION ',' TK_ID TK_ASSIGN E
                         {
                                 string cast = "";
-                                string atribuition = "";
+                                string ATTRIBUITION = "";
 				
 				 identifiers_map* IDMap = stackIDMap.front();
 
@@ -484,6 +610,7 @@ DECLARATION        : DECLARATION ',' TK_ID
 
                         }
                         ;
+
 
                         
 TYPE                	: TK_TYPE_CHAR
@@ -650,7 +777,6 @@ TERMINAL        :       TK_INT
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
 
 				declare($$.label, $$.type, 1);
-				declarations_map declarationsMap = *stackDeclarationsMap.front();
                         }
                         | TK_FLOAT
                         {
@@ -765,6 +891,20 @@ TERMINAL        :       TK_INT
 		                        $$.translation = "";
 				}
                         }
+	                | SIGNAL TK_ID
+                        {
+                               	id_struct* id;
+			
+				if((id = findID($2.label)) == NULL)       
+                                        yyerror("identifier: '" + $2.label + "'  was not declared in this scope.");
+				else
+				{
+		                        $$.label = id->label;
+		                        $$.type = id->type;
+		                        $$.modifier = id->modifier;
+		                        $$.translation = $1.translation;
+				}
+                        }
                         ;
 
 
@@ -843,7 +983,7 @@ void relationalControl(YYSTYPE operation)
 			
 }
 
-YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
+YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 {
 	YYSTYPE* res;
 
@@ -858,7 +998,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
 
         res->translation = operand1.translation + operand2.translation;
 
-        resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation.translation);
+        resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation);
 
         /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
          mais genérico possível, ou seja, desconsiderando-se os modificadores. Tais serão considerados apenas
@@ -871,7 +1011,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
 
         if((operand1.modifier == operand2.modifier) && (operand1.type == operand2.type))
         {
-                res->translation += "\t" + res->label + " = " + operand1.label + " " + operation.translation + " " + operand2.label + ";\n";
+                res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + operand2.label + ";\n";
         }
         else
         {
@@ -887,7 +1027,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
                         strongOperatingLabel = operand1.label;
 
                         res->translation += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                        res->translation += "\t" + res->label + " = " + strongOperatingLabel + " " + operation.translation + " " + keyOperating->label + ";\n";
+                        res->translation += "\t" + res->label + " = " + strongOperatingLabel + " " + operation + " " + keyOperating->label + ";\n";
                 }
                 else
                 {
@@ -895,7 +1035,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, YYSTYPE operation)
                         strongOperatingLabel = operand2.label;
 
                         res->translation += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                        res->translation += "\t" + res->label + " = " + keyOperating->label + " " + operation.translation + " " + strongOperatingLabel + ";\n";
+                        res->translation += "\t" + res->label + " = " + keyOperating->label + " " + operation + " " + strongOperatingLabel + ";\n";
                 }
 
 
@@ -941,6 +1081,9 @@ YYSTYPE assigns(string addtranslation, YYSTYPE id, YYSTYPE exp)
 
 	id_struct* identifier = findID(id.label);
 
+	if(identifier == NULL)
+		yyerror("identifier: '" + id.label + "'  was not declared in this scope.");
+
         if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
         {
                 //aqui deve-se verificar quais casts são possíveis
@@ -957,6 +1100,23 @@ YYSTYPE assigns(string addtranslation, YYSTYPE id, YYSTYPE exp)
 
 	return *res;
 
+}
+
+YYSTYPE generateIntValue(int value)
+{
+	YYSTYPE* valueTkn = new YYSTYPE;
+	stringstream valueString;
+
+	valueString << value;
+
+	valueTkn->label = generateID();
+	valueTkn->translation = "\t" + valueTkn->label + " = " + valueString.str() + ";\n";
+        valueTkn->type = "int";
+        valueTkn->modifier = "";
+
+	declare(valueTkn->label, valueTkn->type, 1);
+	
+	return *valueTkn;
 }
 
 string generateID()
