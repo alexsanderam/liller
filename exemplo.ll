@@ -1,27 +1,15 @@
 
 int main()
 {	
-	int i = 1;
-	int j = 0;
+	int i = 10;
 
-	if(i < 2)
+	while(i > 0)
 	{
-		j+= 2;
-		cout("Entrou no If(1)");
-		
-		if(j > 3)
-			cout("Entrou no If(1.2)");
-		else
-			cout("Entrou no Else(1.2)");
+		cout(i);
+		i--;
 	}
-	else if (i == 2)
-		cout("Entrou no ElseIf(1.1)");
-	else
-		cout("Entrou no Else(1)");
 
-	
-	if(i != 3)
-		cout("Entrou no If(2), pois i == 3");
+	cout("Fim do While");
 
 	return 0;
 }

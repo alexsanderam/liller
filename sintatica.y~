@@ -236,7 +236,11 @@ COMMAND         	: E ';'
                         | DECLARATION ';'
 			| SCOPE
 			| IF
+			| WHILE
 			| ';'
+			{
+				$$.translation = "";
+			}
                         ;
 
 
@@ -281,6 +285,25 @@ IF			: TK_IF '(' E ')' COMMAND %prec IFX
 				$$.translation += "\t" + labelEndIF + ":\n"; /*tradução: labelEndId:*/
 			}
 			;
+
+
+WHILE			: TK_WHILE '(' E ')' COMMAND
+			{
+				YYSTYPE notE;
+				string labelBeginWhile = generateLabel();
+				string labelEndWhile = generateLabel();
+	
+				notE = assignNotExpression($3);
+
+				$$.translation += "\t" + labelBeginWhile + ":\n"; /*tradução: labelEndIF:*/
+				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
+				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t\tgoto " + labelEndWhile + ";\n\n"; /*tradução: goto labelEndIf*/
+				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += "\t\tgoto " + labelBeginWhile + ";\n"; /*tradução: goto labelEndIf*/
+				$$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndIF:*/
+			}
 
 
 
