@@ -8,82 +8,50 @@ using namespace std;
 
 int main()
 {
+	int _temp5;
+	int _temp6;
+	string _temp7;
 	int _temp0;
 	int _temp1;
 	int _temp10;
-	int _temp11;
-	int _temp12;
-	int _temp13;
-	int _temp14;
-	int _temp15;
-	int _temp16;
-	int _temp17;
-	int _temp18;
-	int _temp19;
 	int _temp2;
-	int _temp20;
-	int _temp21;
-	int _temp22;
 	int _temp3;
 	int _temp4;
-	int _temp5;
-	int _temp6;
-	int _temp7;
-	int _temp8;
+	string _temp8;
 	int _temp9;
 
 
 	_temp0 = 1;
 	_temp1 = _temp0;
 
-	_temp2 = 20;
-	_temp3 = _temp2;
 
-	_temp4 = 20;
-	_temp5 = 1;
-	_temp6 = _temp4 + _temp5;
-	_temp7 = _temp6 + _temp3;
-	_temp8 = _temp1 + _temp7;
-	_temp1 = _temp8;
+	_temp3 = 2;
+	_temp4 = _temp1 < _temp3;
+	_temp9 = !_temp4;
 
+	if(_temp9)
+		goto _tempLabel0;
 
-	cout << _temp1 << endl;
+	_temp5 = 2;
+	_temp6 = _temp2 + _temp5;
+	_temp2 = _temp6;
 
-	_temp9 = 20;
-	_temp10 = 1;
-	_temp11 = _temp9 + _temp10;
-	_temp12 = _temp11 + _temp3;
-	_temp13 = _temp1 - _temp12;
-	_temp1 = _temp13;
+	_temp7 = "Entrou no If";
+
+	cout << _temp7 << endl;
 
 
-	cout << _temp1 << endl;
+		goto _tempLabel1;
 
-	_temp14 = 2;
-	_temp15 = _temp1 - _temp14;
-	_temp1 = _temp15;
+	_tempLabel0:
+	_temp8 = "Entrou no Else";
 
+	cout << _temp8 << endl;
 
-	cout << _temp1 << endl;
+	_tempLabel1:
 
-	_temp16 = -1;
-	_temp17 = _temp1 * _temp16;
-	_temp1 = _temp17;
+	_temp10 = 0;
 
-
-	cout << _temp1 << endl;
-
-	_temp18 = 1;
-	_temp19 = 2;
-	_temp20 = _temp18 / _temp19;
-	_temp21 = _temp1 / _temp20;
-	_temp1 = _temp21;
-
-
-	cout << _temp1 << endl;
-
-	_temp22 = 0;
-
-	return _temp22;
+	return _temp10;
 }
 

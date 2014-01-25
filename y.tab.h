@@ -94,7 +94,9 @@
      TK_GOTO = 312,
      TK_OP_INCREASE = 313,
      TK_OP_LESS_LESS = 314,
-     TK_OP_ASSIGN = 315
+     TK_OP_ASSIGN = 315,
+     IFX = 316,
+     ELSE = 317
    };
 #endif
 /* Tokens.  */
@@ -156,6 +158,8 @@
 #define TK_OP_INCREASE 313
 #define TK_OP_LESS_LESS 314
 #define TK_OP_ASSIGN 315
+#define IFX 316
+#define ELSE 317
 
 
 

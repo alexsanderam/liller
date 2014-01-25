@@ -89,9 +89,11 @@ void closeCurrentScope();
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE runCast(YYSTYPE, YYSTYPE);
 bool verifyCast(string, string);
-YYSTYPE assigns(string, YYSTYPE, YYSTYPE);
+YYSTYPE assign(string, YYSTYPE, YYSTYPE);
+YYSTYPE assignNotExpression(YYSTYPE);
 YYSTYPE generateIntValue(int);
 string generateID();
+string generateLabel();
 void relationalControl(YYSTYPE);
 id_struct* findID(string);
 bool isDeclaredCurrentScope(string label);
@@ -129,8 +131,6 @@ void loadOpearationsMap(void);
 %start BEGIN
 
 %nonassoc TK_ASSIGN
-%left TK_IF
-%left TK_ELSE
 %nonassoc TK_OP_ASSIGN
 %left TK_OP_INCREASE TK_OP_LESS_LESS 
 %left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
@@ -144,6 +144,8 @@ void loadOpearationsMap(void);
 %left TK_OP_MOD
 %left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
+%nonassoc IFX
+%nonassoc ELSE
 %%
 
 BEGIN                 	: START DECLARATIONS MAIN SCOPE
@@ -249,13 +251,37 @@ RETURN                	: TK_RETURN E
 
 
 
-IF			: TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
+IF			: TK_IF '(' E ')' COMMAND %prec IFX
 			{
-				$$.translation = $3.translation + "\n\t" + $1.translation + "(" + $3.label + ")\n" + $5.translation + "\n" + $6.translation+ "\n" + $7.translation;	
+				YYSTYPE notE;
+				string labelEndIF = generateLabel();
+	
+				notE = assignNotExpression($3);
+
+				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
+				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t\tgoto " + labelEndIF + ";\n\n"; /*tradução: goto labelEndIf*/
+				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += "\t" + labelEndIF + ":\n"; /*tradução: labelEndIF:*/
 			}
-			| TK_IF '(' E ')' COMMAND
+			| TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
 			{
-				
+				YYSTYPE notE;
+				string labelEndCmd1 = generateLabel();
+				string labelEndIF = generateLabel();
+	
+				notE = assignNotExpression($3);
+
+				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
+				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t\tgoto " + labelEndCmd1 + ";\n\n"; /*tradução: goto labelCmd1*/
+				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += "\t\tgoto " + labelEndIF + ";\n\n"; /*tradução: goto labelEndIf*/
+				$$.translation += "\t" + labelEndCmd1 + ":\n"; /*tradução: labelEndCmd1:*/
+				$$.translation += $7.translation + "\n"; /*tradução: COMMAND (2)*/
+				$$.translation += "\t" + labelEndId + ":\n"; /*tradução: labelEndId:*/
 			}
 			;
 
@@ -439,7 +465,7 @@ INCREASE		: TK_ID TK_OP_INCREASE
 					operation = ($2.translation == "++" ? "+" : "-");
 	
 					op = runBasicOperation(op_id, value, operation);
-					ass = assigns(voidStr, $1, op);
+					ass = assign(voidStr, $1, op);
 
 					auxIncreaseTranslation = ass.translation;
 					flagIncreaseTranslation = true;
@@ -476,7 +502,7 @@ PREV_INCREASE		: TK_OP_INCREASE TK_ID
 					operation = ($1.translation == "++" ? "+" : "-");
 	
 					op = runBasicOperation(op_id, value, operation);
-					ass = assigns(voidStr, $2, op);
+					ass = assign(voidStr, $2, op);
 					
 					$$.translation = ass.translation;
 					$$.label = ass.label;
@@ -494,7 +520,7 @@ ATTRIBUITION        : TK_ID TK_ASSIGN E
 				if(findID($1.label) == NULL)
 					yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
 				else
-					$$ = assigns(voidStr, $1, $3);
+					$$ = assign(voidStr, $1, $3);
                         }
 			| OP_ASSIGN
 			{
@@ -542,7 +568,7 @@ OP_ASSIGN		: TK_ID TK_OP_ASSIGN E
 					
 
 					op = runBasicOperation(op_id, $3, operation);
-					ass = assigns(voidStr, $1, op);
+					ass = assign(voidStr, $1, op);
 
 					$$.translation = ass.translation;
 					$$.label = ass.label;
@@ -618,7 +644,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         yyerror("identifier: '" + $3.label + "'  previously declared here.");
 			
 
-				$$ = assigns($1.translation, $3, $5);
+				$$ = assign($1.translation, $3, $5);
 
 				if ($$.modifier != "")
 					declare($$.label, $$.modifier + " " + $$.type, 1);
@@ -667,7 +693,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
-				$$ = assigns(voidStr, $2, $4);
+				$$ = assign(voidStr, $2, $4);
 
 
 				if ($$.modifier != "")
@@ -1046,8 +1072,6 @@ void relationalControl(YYSTYPE operation)
 		lastOp = operation.translation;
 
 	relationalCounter++;
-
-			
 }
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
@@ -1214,7 +1238,7 @@ bool isDeclaredCurrentScope(string label)
 		return true;	
 }
 
-YYSTYPE assigns(string addtranslation, YYSTYPE id, YYSTYPE exp)
+YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res;	
 	res = new YYSTYPE();
@@ -1241,6 +1265,25 @@ YYSTYPE assigns(string addtranslation, YYSTYPE id, YYSTYPE exp)
 
 	return *res;
 
+}
+
+
+YYSTYPE assignNotExpression(YYSTYPE expr)
+{
+	YYSTYPE* res = new YYSTYPE();
+	string modifier = expr.modifier;
+
+	res->label = generateID();
+	res->type = expr.type;
+	res->modifier = expr.modifier;
+	res->translation = "\t" + res->label + " = !" + expr.label + ";\n";
+
+	if(modifier != "")
+		modifier += " ";
+
+	declare(res->label, modifier + res->type, 1);
+
+	return *res;
 }
 
 YYSTYPE generateIntValue(int value)
@@ -1270,6 +1313,16 @@ string generateID()
         return label.str();
 }          
 
+string generateLabel()
+{
+        static int counterL = 0;
+        stringstream label;
+
+        label << "_tempLabel" << counterL++;
+
+        return label.str();
+}   
+
 
 void declare(string label, string dIType, unsigned int size)
 {
@@ -1278,7 +1331,7 @@ void declare(string label, string dIType, unsigned int size)
 	declarations_map* declarationsMap = stackDeclarationsMap.front();
 
 	if (dIType == "string")
-		finalType = "char";
+		finalType = "string"; //tem que mudar para char ainda
 
 	 declarationsMap->insert(declarations_map::value_type(label, {finalType, size}));
 } 
