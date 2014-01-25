@@ -674,7 +674,7 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   151,   151,   162,   168,   173,   180,   188,   197,   206,
-     211,   217,   230,   237,   238,   239,   240,   241,   242,   246,
+     211,   217,   233,   234,   235,   236,   237,   238,   239,   246,
      254,   268,   290,   297,   304,   311,   315,   319,   323,   327,
      331,   335,   339,   343,   348,   353,   358,   363,   368,   373,
      377,   381,   385,   389,   393,   403,   417,   424,   435,   477,
@@ -1861,6 +1861,9 @@ yyreduce:
 /* Line 1806 of yacc.c  */
 #line 218 "sintatica.y"
     {
+				/*controle para alertar a recursão de operações relacionais*/
+				relationalCounter = 0;					
+
 				/*controle da tradução do incremento/decremento*/
 				if(flagIncreaseTranslation)
 				{
@@ -1871,15 +1874,12 @@ yyreduce:
 			}
     break;
 
-  case 12:
+  case 18:
 
 /* Line 1806 of yacc.c  */
-#line 231 "sintatica.y"
+#line 240 "sintatica.y"
     {
-				(yyval).translation = (yyvsp[(1) - (2)]).translation;
-
-				/*controle para alertar a recursão de operações relacionais*/
-				relationalCounter = 0;			
+				(yyval).translation = "";
 			}
     break;
 

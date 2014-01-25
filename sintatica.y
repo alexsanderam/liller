@@ -216,6 +216,9 @@ COMMANDS        : 	CONTROL_COMMAND COMMANDS
 
 CONTROL_COMMAND		: COMMAND
 			{
+				/*controle para alertar a recursão de operações relacionais*/
+				relationalCounter = 0;					
+
 				/*controle da tradução do incremento/decremento*/
 				if(flagIncreaseTranslation)
 				{
@@ -228,18 +231,15 @@ CONTROL_COMMAND		: COMMAND
 
 
 COMMAND         	: E ';'
-			{
-				$$.translation = $1.translation;
-
-				/*controle para alertar a recursão de operações relacionais*/
-				relationalCounter = 0;			
-			}
 			| RETURN ';'  
 			| COUT ';'
                         | DECLARATION ';'
 			| SCOPE
 			| IF
 			| ';'
+			{
+				$$.translation = "";
+			}
                         ;
 
 

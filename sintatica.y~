@@ -216,6 +216,9 @@ COMMANDS        : 	CONTROL_COMMAND COMMANDS
 
 CONTROL_COMMAND		: COMMAND
 			{
+				/*controle para alertar a recursão de operações relacionais*/
+				relationalCounter = 0;					
+
 				/*controle da tradução do incremento/decremento*/
 				if(flagIncreaseTranslation)
 				{
@@ -228,12 +231,6 @@ CONTROL_COMMAND		: COMMAND
 
 
 COMMAND         	: E ';'
-			{
-				$$.translation = $1.translation;
-
-				/*controle para alertar a recursão de operações relacionais*/
-				relationalCounter = 0;			
-			}
 			| RETURN ';'  
 			| COUT ';'
                         | DECLARATION ';'
@@ -281,7 +278,7 @@ IF			: TK_IF '(' E ')' COMMAND %prec IFX
 				$$.translation += "\t\tgoto " + labelEndIF + ";\n\n"; /*tradução: goto labelEndIf*/
 				$$.translation += "\t" + labelEndCmd1 + ":\n"; /*tradução: labelEndCmd1:*/
 				$$.translation += $7.translation + "\n"; /*tradução: COMMAND (2)*/
-				$$.translation += "\t" + labelEndId + ":\n"; /*tradução: labelEndId:*/
+				$$.translation += "\t" + labelEndIF + ":\n"; /*tradução: labelEndId:*/
 			}
 			;
 
