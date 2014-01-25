@@ -129,6 +129,8 @@ void loadOpearationsMap(void);
 %start BEGIN
 
 %nonassoc TK_ASSIGN
+%left TK_IF
+%left TK_ELSE
 %nonassoc TK_OP_ASSIGN
 %left TK_OP_INCREASE TK_OP_LESS_LESS 
 %left TK_OP_LOGIC_OR TK_OP_LOGIC_AND
