@@ -451,6 +451,24 @@ FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL
 
 
 
+SWITCH					: TK_SWITCH '(' E ')' COMMAND
+						{
+
+						}
+						;
+
+
+CASE					: TK_CASE '(' E ')' COMMANDS
+						{
+
+
+						} 
+						;
+
+
+CASE_DEFAULT			: 
+
+
 E                       : '(' E ')'
                         {
                                      $$.translation = $2.translation;
@@ -1170,7 +1188,7 @@ TERMINAL        :       TK_INT
                                         $$.label = id->label;
                                         $$.type = id->type;
                                         $$.modifier = id->modifier;
-                                        $$.translation = $1.translation;
+                                        $$.translation = $1.translation + $$.label;
                                 }
                         }
                         ;
