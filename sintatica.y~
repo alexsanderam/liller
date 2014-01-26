@@ -188,11 +188,14 @@ SCOPE                        : BEGIN_SCOPE COMMANDS END_SCOPE
 
 
 
-BEGIN_SCOPE                : '{'
+BEGIN_SCOPE             : '{'
                         {
                                 openNewScope();                        
                                 $$.translation = "";
-                        }
+
+                                /*controle de declarações, neste caso é permitido realizar declarações*/
+                                flagDeclarationNotAllowed = false;
+                        }	
                         ;
                         
         
@@ -206,7 +209,7 @@ END_SCOPE                : '}'
                         ;
 
 
-COMMANDS        :         COMMAND COMMANDS
+COMMANDS        	: COMMAND COMMANDS
                         {
                                 $$.translation = $1.translation + "\n" + $2.translation;
                         }
@@ -217,7 +220,7 @@ COMMANDS        :         COMMAND COMMANDS
                         ;
 
 
-COMMAND                        : STATEMENT
+COMMAND                 : STATEMENT
                         {
                                 /*controle para alertar a recursão de operações relacionais*/
                                 relationalCounter = 0;                                        
@@ -345,6 +348,8 @@ DO_WHILE                : CNAD TK_DO COMMAND TK_WHILE '(' E ')' ';'
                         }
                         ;
 
+
+
 OPTIONAL_E                : E
                         |
                         ;
@@ -372,38 +377,9 @@ FOR                         :CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIO
                                 $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
 
                         }
-/*
-FOR                        : CNAD TK_FOR '(' ';' ';' ')' COMMAND //loop infinito
-                        {
-                                string labelBeginFor = generateLabel();
-                                string labelEndFor = generateLabel();
-
-                                $$.translation = "\n\t" + labelBeginFor + ":\n"; //tradução: labelBeginFor:
-                                $$.translation += $7.translation; //tradução: COMMAND
-                                $$.translation += "\t\tgoto " + labelBeginFor + ";\n"; //tradução: goto labelBeginWhile
-                        }
-                        | CNAD TK_FOR '(' ATTRIBUITION ';' E ';' E ')' COMMAND
-                        {
-                                YYSTYPE notE;
-                                string labelBeginFor = generateLabel();
-                                string labelEndFor = generateLabel();
-        
-                                notE = assignNotExpression($6);
-
-                                $$.translation = $4.translation; //tradução da atribuição
-                                $$.translation += "\n\t" + labelBeginFor + ":\n"; //tradução: labelBeginFor:
-                                $$.translation += $6.translation; //tradução da expressão E1
-                                $$.translation += notE.translation + "\n"; //atribui a negação da expressão E1
-                                $$.translation += "\tif (" + notE.label + ")\n"; //tradução: if (!E1)
-                                $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; //tradução: goto labelEndFor
-                                $$.translation += $10.translation; //tradução: COMMAND
-                                $$.translation += $8.translation; //tradução: E2
-                                $$.translation += "\t\tgoto " + labelBeginFor + ";\n"; //tradução: goto labelBeginWhile
-                                $$.translation += "\n\t" + labelEndFor + ":\n"; //tradução: labelEndWhile:
 
 
-                        }
-*/
+
                         /*| CNAD TK_FOR '(' ATTRIBUITION ".." TERMINAL ')' COMMAND
                         {
                                 YYSTYPE expr; /*expressão que controla a parada do for*/
@@ -452,6 +428,8 @@ FOR                        : CNAD TK_FOR '(' ';' ';' ')' COMMAND //loop infinito
                         
                         }*/
                         ;
+
+
 
 E                       : '(' E ')'
                         {
@@ -717,7 +695,7 @@ OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
                                         $1.type = id->type;
                                         $1.modifier = id->modifier;
 
-				/*verifica qual operação deve ser realizada*/
+					/*verifica qual operação deve ser realizada*/
 					if ($2.translation == "+=")
 						operation = "+";
 					else if ($2.translation == "-=")
