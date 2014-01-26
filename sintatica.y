@@ -362,6 +362,23 @@ OPTIONAL_E              : E
 
 
 
+ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							| TERMINAL
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							;
+
+
 FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
                         {
                                 YYSTYPE notE;
@@ -432,22 +449,6 @@ FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL
                         }
 						;
 
-
-ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
-							| TERMINAL
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
-							;
 
 
 E                       : '(' E ')'
