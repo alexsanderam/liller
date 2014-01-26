@@ -61,6 +61,12 @@ OpLessAssign "-="
 OpMulAssign "*="
 OpDivAssign "/="
 OpModAssign "%="
+OpLeftAssign "<<="
+OpRightAssign ">>="
+OpAndAssign "&="
+OpOrAssign "|="
+OpXorAssign "^="
+
 
 OpSum [+]
 OpSub [-]
@@ -120,6 +126,12 @@ Assign "="
 {OpMulAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
 {OpDivAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
 {OpModAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpLeftAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpRightAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpAndAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpOrAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpXorAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+
 
 {OpSum}                {yylval.translation = yytext; return TK_OP_SUM; }
 {OpSub}                {yylval.translation = yytext; return TK_OP_SUB; }

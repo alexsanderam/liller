@@ -28,6 +28,7 @@ If "if"
 Else "else"
 For "for"
 Each "each"
+Do "do"
 While "while"
 Break "break"
 Continue "continue"
@@ -60,6 +61,12 @@ OpLessAssign "-="
 OpMulAssign "*="
 OpDivAssign "/="
 OpModAssign "%="
+OpLeftAssign "<<="
+OpRightssign ">>="
+OpAndAssign "&="
+OpOrAssign "|="
+OpXorAssign "^="
+
 
 OpSum [+]
 OpSub [-]
@@ -119,6 +126,12 @@ Assign "="
 {OpMulAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
 {OpDivAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
 {OpModAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpLeftAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpRightAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpAndAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpOrAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+{OpXorAssign}                {yylval.translation = yytext; return TK_OP_ASSIGN; }
+
 
 {OpSum}                {yylval.translation = yytext; return TK_OP_SUM; }
 {OpSub}                {yylval.translation = yytext; return TK_OP_SUB; }
@@ -173,6 +186,7 @@ Assign "="
 {Else}                { yylval.translation = yytext; return TK_ELSE; }
 {For}                { yylval.translation = yytext; return TK_FOR; }
 {Each}                { yylval.translation = yytext; return TK_EACH; }
+{Do}                { yylval.translation = yytext; return TK_DO; }
 {While}                { yylval.translation = yytext; return TK_WHILE; }
 {Break}                { yylval.translation = yytext; return TK_BREAK; }
 {Continue}                { yylval.translation = yytext; return TK_CONTINUE; }
