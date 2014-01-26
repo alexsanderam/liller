@@ -64,6 +64,7 @@ map<operation_struct, string> operationsMap;
 
 const string voidStr = "";
 
+/*declaraçãoes (todas)*/
 string declarations = "";
 
 /*controle de erro ou warning*/
@@ -79,6 +80,8 @@ unsigned int relationalCounter = 0;
 string auxIncreaseTranslation = "";
 bool flagIncreaseTranslation = false;
 
+/*controle de declarações, quando tais não são permititdas (exemplo: if, for, ...)*/
+bool flagDeclarationNotAllowed = false;
 
 int yylex(void);
 void yyerror(string);
@@ -203,7 +206,7 @@ END_SCOPE		: '}'
 			;
 
 
-COMMANDS        : 	CONTROL_COMMAND COMMANDS
+COMMANDS        : 	COMMAND COMMANDS
                         {
                                 $$.translation = $1.translation + "\n" + $2.translation;
                         }
@@ -214,7 +217,7 @@ COMMANDS        : 	CONTROL_COMMAND COMMANDS
 			;
 
 
-CONTROL_COMMAND		: COMMAND
+COMMAND			: STATEMENT
 			{
 				/*controle para alertar a recursão de operações relacionais*/
 				relationalCounter = 0;					
@@ -230,14 +233,23 @@ CONTROL_COMMAND		: COMMAND
 			;
 
 
-COMMAND         	: E ';'
-			| RETURN ';'  
+STATEMENT         	: E ';'
+			| RETURN ';'
 			| COUT ';'
                         | DECLARATION ';'
+			{
+				/*controle de declarações, quando tais não são permititdas (exemplo: if, for, ...)*/
+				if(flagDeclarationNotAllowed)
+				{
+					yyerror("declarations not allowed.");
+					flagDeclarationNotAllowed = false;
+				}
+			}
 			| SCOPE
 			| IF
 			| WHILE
 			| DO_WHILE
+			| FOR
 			| ';'
 			{
 				$$.translation = "";
@@ -253,74 +265,165 @@ RETURN                	: TK_RETURN E
 
 
 
-IF			: TK_IF '(' E ')' COMMAND %prec IFX
+			
+/*CNAD: Commands not allow declarations*/
+CNAD			:
 			{
+				flagDeclarationNotAllowed = true;
+			}
+			;
+
+
+IF			: CNAD TK_IF '(' E ')' COMMAND %prec IFX
+			{				
 				YYSTYPE notE;
 				string labelEndIF = generateLabel();
 	
-				notE = assignNotExpression($3);
+				notE = assignNotExpression($4);
 
-				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation = $4.translation; /*tradução da expressão E*/
 				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
-				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t" + $2.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
 				$$.translation += "\t\tgoto " + labelEndIF + ";\n\n"; /*tradução: goto labelEndIf*/
-				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += $6.translation + "\n"; /*tradução: COMMAND*/
 				$$.translation += "\t" + labelEndIF + ":\n"; /*tradução: labelEndIF:*/
+
 			}
-			| TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
+			| CNAD TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
 			{
 				YYSTYPE notE;
 				string labelEndCmd1 = generateLabel();
 				string labelEndIF = generateLabel();
 	
-				notE = assignNotExpression($3);
+				notE = assignNotExpression($4);
 
-				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation = $4.translation; /*tradução da expressão E*/
 				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
-				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t" + $2.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
 				$$.translation += "\t\tgoto " + labelEndCmd1 + ";\n\n"; /*tradução: goto labelCmd1*/
-				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += $6.translation + "\n"; /*tradução: COMMAND*/
 				$$.translation += "\t\tgoto " + labelEndIF + ";\n\n"; /*tradução: goto labelEndIf*/
 				$$.translation += "\t" + labelEndCmd1 + ":\n"; /*tradução: labelEndCmd1:*/
-				$$.translation += $7.translation + "\n"; /*tradução: COMMAND (2)*/
+				$$.translation += $8.translation + "\n"; /*tradução: COMMAND (2)*/
 				$$.translation += "\t" + labelEndIF + ":\n"; /*tradução: labelEndId:*/
 			}
 			;
 
 
-WHILE			: TK_WHILE '(' E ')' COMMAND
+WHILE			: CNAD TK_WHILE '(' E ')' COMMAND
 			{
 				YYSTYPE notE;
 				string labelBeginWhile = generateLabel();
 				string labelEndWhile = generateLabel();
 	
-				notE = assignNotExpression($3);
+				notE = assignNotExpression($4);
 
-				$$.translation = "\t" + labelBeginWhile + ":\n"; /*tradução: labelBeginWhile:*/
-				$$.translation += $3.translation; /*tradução da expressão E*/
+				$$.translation = "\n\t" + labelBeginWhile + ":\n"; /*tradução: labelBeginWhile:*/
+				$$.translation += $4.translation; /*tradução da expressão E*/
 				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
 				$$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E)*/
 				$$.translation += "\t\tgoto " + labelEndWhile + ";\n\n"; /*tradução: goto labelEndWhile*/
-				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += $6.translation + "\n"; /*tradução: COMMAND*/
 				$$.translation += "\t\tgoto " + labelBeginWhile + ";\n"; /*tradução: goto labelBeginWhile*/
 				$$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndWhile:*/
+
 			}
 			;
 
 
 
-DO_WHILE		: TK_DO COMMAND TK_WHILE '(' E ')' ';'
+DO_WHILE		: CNAD TK_DO COMMAND TK_WHILE '(' E ')' ';'
 			{
 				string labelBeginDoWhile = generateLabel();
 
-				$$.translation = "\t" + labelBeginDoWhile + ":\n"; /*tradução: labelBeginDoWhileIF:*/
-				$$.translation += $2.translation + "\n"; /*tradução: COMMAND*/
-				$$.translation += $5.translation; /*tradução da expressão E*/
-				$$.translation += "\tif (" + $5.label + ")\n"; /*tradução: if (E)*/
+				$$.translation = "\n\t" + labelBeginDoWhile + ":\n"; /*tradução: labelBeginDoWhileIF:*/
+				$$.translation += $3.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += $6.translation; /*tradução da expressão E*/
+				$$.translation += "\tif (" + $6.label + ")\n"; /*tradução: if (E)*/
 				$$.translation += "\t\tgoto " + labelBeginDoWhile + ";\n"; /*tradução: goto labelEndIf*/
+
 			}
 			;
 
+
+FOR			: CNAD TK_FOR '(' ';' ';' ')' COMMAND /*loop infinito*/
+			{
+				string labelBeginFor = generateLabel();
+				string labelEndFor = generateLabel();
+
+				$$.translation = "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+				$$.translation += $7.translation; /*tradução: COMMAND*/
+				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
+			}
+			| CNAD TK_FOR '(' ATTRIBUITION ';' E ';' E ')' COMMAND
+			{
+				YYSTYPE notE;
+				string labelBeginFor = generateLabel();
+				string labelEndFor = generateLabel();
+	
+				notE = assignNotExpression($6);
+
+				$$.translation = $4.translation; /*tradução da atribuição*/
+				$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+				$$.translation += $6.translation; /*tradução da expressão E1*/
+				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E1*/
+				$$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E1)*/
+				$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+				$$.translation += $10.translation; /*tradução: COMMAND*/
+				$$.translation += $8.translation; /*tradução: E2*/
+				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
+				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/
+
+
+			}
+			/*| CNAD TK_FOR '(' ATTRIBUITION ".." TERMINAL ')' COMMAND
+			{
+				YYSTYPE expr; /*expressão que controla a parada do for*/
+			//	YYSTYPE value;
+			//	YYSTYPE op;
+			//	YYSTYPE ass;
+
+			//	string labelBeginFor = generateLabel();
+			//	string labelEndFor = generateLabel();
+
+			//	string modifier;
+
+			//	/*realiza o teste lógico (negado)*/
+			//	expr = runBasicOperation($3, $5, ">");
+
+
+				/*realiza o incremento*/
+			//	value = generateIntValue(1);
+			//	op = runBasicOperation($3, value, "+");
+			//	ass.label = generateID();
+			//	ass.type = op.type;
+			//	ass.modifier = op.modifier;
+			//	ass.translation = op.translation + "\tass.label = " + op.label;
+
+			//	$$.translation = $4.translation; /*tradução da atribuição*/
+			//	$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+			//	$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
+			//	$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
+			//	$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+			//	$$.translation += $7.translation; /*tradução: COMMAND*/
+			//	$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
+			//	$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
+			//	$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/				
+
+
+			//	modifier = ass.modifier;
+
+			//	if(modifier != "")
+			//		modifier += " ";
+
+			//	declare(ass.label, modifier + ass.type, 1);
+
+			//}
+			/*| TK_FOR '(' TERMINAL ".." TERMINAL ')' COMMAND
+			{
+			
+			}*/
+			;
 
 
 E                       : '(' E ')'
@@ -508,6 +611,7 @@ INCREASE		: TK_ID TK_OP_INCREASE
 				}
 			}
 			;
+
 
 
 PREV_INCREASE		: TK_OP_INCREASE TK_ID

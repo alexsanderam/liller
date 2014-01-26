@@ -3,17 +3,11 @@ int main()
 {	
 	int i = 0;
 
-	do
-	{
-		if(i == 0)
-			i = 9;
+	/*for(i = 0; i < 10; i++)
+		cout(i);*/
 
+	for(;;)
 		cout(i);
-		i--;
-
-	} while(i > 0);
-
-	cout("Fim do Do..While");
 
 	return 0;
 }
