@@ -274,7 +274,7 @@ RETURN                  : TK_RETURN E
 
 
                         
-/*CNAD: Commands not allow declarations*/
+/*CNAD: Commands not allow declaration*/
 CNAD                    :
                         {
                                 flagDeclarationNotAllowed = true;
@@ -363,20 +363,20 @@ OPTIONAL_E              : E
 
 
 ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
-							| TERMINAL
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
-							;
+				{
+					$$.translation = $1.translation;
+					$$.label = $1.label;
+					$$.type = $1.type;
+					$$.modifier = $1.modifier;
+				}
+				| TERMINAL
+				{
+					$$.translation = $1.translation;
+					$$.label = $1.label;
+					$$.type = $1.type;
+					$$.modifier = $1.modifier;
+				}
+				;
 
 
 FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
@@ -403,82 +403,71 @@ FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL
                         | CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
                         {
                                 YYSTYPE expr; /*expressão que controla a parada do for*/
-                        	  	YYSTYPE value; /*constante 1*/
-                        		YYSTYPE op; /*operação de incremento*/
-								YYSTYPE ass; /*atribuição*/
+	        	  	YYSTYPE value; /*constante 1*/
+	        		YYSTYPE op; /*operação de incremento*/
+				YYSTYPE ass; /*atribuição*/
 
-								string labelBeginFor = generateLabel();
-								string labelEndFor = generateLabel();
+				string labelBeginFor = generateLabel();
+				string labelEndFor = generateLabel();
 
-								string modifier;
-
-								/*realiza o teste lógico (negado)*/
-								expr = runBasicOperation($4, $6, ">");
+				/*realiza o teste lógico (negado)*/
+				expr = runBasicOperation($4, $6, ">");
 
 
-								/*realiza o incremento*/
-								value = generateIntValue(1);
-								op = runBasicOperation($4, value, "+");
-								ass.label = $4.label;
-								ass.type = op.type;
-								ass.modifier = op.modifier;
-								ass.translation = op.translation + "\t" + ass.label + " = " + op.label + ";\n";
-								
+				/*realiza o incremento*/
+				value = generateIntValue(1);
+				op = runBasicOperation($4, value, "+");
+				ass.label = $4.label;
+				ass.type = op.type;
+				ass.modifier = op.modifier;
+				ass.translation = op.translation + "\t" + ass.label + " = " + op.label + ";\n";
+				
 
-								findAndReplace(&(expr.translation), $4.translation, voidStr);
-								findAndReplace(&(ass.translation), $4.translation, voidStr);
+				findAndReplace(&(expr.translation), $4.translation, voidStr);
+				findAndReplace(&(ass.translation), $4.translation, voidStr);
 
-								$$.translation = $4.translation; /*tradução da atribuição*/
-								$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
-								$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
-								$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
-								$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
-								$$.translation += $8.translation; /*tradução: COMMAND*/
-								$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
-								$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
-								$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
-
-
-								modifier = ass.modifier;
-
-								if(modifier != "")
-									modifier += " ";
-
-								declare(ass.label, modifier + ass.type, 1);
-
+				$$.translation = $4.translation; /*tradução da atribuição*/
+				$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+				$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
+				$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
+				$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+				$$.translation += $8.translation; /*tradução: COMMAND*/
+				$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
+				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
+				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
                         }
-						;
+			;
 
 
 
-SWITCH			: TK_SWITCH '(' E ')' COMMAND
+SWITCH			: TK_SWITCH '(' E ')' CASES
 			{
-
+				
 			}
 			;
 
 
-CASE			: CASE TK_CASE '(' E ')' ':' COMMANDS
-			{
 
-			} 
+CASES			: CASES CASE
+			| TK_DEFAULT ':' COMMANDS
 			;
 
-
-CASE_DEFAULT		: TK_DEFAULT ':'
-
+CASE			: TK_CASE E ':' COMMANDS
+			| COMMAND
+			|
+			;
 
 
 
 
 E                       : '(' E ')'
                         {
-                                     $$.translation = $2.translation;
+                                $$.translation = $2.translation;
                                 $$.label = $2.label;
                                 $$.type = $2.type;
                                 $$.modifier = $2.modifier;                
                         }
-                               | TERMINAL
+                        | TERMINAL
                         {
                                 $$.translation = $1.translation;
                                 $$.label = $1.label;

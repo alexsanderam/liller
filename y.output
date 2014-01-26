@@ -1,3 +1,10 @@
+Nonterminals useless in grammar
+
+   SWITCH
+   CASES
+   CASE
+
+
 Terminals unused in grammar
 
    TK_END
@@ -11,6 +18,19 @@ Terminals unused in grammar
    TK_GOTO
    TK_OP_LESS_LESS
    ELSE
+   ':'
+
+
+Rules useless in grammar
+
+  110 SWITCH: TK_SWITCH '(' E ')' CASES
+
+  111 CASES: CASES CASE
+  112      | TK_DEFAULT ':' COMMANDS
+
+  113 CASE: TK_CASE E ':' COMMANDS
+  114     | COMMAND
+  115     | /* empty */
 
 
 State 179 conflicts: 1 shift/reduce
@@ -164,6 +184,7 @@ $end (0) 0
 '(' (40) 3 4 23 24 25 26 31 32 33 36 64
 ')' (41) 3 4 23 24 25 26 31 32 33 36 64
 ',' (44) 67 68
+':' (58)
 ';' (59) 11 12 13 14 20 26 31 65
 '{' (123) 6
 '}' (125) 7
@@ -234,68 +255,68 @@ ELSE (319)
 
 Nonterminals, with rules where they appear
 
-$accept (71)
+$accept (72)
     on left: 0
-BEGIN (72)
+BEGIN (73)
     on left: 1, on right: 0
-START (73)
+START (74)
     on left: 2, on right: 1
-MAIN (74)
+MAIN (75)
     on left: 3 4, on right: 1
-SCOPE (75)
+SCOPE (76)
     on left: 5, on right: 1 15
-BEGIN_SCOPE (76)
+BEGIN_SCOPE (77)
     on left: 6, on right: 5
-END_SCOPE (77)
+END_SCOPE (78)
     on left: 7, on right: 5
-COMMANDS (78)
+COMMANDS (79)
     on left: 8 9, on right: 5 8
-COMMAND (79)
+COMMAND (80)
     on left: 10, on right: 8 23 24 25 26 31 32
-STATEMENT (80)
+STATEMENT (81)
     on left: 11 12 13 14 15 16 17 18 19 20, on right: 10
-RETURN (81)
+RETURN (82)
     on left: 21, on right: 12
-CNAD (82)
+CNAD (83)
     on left: 22, on right: 23 24 25 26 31 32
-IF (83)
+IF (84)
     on left: 23 24, on right: 16
-WHILE (84)
+WHILE (85)
     on left: 25, on right: 17
-DO_WHILE (85)
+DO_WHILE (86)
     on left: 26, on right: 18
-OPTIONAL_E (86)
+OPTIONAL_E (87)
     on left: 27 28, on right: 31
-ATTRIBUITION_OR_TERMINAL (87)
+ATTRIBUITION_OR_TERMINAL (88)
     on left: 29 30, on right: 32
-FOR (88)
+FOR (89)
     on left: 31 32, on right: 19
-E (89)
+E (90)
     on left: 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
     51 52 53 54 55 56 57 58, on right: 11 21 23 24 25 26 27 33 37 38
     39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 61 63 64
     68 70
-INCREASE (90)
+INCREASE (91)
     on left: 59, on right: 57
-PREV_INCREASE (91)
+PREV_INCREASE (92)
     on left: 60, on right: 58
-ATTRIBUITION (92)
+ATTRIBUITION (93)
     on left: 61 62, on right: 29 35
-OP_ASSIGN (93)
+OP_ASSIGN (94)
     on left: 63, on right: 62
-COUT (94)
+COUT (95)
     on left: 64, on right: 13
-DECLARATIONS (95)
+DECLARATIONS (96)
     on left: 65 66, on right: 1 65
-DECLARATION (96)
+DECLARATION (97)
     on left: 67 68 69 70, on right: 14 65 67 68
-TYPE (97)
+TYPE (98)
     on left: 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88
     89 90 91 92 93 94 95, on right: 36 69 70
-TERMINAL (98)
+TERMINAL (99)
     on left: 96 97 98 99 100 101 102 103 104 105 106 107, on right:
     30 32 34 36
-SIGNAL (99)
+SIGNAL (100)
     on left: 108 109, on right: 100 101 102 103 107
 
 
