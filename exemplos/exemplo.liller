@@ -1,29 +1,28 @@
 int main()
 {	
-	/*Aqui é um comentário
-	Este arquivo é de exemplo da Linguagem Liller
-	e do Compilador prescot-liller.*/
+	int i = 1;
+	int j = 0;
+
+	if(i < 2)
+	{
+		int z;
+
+		j+= 2;
+		cout("Entrou no If(1)");
+		
+		if(j > 3)
+			cout("Entrou no If(1.2)");
+		else
+			cout("Entrou no Else(1.2)");
+	}
+	else if (i == 2)
+		cout("Entrou no ElseIf(1.1)");
+	else
+		cout("Entrou no Else(1)");
+
 	
-	unsigned short int k;
-	int j;
-	float z, v = 10;
-	bool x;
-
-	k = j = 1 / 1;
-	k = 2;
-	j = (2 - 5.0) * 3;
-
-	//k < j;
-
-	int p;
-	//int j; //isto ocasiona um erro, esta variável já foi declarada antes
-	
-	z = k;
-
-	1 - 50;
-	3 % 3;
-
-	"aa" + 10;
+	if(i != 3)
+		cout("Entrou no If(2), pois i == 3");
 
 	return 0;
 }

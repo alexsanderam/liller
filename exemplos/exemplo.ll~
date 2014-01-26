@@ -1,20 +1,18 @@
 int main()
 {	
-
 	int i = 0;
 
-	if(i == 0)
-		goto rotulo;
+	for(i = 0; i < 10; i++)
+	{
+		int k;
+		cout(i);
+	}
 
 
-	i++;
-	cout(i);
+	int j = 0;
 
-
-	rotulo:
-
-	i--;
-	cout(i);
+	for(int j = 10; j < 20; j++)
+		cout(j);
 
 	return 0;
 }
