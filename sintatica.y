@@ -451,23 +451,24 @@ FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL
 
 
 
-/*SWITCH					: TK_SWITCH '(' E ')' COMMAND
-						{
+SWITCH			: TK_SWITCH '(' E ')' COMMAND
+			{
 
-						}
-						;
-
-
-CASE					: TK_CASE '(' E ')' COMMANDS
-						{
+			}
+			;
 
 
-						} 
-						;
+CASE			: CASE TK_CASE '(' E ')' ':' COMMANDS
+			{
+
+			} 
+			;
 
 
-CASE_DEFAULT			: 
-*/
+CASE_DEFAULT		: TK_DEFAULT ':'
+
+
+
 
 
 E                       : '(' E ')'
