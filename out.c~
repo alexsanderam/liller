@@ -8,33 +8,54 @@ using namespace std;
 
 int main()
 {
+	int _temp6;
+	int _temp7;
 	int _temp0;
 	int _temp1;
+	int _temp10;
+	int _temp11;
+	int _temp12;
+	int _temp13;
 	int _temp2;
 	int _temp3;
 	int _temp4;
-	int _temp5;
-	int _temp6;
-	 _temp7;
+	float _temp5;
 	int _temp8;
+	float _temp9;
 
 
-	_temp0 = 0;
+	_temp0 = 1;
 	_temp1 = _temp0;
 
-for
-	_tempLabel0:
-0	_temp7 = !i;
+	_temp2 = 0;
+	_temp3 = _temp2;
 
-	if (_temp7)
+	_temp4 = 1;
+	_temp1 = _temp4;
+
+	_tempLabel0:
+	_temp5 = 2.5;
+	_temp9 = (float) _temp1;
+	_temp8 = _temp9 > _temp5;
+	if (_temp8)
 		goto _tempLabel1;
 
-++10		goto _tempLabel0;
+	_temp6 = 1;
+	_temp7 = _temp3 + _temp6;
+	_temp3 = _temp7;
+
+
+	cout << _temp3 << endl;
+
+	_temp10 = 1;
+	_temp11 = _temp1 + _temp10;
+	_temp1 = _temp11;
+		goto _tempLabel0;
 
 	_tempLabel1:
 
-	_temp8 = 0;
+	_temp13 = 0;
 
-	return _temp8;
+	return _temp13;
 }
 

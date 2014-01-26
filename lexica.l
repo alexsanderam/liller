@@ -67,6 +67,7 @@ OpAndAssign "&="
 OpOrAssign "|="
 OpXorAssign "^="
 
+DotDot ".."
 
 OpSum [+]
 OpSub [-]
@@ -157,7 +158,7 @@ Assign "="
 {OpLogicBinShiftR}                {yylval.translation = yytext; return TK_OP_BIN_SHIFTR; }
 {OpLogicBinShiftL}                {yylval.translation = yytext; return TK_OP_BIN_SHIFTL; }
 
-
+{DotDot}	{return TK_DOT_DOT;}
 {Assign}        { return TK_ASSIGN; }
 
 {Int}                { yylval.translation = yytext; return TK_INT; }

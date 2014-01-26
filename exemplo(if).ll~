@@ -1,3 +1,4 @@
+
 int main()
 {	
 	int i = 1;
@@ -5,8 +6,6 @@ int main()
 
 	if(i < 2)
 	{
-		int z;
-
 		j+= 2;
 		cout("Entrou no If(1)");
 		

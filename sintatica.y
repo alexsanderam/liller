@@ -102,6 +102,7 @@ id_struct* findID(string);
 bool isDeclaredCurrentScope(string label);
 void declare(string, string, unsigned int);
 string getDeclarations();
+void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
 id_struct* defineKeyOperating(string, string, string, string);
 string verifyStrongType(string, string);
@@ -129,6 +130,7 @@ void loadOpearationsMap(void);
 %token TK_GOTO
 %token TK_OP_INCREASE TK_OP_LESS_LESS 
 %token TK_OP_ASSIGN
+%token TK_DOT_DOT
 
 
 %start BEGIN
@@ -151,7 +153,7 @@ void loadOpearationsMap(void);
 %nonassoc ELSE
 %%
 
-BEGIN                         : START DECLARATIONS MAIN SCOPE
+BEGIN                   : START DECLARATIONS MAIN SCOPE
                         {
                                 if(!error)
                                         cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
@@ -161,14 +163,14 @@ BEGIN                         : START DECLARATIONS MAIN SCOPE
                         ;
 
 
-START                        : 
+START                   : 
                         {
                                 openNewScope();        
                         }
                         ;
 
 
-MAIN                        : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')'
+MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')'
                         {
                                $$.translation = "int main(void)\n";
 
@@ -180,11 +182,13 @@ MAIN                        : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')'
                         ;
 
 
-SCOPE                        : BEGIN_SCOPE COMMANDS END_SCOPE
+
+SCOPE                   : BEGIN_SCOPE COMMANDS END_SCOPE
                         {
                                 $$.translation =  $1.translation + $2.translation + $3.translation;
                         }
                         ;
+
 
 
 
@@ -207,6 +211,7 @@ END_SCOPE                : '}'
                                 $$.translation = "";
                         }
                         ;
+
 
 
 COMMANDS        	: COMMAND COMMANDS
@@ -236,7 +241,7 @@ COMMAND                 : STATEMENT
                         ;
 
 
-STATEMENT                 : E ';'
+STATEMENT               : E ';'
                         | RETURN ';'
                         | COUT ';'
                         | DECLARATION ';'
@@ -260,24 +265,25 @@ STATEMENT                 : E ';'
                         ;
 
 
-RETURN                        : TK_RETURN E 
+
+RETURN                  : TK_RETURN E 
                         {
                                 $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
                         }
                         ;
 
 
-
                         
 /*CNAD: Commands not allow declarations*/
-CNAD                        :
+CNAD                    :
                         {
                                 flagDeclarationNotAllowed = true;
                         }
                         ;
 
 
-IF                        : CNAD TK_IF '(' E ')' COMMAND %prec IFX
+
+IF                      : CNAD TK_IF '(' E ')' COMMAND %prec IFX
                         {                                
                                 YYSTYPE notE;
                                 string labelEndIF = generateLabel();
@@ -313,7 +319,7 @@ IF                        : CNAD TK_IF '(' E ')' COMMAND %prec IFX
                         ;
 
 
-WHILE                        : CNAD TK_WHILE '(' E ')' COMMAND
+WHILE                   : CNAD TK_WHILE '(' E ')' COMMAND
                         {
                                 YYSTYPE notE;
                                 string labelBeginWhile = generateLabel();
@@ -350,15 +356,14 @@ DO_WHILE                : CNAD TK_DO COMMAND TK_WHILE '(' E ')' ';'
 
 
 
-OPTIONAL_E                : E
+OPTIONAL_E              : E
                         |
                         ;
 
 
 
-FOR                         :CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
                         {
-
                                 YYSTYPE notE;
                                 string labelBeginFor = generateLabel();
                                 string labelEndFor = generateLabel();
@@ -377,60 +382,72 @@ FOR                         :CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIO
                                 $$.translation += "\t" + $8.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
                                 $$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
                                 $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
-
                         }
-
-
-
-                        /*| CNAD TK_FOR '(' ATTRIBUITION ".." TERMINAL ')' COMMAND
+                        | CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
                         {
                                 YYSTYPE expr; /*expressão que controla a parada do for*/
-                        //        YYSTYPE value;
-                        //        YYSTYPE op;
-                        //        YYSTYPE ass;
+                        	  	YYSTYPE value; /*constante 1*/
+                        		YYSTYPE op; /*operação de incremento*/
+								YYSTYPE ass; /*atribuição*/
 
-                        //        string labelBeginFor = generateLabel();
-                        //        string labelEndFor = generateLabel();
+								string labelBeginFor = generateLabel();
+								string labelEndFor = generateLabel();
 
-                        //        string modifier;
+								string modifier;
 
-                        //        /*realiza o teste lógico (negado)*/
-                        //        expr = runBasicOperation($3, $5, ">");
-
-
-                                /*realiza o incremento*/
-                        //        value = generateIntValue(1);
-                        //        op = runBasicOperation($3, value, "+");
-                        //        ass.label = generateID();
-                        //        ass.type = op.type;
-                        //        ass.modifier = op.modifier;
-                        //        ass.translation = op.translation + "\tass.label = " + op.label;
-
-                        //        $$.translation = $4.translation; /*tradução da atribuição*/
-                        //        $$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
-                        //        $$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
-                        //        $$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
-                        //        $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
-                        //        $$.translation += $7.translation; /*tradução: COMMAND*/
-                        //        $$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
-                        //        $$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
-                        //        $$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
+								/*realiza o teste lógico (negado)*/
+								expr = runBasicOperation($4, $6, ">");
 
 
-                        //        modifier = ass.modifier;
+								/*realiza o incremento*/
+								value = generateIntValue(1);
+								op = runBasicOperation($4, value, "+");
+								ass.label = $4.label;
+								ass.type = op.type;
+								ass.modifier = op.modifier;
+								ass.translation = op.translation + "\t" + ass.label + " = " + op.label + ";\n";
+								
 
-                        //        if(modifier != "")
-                        //                modifier += " ";
+								findAndReplace(&(expr.translation), $4.translation, voidStr);
+								findAndReplace(&(ass.translation), $4.translation, voidStr);
 
-                        //        declare(ass.label, modifier + ass.type, 1);
+								$$.translation = $4.translation; /*tradução da atribuição*/
+								$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+								$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
+								$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
+								$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+								$$.translation += $8.translation; /*tradução: COMMAND*/
+								$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
+								$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
+								$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
 
-                        //}
-                        /*| TK_FOR '(' TERMINAL ".." TERMINAL ')' COMMAND
-                        {
-                        
-                        }*/
-                        ;
 
+								modifier = ass.modifier;
+
+								if(modifier != "")
+									modifier += " ";
+
+								declare(ass.label, modifier + ass.type, 1);
+
+                        }
+						;
+
+
+ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							| TERMINAL
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							;
 
 
 E                       : '(' E ')'
@@ -697,27 +714,27 @@ OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
                                         $1.type = id->type;
                                         $1.modifier = id->modifier;
 
-					/*verifica qual operação deve ser realizada*/
-					if ($2.translation == "+=")
-						operation = "+";
-					else if ($2.translation == "-=")
-						operation = "-";
-					else if ($2.translation == "*=")
-						operation = "*";
-					else if ($2.translation == "/=")
-						operation = "/";
-					else if ($2.translation == "%=")
-						operation = "%";
-					else if ($2.translation == "<<=")
-						operation = "<<";
-					else if ($2.translation == ">>=")
-						operation = ">>";
-					else if ($2.translation == "&=")
-						operation = "&";
-					else if ($2.translation == "|=")
-						operation = "|";
-					else if ($2.translation == "^=")
-						operation = "^";
+										/*verifica qual operação deve ser realizada*/
+										if ($2.translation == "+=")
+											operation = "+";
+										else if ($2.translation == "-=")
+											operation = "-";
+										else if ($2.translation == "*=")
+											operation = "*";
+										else if ($2.translation == "/=")
+											operation = "/";
+										else if ($2.translation == "%=")
+											operation = "%";
+										else if ($2.translation == "<<=")
+											operation = "<<";
+										else if ($2.translation == ">>=")
+											operation = ">>";
+										else if ($2.translation == "&=")
+											operation = "&";
+										else if ($2.translation == "|=")
+											operation = "|";
+										else if ($2.translation == "^=")
+											operation = "^";
                                         
                                         /*Realiza as operações referentes a operação*/
                                         op_id = $1;
@@ -1294,6 +1311,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 }
 
 
+
 YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
 {
         YYSTYPE* res;
@@ -1320,7 +1338,7 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
                         res->type = to.type;
                         res->modifier = to.modifier;
 
-                             res->translation = from.translation + "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + "\n;";
+                        res->translation = from.translation + "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + "\n;";
 
                         declare(res->label, res->modifier + res->type, 1);
                 }
@@ -1513,6 +1531,15 @@ string getDeclarations()
         }
 
         return declarations.str();
+}
+
+void findAndReplace(string* source, const string find, const string replace)
+{
+    for(std::string::size_type i = 0; (i = source->find(find, i)) != std::string::npos;)
+    {
+        source->replace(i, find.length(), replace);
+        i += replace.length() - find.length() + 1;
+    }
 }
 
 

@@ -3,26 +3,18 @@ int main()
 	int i = 1;
 	int j = 0;
 
-	if(i < 2)
+	for(i=1..2.5)
 	{
-		int z;
-
-		j+= 2;
-		cout("Entrou no If(1)");
-		
-		if(j > 3)
-			cout("Entrou no If(1.2)");
-		else
-			cout("Entrou no Else(1.2)");
+		j++;
+		cout(j);
 	}
-	else if (i == 2)
-		cout("Entrou no ElseIf(1.1)");
-	else
-		cout("Entrou no Else(1)");
 
-	
-	if(i != 3)
-		cout("Entrou no If(2), pois i == 3");
+	for(1..2.5)
+	{
+		j++;
+		cout(j);
+	}
+
 
 	return 0;
 }
