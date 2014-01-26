@@ -67,7 +67,7 @@ OpAndAssign "&="
 OpOrAssign "|="
 OpXorAssign "^="
 
-GoLabel ":"
+GoLabel "Oo"
 DotDot ".."
 
 OpSum [+]

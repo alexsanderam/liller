@@ -7,6 +7,8 @@
 
 #define YYSTYPE args
 
+extern int yylineno;
+
 using namespace std;
 
 typedef struct idStruct
@@ -15,6 +17,14 @@ typedef struct idStruct
         string modifier;
         string label;
 } id_struct;
+
+
+typedef struct
+{
+        string label;
+	bool found;
+	unsigned int line; //utilizado no tratamento de erro
+} label_struct;
 
 struct args
 {
@@ -52,11 +62,15 @@ typedef struct
 
 typedef map<string, id_struct> identifiers_map;
 typedef map<string, variable_declarations_struct> declarations_map;
+typedef map<string, label_struct> labels_map;
 
 
 /*pilhas para controle de escopo*/
 list<identifiers_map*> stackIDMap;
 list<declarations_map*> stackDeclarationsMap;
+
+/*mapa de rótulos*/
+labels_map labelMap;
 
 /*mapa de operações permititdas*/
 map<operation_struct, string> operationsMap;
@@ -99,8 +113,10 @@ string generateID();
 string generateLabel();
 void relationalControl(YYSTYPE);
 id_struct* findID(string);
+label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string label);
 void declare(string, string, unsigned int);
+void verifyLabels();
 string getDeclarations();
 void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
@@ -131,6 +147,7 @@ void loadOpearationsMap(void);
 %token TK_OP_INCREASE TK_OP_LESS_LESS 
 %token TK_OP_ASSIGN
 %token TK_DOT_DOT
+%token TK_GO_LABEL
 
 
 %start BEGIN
@@ -155,7 +172,9 @@ void loadOpearationsMap(void);
 
 BEGIN                   : START DECLARATIONS MAIN SCOPE
                         {
-                                if(!error)
+				verifyLabels(); /*verifica se há erros relacionados à rótulos*/
+
+				if(!error)
                                         cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
                                 else
                                         exit(1);
@@ -258,6 +277,8 @@ STATEMENT               : E ';'
                         | WHILE
                         | DO_WHILE
                         | FOR
+			| LABEL
+			| GOTO ';'
                         | ';'
                         {
                                 $$.translation = "";
@@ -435,20 +456,53 @@ FOR                     : CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL
 				$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
 				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
 				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
-
-
-				modifier = ass.modifier;
-
-				if(modifier != "")
-					modifier += " ";
-
-				//declare(ass.label, modifier + ass.type, 1);
                         }
 			;
 
 
+LABEL			: TK_ID TK_GO_LABEL
+			{
+				label_struct* l;
 
-SWITCH			: TK_SWITCH '(' E ')' CASES
+				if(((l = findLabel($1.label)) != NULL) && (l->found == true))
+					yyerror("duplicate label " + $1.label);
+				else if(l == NULL)
+				{
+					$$.label = generateLabel();
+					labelMap[$1.label].found = false;
+					labelMap[$1.label].label = $$.label;
+				}
+				else
+				{
+					labelMap[$1.label].found = true;
+					$$.label = labelMap[$1.label].label;
+				}
+
+				labelMap[$1.label].line = yylineno;
+
+				$$.translation = "\t" + $$.label + ":\n";
+			}
+			;
+
+
+GOTO			: TK_GOTO TK_ID
+			{
+				label_struct* l;
+
+				if((l = findLabel($2.label)) != NULL)
+					$$.label = l->label;
+                                else
+					$$.label = generateLabel();
+
+				labelMap[$2.label].found = false;
+				labelMap[$2.label].label = $$.label;
+				labelMap[$2.label].line = yylineno;
+                                $$.translation = "\tgoto " + $$.label + ";\n";
+			}
+			;
+
+
+/*SWITCH			: TK_SWITCH '(' E ')' CASES
 			{
 				
 			}
@@ -458,13 +512,13 @@ SWITCH			: TK_SWITCH '(' E ')' CASES
 
 CASES			: CASES CASE
 			| TK_DEFAULT ':' COMMANDS
+			| COMMAND
 			;
 
 CASE			: TK_CASE E ':' COMMANDS
-			| COMMAND
 			|
 			;
-
+*/
 
 
 
@@ -898,7 +952,7 @@ DECLARATION        : DECLARATION ',' TK_ID
 
 
                         
-TYPE                        : TK_TYPE_CHAR
+TYPE                    : TK_TYPE_CHAR
                         {
                                 $$.type = $1.translation;
                                 $$.modifier = "";
@@ -1164,7 +1218,7 @@ TERMINAL        :       TK_INT
                         }
                         | TK_ID
                         {
-                                       id_struct* id;
+                                id_struct* id;
                         
                                 if((id = findID($1.label)) == NULL)       
                                         yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
@@ -1209,7 +1263,6 @@ SIGNAL                :        TK_OP_SUM | TK_OP_SUB
 %%
 
 #include "lex.yy.c"
-
 int yyparse();
 
 int main( int argc, char* argv[] )
@@ -1421,13 +1474,23 @@ id_struct* findID(string label)
 
                 if(IDMap->find(label) != IDMap->end())
                 {
-                        return         &(*IDMap)[label];
+                        return &(*IDMap)[label];
                 }
         }
 
 
         return NULL;
 }
+
+
+label_struct* findLabel(string label)
+{       
+        if(labelMap.find(label) != labelMap.end())
+                return &(labelMap)[label];
+
+        return NULL;
+}
+
 
 bool isDeclaredCurrentScope(string label)
 {
@@ -1523,6 +1586,24 @@ string generateLabel()
 
         return label.str();
 }   
+
+
+void verifyLabels()
+{
+        labels_map::iterator i;
+	unsigned int line;
+        
+        for(i = labelMap.begin(); i != labelMap.end(); i++)
+        {                        
+		if(i->second.found == false)
+		{
+			line = yylineno; /*backup da linha*/
+			yylineno = i->second.line; /*atualiza linha*/
+			yyerror("'" + i->first + "' used but not defined");
+			yylineno = line; /*atualiza linha*/
+		}
+	}
+}
 
 
 void declare(string label, string dIType, unsigned int size)
