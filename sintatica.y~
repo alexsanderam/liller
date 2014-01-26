@@ -121,7 +121,7 @@ void loadOpearationsMap(void);
 %token TK_COUT
 %token TK_IF TK_ELSE
 %token TK_SWITCH TK_CASE TK_DEFAULT
-%token TK_FOR TK_EACH TK_WHILE
+%token TK_FOR TK_EACH TK_WHILE TK_DO
 %token TK_BREAK TK_CONTINUE
 %token TK_GOTO
 %token TK_OP_INCREASE TK_OP_LESS_LESS 
@@ -237,6 +237,7 @@ COMMAND         	: E ';'
 			| SCOPE
 			| IF
 			| WHILE
+			| DO_WHILE
 			| ';'
 			{
 				$$.translation = "";
@@ -295,15 +296,30 @@ WHILE			: TK_WHILE '(' E ')' COMMAND
 	
 				notE = assignNotExpression($3);
 
-				$$.translation += "\t" + labelBeginWhile + ":\n"; /*tradução: labelEndIF:*/
-				$$.translation = $3.translation; /*tradução da expressão E*/
+				$$.translation = "\t" + labelBeginWhile + ":\n"; /*tradução: labelBeginWhile:*/
+				$$.translation += $3.translation; /*tradução da expressão E*/
 				$$.translation += notE.translation + "\n"; /*atribui a negação da expressão E*/
-				$$.translation += "\t" + $1.translation + "("	+ notE.label + ")\n"; /*tradução: if (!E)*/
-				$$.translation += "\t\tgoto " + labelEndWhile + ";\n\n"; /*tradução: goto labelEndIf*/
+				$$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E)*/
+				$$.translation += "\t\tgoto " + labelEndWhile + ";\n\n"; /*tradução: goto labelEndWhile*/
 				$$.translation += $5.translation + "\n"; /*tradução: COMMAND*/
-				$$.translation += "\t\tgoto " + labelBeginWhile + ";\n"; /*tradução: goto labelEndIf*/
-				$$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndIF:*/
+				$$.translation += "\t\tgoto " + labelBeginWhile + ";\n"; /*tradução: goto labelBeginWhile*/
+				$$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndWhile:*/
 			}
+			;
+
+
+
+DO_WHILE		: TK_DO COMMAND TK_WHILE '(' E ')' ';'
+			{
+				string labelBeginDoWhile = generateLabel();
+
+				$$.translation = "\t" + labelBeginDoWhile + ":\n"; /*tradução: labelBeginDoWhileIF:*/
+				$$.translation += $2.translation + "\n"; /*tradução: COMMAND*/
+				$$.translation += $5.translation; /*tradução da expressão E*/
+				$$.translation += "\tif (" + $5.label + ")\n"; /*tradução: if (E)*/
+				$$.translation += "\t\tgoto " + labelBeginDoWhile + ";\n"; /*tradução: goto labelEndIf*/
+			}
+			;
 
 
 

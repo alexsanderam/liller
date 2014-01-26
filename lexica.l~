@@ -28,7 +28,6 @@ If "if"
 Else "else"
 For "for"
 Each "each"
-Do "do"
 While "while"
 Break "break"
 Continue "continue"
@@ -174,7 +173,6 @@ Assign "="
 {Else}                { yylval.translation = yytext; return TK_ELSE; }
 {For}                { yylval.translation = yytext; return TK_FOR; }
 {Each}                { yylval.translation = yytext; return TK_EACH; }
-{Do}                { yylval.translation = yytext; return TK_DO; }
 {While}                { yylval.translation = yytext; return TK_WHILE; }
 {Break}                { yylval.translation = yytext; return TK_BREAK; }
 {Continue}                { yylval.translation = yytext; return TK_CONTINUE; }
