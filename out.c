@@ -24,6 +24,7 @@ int main()
 	int _temp19;
 	int _temp2;
 	int _temp20;
+	int _temp21;
 	int _temp3;
 	int _temp4;
 	float _temp5;
@@ -84,8 +85,10 @@ int main()
 
 	_tempLabel3:
 
-	_temp20 = 0;
+	_temp20 = -_temp1;
 
-	return _temp20;
+	_temp21 = 0;
+
+	return _temp21;
 }
 

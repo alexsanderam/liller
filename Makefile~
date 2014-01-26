@@ -4,6 +4,6 @@ all:
 		yacc -v sintatica.y
 		g++ -o glf y.tab.c -lfl -std=c++0x
 
-		./glf < ./exemplos/exemplo.ll > out.c
+		./glf < ./exemplo/exemplo.ll > out.c
 		g++ -o out out.c
 		./out

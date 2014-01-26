@@ -15,6 +15,8 @@ int main()
 		cout(j);
 	}
 
+	-i;
+
 
 	return 0;
 }

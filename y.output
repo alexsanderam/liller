@@ -63,11 +63,11 @@ Grammar
    27 OPTIONAL_E: E
    28           | /* empty */
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
-   30    | CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
+   29 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION
+   30                         | TERMINAL
 
-   31 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION
-   32                         | TERMINAL
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   32    | CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
 
    33 E: '(' E ')'
    34  | TERMINAL
@@ -161,10 +161,10 @@ Grammar
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 3 4 23 24 25 26 29 30 33 36 64
-')' (41) 3 4 23 24 25 26 29 30 33 36 64
+'(' (40) 3 4 23 24 25 26 31 32 33 36 64
+')' (41) 3 4 23 24 25 26 31 32 33 36 64
 ',' (44) 67 68
-';' (59) 11 12 13 14 20 26 29 65
+';' (59) 11 12 13 14 20 26 31 65
 '{' (123) 6
 '}' (125) 7
 error (256)
@@ -217,7 +217,7 @@ TK_ELSE (303) 24
 TK_SWITCH (304)
 TK_CASE (305)
 TK_DEFAULT (306)
-TK_FOR (307) 29 30
+TK_FOR (307) 31 32
 TK_EACH (308)
 TK_WHILE (309) 25 26
 TK_DO (310) 26
@@ -227,7 +227,7 @@ TK_GOTO (313)
 TK_OP_INCREASE (314) 59 60
 TK_OP_LESS_LESS (315)
 TK_OP_ASSIGN (316) 63
-TK_DOT_DOT (317) 30
+TK_DOT_DOT (317) 32
 IFX (318)
 ELSE (319)
 
@@ -251,13 +251,13 @@ END_SCOPE (77)
 COMMANDS (78)
     on left: 8 9, on right: 5 8
 COMMAND (79)
-    on left: 10, on right: 8 23 24 25 26 29 30
+    on left: 10, on right: 8 23 24 25 26 31 32
 STATEMENT (80)
     on left: 11 12 13 14 15 16 17 18 19 20, on right: 10
 RETURN (81)
     on left: 21, on right: 12
 CNAD (82)
-    on left: 22, on right: 23 24 25 26 29 30
+    on left: 22, on right: 23 24 25 26 31 32
 IF (83)
     on left: 23 24, on right: 16
 WHILE (84)
@@ -265,11 +265,11 @@ WHILE (84)
 DO_WHILE (85)
     on left: 26, on right: 18
 OPTIONAL_E (86)
-    on left: 27 28, on right: 29
-FOR (87)
-    on left: 29 30, on right: 19
-ATTRIBUITION_OR_TERMINAL (88)
-    on left: 31 32, on right: 30
+    on left: 27 28, on right: 31
+ATTRIBUITION_OR_TERMINAL (87)
+    on left: 29 30, on right: 32
+FOR (88)
+    on left: 31 32, on right: 19
 E (89)
     on left: 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
     51 52 53 54 55 56 57 58, on right: 11 21 23 24 25 26 27 33 37 38
@@ -280,7 +280,7 @@ INCREASE (90)
 PREV_INCREASE (91)
     on left: 60, on right: 58
 ATTRIBUITION (92)
-    on left: 61 62, on right: 31 35
+    on left: 61 62, on right: 29 35
 OP_ASSIGN (93)
     on left: 63, on right: 62
 COUT (94)
@@ -1063,8 +1063,8 @@ state 68
    24   | CNAD . TK_IF '(' E ')' COMMAND TK_ELSE COMMAND
    25 WHILE: CNAD . TK_WHILE '(' E ')' COMMAND
    26 DO_WHILE: CNAD . TK_DO COMMAND TK_WHILE '(' E ')' ';'
-   29 FOR: CNAD . TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
-   30    | CNAD . TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
+   31 FOR: CNAD . TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   32    | CNAD . TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
 
     TK_IF     shift, and go to state 102
     TK_FOR    shift, and go to state 103
@@ -1552,8 +1552,8 @@ state 102
 
 state 103
 
-   29 FOR: CNAD TK_FOR . '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
-   30    | CNAD TK_FOR . '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
+   31 FOR: CNAD TK_FOR . '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   32    | CNAD TK_FOR . '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
 
     '('  shift, and go to state 141
 
@@ -2428,8 +2428,8 @@ state 140
 
 state 141
 
-   29 FOR: CNAD TK_FOR '(' . OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
-   30    | CNAD TK_FOR '(' . ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' . OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   32    | CNAD TK_FOR '(' . ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -3205,14 +3205,14 @@ state 166
 
 state 167
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E . ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E . ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
 
     ';'  shift, and go to state 175
 
 
 state 168
 
-   30 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL . TK_DOT_DOT TERMINAL ')' COMMAND
+   32 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL . TK_DOT_DOT TERMINAL ')' COMMAND
 
     TK_DOT_DOT  shift, and go to state 176
 
@@ -3263,19 +3263,19 @@ state 169
 
 state 170
 
-   31 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION .
+   29 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION .
    35 E: ATTRIBUITION .
 
-    TK_DOT_DOT  reduce using rule 31 (ATTRIBUITION_OR_TERMINAL)
+    TK_DOT_DOT  reduce using rule 29 (ATTRIBUITION_OR_TERMINAL)
     $default    reduce using rule 35 (E)
 
 
 state 171
 
-   32 ATTRIBUITION_OR_TERMINAL: TERMINAL .
+   30 ATTRIBUITION_OR_TERMINAL: TERMINAL .
    34 E: TERMINAL .
 
-    TK_DOT_DOT  reduce using rule 32 (ATTRIBUITION_OR_TERMINAL)
+    TK_DOT_DOT  reduce using rule 30 (ATTRIBUITION_OR_TERMINAL)
     $default    reduce using rule 34 (E)
 
 
@@ -3389,7 +3389,7 @@ state 174
 
 state 175
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' . OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' . OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -3419,7 +3419,7 @@ state 175
 
 state 176
 
-   30 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT . TERMINAL ')' COMMAND
+   32 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT . TERMINAL ')' COMMAND
 
     TK_INT         shift, and go to state 46
     TK_FLOAT       shift, and go to state 47
@@ -3532,14 +3532,14 @@ state 179
 
 state 180
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E . ';' OPTIONAL_E ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E . ';' OPTIONAL_E ')' COMMAND
 
     ';'  shift, and go to state 185
 
 
 state 181
 
-   30 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL . ')' COMMAND
+   32 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL . ')' COMMAND
 
     ')'  shift, and go to state 186
 
@@ -3653,7 +3653,7 @@ state 184
 
 state 185
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' . OPTIONAL_E ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' . OPTIONAL_E ')' COMMAND
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -3683,7 +3683,7 @@ state 185
 
 state 186
 
-   30 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' . COMMAND
+   32 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' . COMMAND
 
     TK_INT                shift, and go to state 46
     TK_FLOAT              shift, and go to state 47
@@ -3754,16 +3754,16 @@ state 188
 
 state 189
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E . ')' COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E . ')' COMMAND
 
     ')'  shift, and go to state 192
 
 
 state 190
 
-   30 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND .
+   32 FOR: CNAD TK_FOR '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' COMMAND .
 
-    $default  reduce using rule 30 (FOR)
+    $default  reduce using rule 32 (FOR)
 
 
 state 191
@@ -3775,7 +3775,7 @@ state 191
 
 state 192
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' . COMMAND
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' . COMMAND
 
     TK_INT                shift, and go to state 46
     TK_FLOAT              shift, and go to state 47
@@ -3832,6 +3832,6 @@ state 192
 
 state 193
 
-   29 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND .
+   31 FOR: CNAD TK_FOR '(' OPTIONAL_E ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND .
 
-    $default  reduce using rule 29 (FOR)
+    $default  reduce using rule 31 (FOR)
