@@ -72,10 +72,15 @@ list<declarations_map*> stackDeclarationsMap;
 /*mapa de rótulos*/
 labels_map labelMap;
 
+/*pilhas (na verdade lsitas) de rótulos - usado nos comandos break e continue*/
+list<string> stackBeginLabels;
+list<string> stackEndLabels;
+
 /*mapa de operações permititdas*/
 map<operation_struct, string> operationsMap;
 
 
+/*constante string vazia*/
 const string voidStr = "";
 
 /*declaraçãoes (todas)*/
@@ -97,6 +102,11 @@ bool flagIncreaseTranslation = false;
 /*controle de declarações, quando tais não são permititdas (exemplo: if, for, ...)*/
 bool flagDeclarationNotAllowed = false;
 bool flagDeclarationNotAllowedAux = false;
+
+/*controle do uso do continue e do break*/
+bool flagContinue = false;
+bool flagBreak = false;
+
 
 int yylex(void);
 void yyerror(string);
@@ -285,6 +295,8 @@ STATEMENT               : E ';'
                         | FOR
 			| LABEL
 			| GOTO ';'
+			| CONTINUE ';'
+			| BREAK ';'
                         | ';'
                         {
                                 $$.translation = "";
@@ -358,6 +370,17 @@ WHILE_C			: TK_WHILE
 			{
 				/*controle de declaraçãoes*/
                                 flagDeclarationNotAllowed = true;
+
+				/*controle do continue e do break*/
+				flagContinue = true;
+				flagBreak = true;
+
+                                string labelBeginWhile = generateLabel();
+                                string labelEndWhile = generateLabel();
+
+				/*empilha os labels*/
+				stackBeginLabels.push_front(labelBeginWhile);
+				stackEndLabels.push_front(labelEndWhile);
 			}
 			;
 
@@ -365,8 +388,8 @@ WHILE_C			: TK_WHILE
 WHILE                   : WHILE_C '(' E ')' COMMAND
                         {
                                 YYSTYPE notE;
-                                string labelBeginWhile = generateLabel();
-                                string labelEndWhile = generateLabel();
+                                string labelBeginWhile = stackBeginLabels.front();
+                                string labelEndWhile = stackEndLabels.front();
         
                                 notE = assignNotExpression($3);
 
@@ -379,6 +402,15 @@ WHILE                   : WHILE_C '(' E ')' COMMAND
                                 $$.translation += "\t\tgoto " + labelBeginWhile + ";\n"; /*tradução: goto labelBeginWhile*/
                                 $$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndWhile:*/
 
+
+				/*desempilha os labels*/
+				stackBeginLabels.pop_front();
+				stackEndLabels.pop_front();
+
+				/*controle do continue e do break*/
+				flagContinue = false;
+				flagBreak = false;
+
 				/*controle de declaraçãoes*/
 				flagDeclarationNotAllowedAux = false;
                                 flagDeclarationNotAllowed = false;
@@ -390,19 +422,43 @@ DO_WHILE_C		: TK_DO
 			{
 				/*controle de declaraçãoes*/
                                 flagDeclarationNotAllowed = true;
+
+				/*controle do continue e do break*/
+				flagContinue = true;
+				flagBreak = true;
+
+                                string labelBeginDoWhile = generateLabel();
+                                string labelEndDoWhile = generateLabel();
+
+				/*empilha os labels*/
+				stackBeginLabels.push_front(labelBeginDoWhile);
+				stackEndLabels.push_front(labelEndDoWhile);
 			}
 			;
 
 
 DO_WHILE                : DO_WHILE_C COMMAND TK_WHILE '(' E ')' ';'
                         {
-                                string labelBeginDoWhile = generateLabel();
+                                string labelBeginDoWhile = stackBeginLabels.front();
+                                string labelEndDoWhile = stackEndLabels.front();
+
 
                                 $$.translation = "\n\t" + labelBeginDoWhile + ":\n"; /*tradução: labelBeginDoWhileIF:*/
                                 $$.translation += $2.translation + "\n"; /*tradução: COMMAND*/
                                 $$.translation += $5.translation; /*tradução da expressão E*/
                                 $$.translation += "\tif (" + $5.label + ")\n"; /*tradução: if (E)*/
                                 $$.translation += "\t\tgoto " + labelBeginDoWhile + ";\n"; /*tradução: goto labelEndIf*/
+                                $$.translation += "\t" + labelEndDoWhile + ":\n\n"; /*tradução: labelEndDoWhileIF:*/
+
+
+				/*desempilha os labels*/
+				stackBeginLabels.pop_front();
+				stackEndLabels.pop_front();
+
+				/*controle do continue e do break*/
+				flagContinue = false;
+				flagBreak = false;
+
 
 				/*controle de declaraçãoes*/
 				flagDeclarationNotAllowedAux = false;
@@ -448,7 +504,19 @@ FOR_C			: TK_FOR
 			        flagDeclarationNotAllowed = true;
 
 				/*para os casos de declaração dentro do for*/
-                                openNewScope();        
+                                openNewScope();
+
+				/*controle do continue e do break*/
+				flagContinue = true;
+				flagBreak = true;
+
+                                string labelBeginFor = generateLabel();
+                                string labelEndFor = generateLabel();
+
+				/*empilha os labels*/
+				stackBeginLabels.push_front(labelBeginFor);
+				stackEndLabels.push_front(labelEndFor);
+
 			}
 			;
 
@@ -456,8 +524,9 @@ FOR_C			: TK_FOR
 FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' COMMAND
                         {
                                 YYSTYPE notE;
-                                string labelBeginFor = generateLabel();
-                                string labelEndFor = generateLabel();
+                                string labelBeginFor = stackBeginLabels.front();
+                                string labelEndFor = stackEndLabels.front();
+
 
                                 $$.translation =  "\n" + $3.translation + "\n"; /*tradução da inicialização do For, que pode ser vazia*/
                                 $$.translation += "\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
@@ -469,10 +538,20 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
                                         $$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E)*/
                                         $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
                                 }
+
                                 $$.translation += $9.translation + "\n"; /*tradução: COMMAND*/
                                 $$.translation += "\t" + $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
                                 $$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
                                 $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
+
+
+				/*desempilha os labels*/
+				stackBeginLabels.pop_front();
+				stackEndLabels.pop_front();
+
+				/*controle do continue e do break*/
+				flagContinue = false;
+				flagBreak = false;
 
 				/*desempilha o escopo (para os casos de declaração dentro do for)*/
                                 declarations += getDeclarations();
@@ -490,8 +569,8 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 	        		YYSTYPE op; /*operação de incremento*/
 				YYSTYPE ass; /*atribuição*/
 
-				string labelBeginFor = generateLabel();
-				string labelEndFor = generateLabel();
+                                string labelBeginFor = stackBeginLabels.front();
+                                string labelEndFor = stackEndLabels.front();
 
 				/*realiza o teste lógico (negado)*/
 				expr = runBasicOperation($3, $5, ">");
@@ -518,6 +597,15 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
 				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
 				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
+
+
+				/*desempilha os labels*/
+				stackBeginLabels.pop_front();
+				stackEndLabels.pop_front();
+
+				/*controle do continue e do break*/
+				flagContinue = false;
+				flagBreak = false;
 
 				/*controle de declaraçãoes*/
 				flagDeclarationNotAllowedAux = false;
@@ -568,12 +656,52 @@ GOTO			: TK_GOTO TK_ID
 			;
 
 
-/*SWITCH			: TK_SWITCH '(' E ')' CASES
+
+CONTINUE		: TK_CONTINUE
 			{
-				
+				if(!flagContinue)
+					yyerror("continue statement not within a loop");
+				else
+				{			
+					cout << "//" << stackBeginLabels.size() << endl;
+	
+					/*obtém o primeiro label da pilha de Begins*/
+					string label = stackBeginLabels.front();
+					$$.translation = "\tgoto " + label + ";\n";
+				}
 			}
 			;
 
+
+BREAK			: TK_BREAK
+			{
+				if(!flagBreak)
+					yyerror("break statement not within loop or switch");
+				else
+				{	
+					/*obtém o primeiro label da pilha de Begins*/
+					string label = stackEndLabels.front();
+
+					$$.translation = "\tgoto " + label + ";\n";
+				}
+			}
+			;
+
+
+/*SWITCH_C		: TK_SWITCH
+			{
+				/*controle do break*/
+/*				flagBreak = true;
+			}
+			;
+
+
+SWITCH			: TK_SWITCH '(' E ')' CASES
+			{
+				/*controle do break*/
+/*				flagBreak = false;
+			}
+			;
 
 
 CASES			: CASES CASE
