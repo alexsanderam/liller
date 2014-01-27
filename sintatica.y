@@ -106,6 +106,9 @@ bool flagDeclarationNotAllowedAux = false;
 /*controle do uso do continue e do break*/
 bool flagContinue = false;
 bool flagBreak = false;
+bool exprBeforeContinue = false; /*somente no caso do for*/
+string translationContinue = ""; /*somente no caso do for*/
+
 
 
 int yylex(void);
@@ -511,6 +514,10 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
                                 string labelBeginFor = stackBeginLabels.front();
                                 string labelEndFor = stackEndLabels.front();
 
+				size_t pos;
+				string stat = $9.translation;
+				string afterContinue;
+
 
                                 $$.translation =  "\n" + $3.translation + "\n"; /*tradução da inicialização do For, que pode ser vazia*/
                                 $$.translation += "\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
@@ -523,8 +530,22 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
                                         $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
                                 }
 
-                                $$.translation += $9.translation + "\n"; /*tradução: STATEMENT*/
-                                $$.translation += "\t" + $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
+				if(exprBeforeContinue == true)
+				{
+					pos = $9.translation.find(translationContinue);
+					stat = $9.translation.substr(0,  (pos == 0 ? pos : pos - 1));
+					afterContinue = $9.translation.substr(pos, $9.translation.size());
+				}
+
+                                $$.translation += stat + "\n"; /*tradução: STATEMENT*/
+
+				if(exprBeforeContinue == true)
+				{
+	                                $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
+					$$.translation += afterContinue; /*tradução do continue e dos comandos após (quando há)*/
+				}
+
+                                $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
                                 $$.translation += "\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
                                 $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
 
@@ -536,6 +557,7 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				/*controle do continue e do break*/
 				flagContinue = false;
 				flagBreak = false;
+				exprBeforeContinue = false;
 
 				/*desempilha o escopo (para os casos de declaração dentro do for)*/
                                 declarations += getDeclarations();
@@ -556,6 +578,10 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
                                 string labelBeginFor = stackBeginLabels.front();
                                 string labelEndFor = stackEndLabels.front();
 
+				size_t pos;
+				string stat = $7.translation;
+				string afterContinue;
+
 				/*realiza o teste lógico (negado)*/
 				expr = runBasicOperation($3, $5, ">");
 
@@ -572,12 +598,30 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				findAndReplace(&(expr.translation), $3.translation, voidStr);
 				findAndReplace(&(ass.translation), $3.translation, voidStr);
 
+
 				$$.translation = $3.translation; /*tradução da atribuição*/
 				$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
 				$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
 				$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
 				$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
-				$$.translation += $7.translation; /*tradução: STATEMENT*/
+
+
+				if(exprBeforeContinue == true)
+				{
+					pos = $7.translation.find(translationContinue);
+					stat = $7.translation.substr(0,  pos = (pos == 0 ? pos : pos - 1));
+
+					afterContinue = $7.translation.substr(pos, $7.translation.size());
+				}
+
+                                $$.translation += stat + "\n"; /*tradução: STATEMENT*/
+
+				if(exprBeforeContinue == true)
+				{
+	                                $$.translation += ass.translation + "\n"; /*tradução: da atualização do identicador (atribuição)*/
+					$$.translation += afterContinue; /*tradução do continue e dos comandos após (quando há)*/
+				}
+
 				$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
 				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
 				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
@@ -590,6 +634,12 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				/*controle do continue e do break*/
 				flagContinue = false;
 				flagBreak = false;
+				exprBeforeContinue = false;
+
+				/*desempilha o escopo (para os casos de declaração dentro do for)*/
+                                declarations += getDeclarations();
+				closeCurrentScope(); /*desempilha*/
+
 
 				/*controle de declaraçãoes*/
 				flagDeclarationNotAllowedAux = false;
@@ -647,9 +697,13 @@ CONTINUE		: TK_CONTINUE
 					yyerror("continue statement not within a loop");
 				else
 				{			
+
 					/*obtém o primeiro label da pilha de Begins*/
 					string label = stackBeginLabels.front();
 					$$.translation = "\tgoto " + label + ";\n";
+
+					exprBeforeContinue = true;
+					translationContinue = $$.translation;
 				}
 			}
 			;
@@ -843,7 +897,7 @@ E                       : '(' E ')'
                         }
                         | INCREASE
                         {
-                                       $$.translation = $1.translation;
+                                $$.translation = $1.translation;
                                 $$.label = $1.label;
                                 $$.type = $1.type;
                                 $$.modifier = $1.modifier;
@@ -1026,7 +1080,7 @@ COUT                        : TK_COUT '(' E_C ')'
 
 
 
-DECLARATIONS                : DECLARATIONS DECLARATION ';' 
+DECLARATIONS            : DECLARATIONS DECLARATION ';' 
                         {
                                 $$.translation = $1.translation + $2.translation;
                                 declarations += getDeclarations();
