@@ -23,7 +23,10 @@ typedef struct
 {
         string label;
 	bool found;
-	unsigned int line; //utilizado no tratamento de erro
+
+	/*utilizado no tratamento de erros
+	 ou warnings*/
+	unsigned int line;
 } label_struct;
 
 struct args
@@ -106,9 +109,6 @@ bool flagDeclarationNotAllowedAux = false;
 /*controle do uso do continue e do break*/
 bool flagContinue = false;
 bool flagBreak = false;
-bool exprBeforeContinue = false; /*somente no caso do for*/
-string translationContinue = ""; /*somente no caso do for*/
-
 
 
 int yylex(void);
@@ -186,10 +186,13 @@ void loadOpearationsMap(void);
 
 BEGIN                   : START DECLARATIONS MAIN SCOPE
                         {
+				string globalDeclarations = "/*============Variáveis globais==============*/\n";
+				globalDeclarations += getDeclarations();
+	
 				verifyLabels(); /*verifica se há erros relacionados à rótulos*/
 
 				if(!error)
-                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
+                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + globalDeclarations + "\n" + $3.translation + "{\n" + declarations + "\n" + $2.translation + "\n" + $4.translation + "}\n" << endl;
                                 else
                                         exit(1);
                         }
@@ -485,6 +488,7 @@ ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
 				;
 
 
+
 FOR_C			: TK_FOR
 			{
 				/*controle de declaraçãoes*/
@@ -497,11 +501,11 @@ FOR_C			: TK_FOR
 				flagContinue = true;
 				flagBreak = true;
 
-                                string labelBeginFor = generateLabel();
+                                string labelIncreaseFor = generateLabel();
                                 string labelEndFor = generateLabel();
 
 				/*empilha os labels*/
-				stackBeginLabels.push_front(labelBeginFor);
+				stackBeginLabels.push_front(labelIncreaseFor);
 				stackEndLabels.push_front(labelEndFor);
 
 			}
@@ -511,12 +515,9 @@ FOR_C			: TK_FOR
 FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
                         {
                                 YYSTYPE notE;
-                                string labelBeginFor = stackBeginLabels.front();
+                                string labelBeginFor = generateLabel();
+                                string labelIncreaseFor = stackBeginLabels.front();
                                 string labelEndFor = stackEndLabels.front();
-
-				size_t pos;
-				string stat = $9.translation;
-				string afterContinue;
 
 
                                 $$.translation =  "\n" + $3.translation + "\n"; /*tradução da inicialização do For, que pode ser vazia*/
@@ -530,21 +531,8 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
                                         $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
                                 }
 
-				if(exprBeforeContinue == true)
-				{
-					pos = $9.translation.find(translationContinue);
-					stat = $9.translation.substr(0,  (pos == 0 ? pos : pos - 1));
-					afterContinue = $9.translation.substr(pos, $9.translation.size());
-				}
-
-                                $$.translation += stat + "\n"; /*tradução: STATEMENT*/
-
-				if(exprBeforeContinue == true)
-				{
-	                                $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
-					$$.translation += afterContinue; /*tradução do continue e dos comandos após (quando há)*/
-				}
-
+				$$.translation += $9.translation + "\n"; /*tradução: STATEMENT*/
+                                $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
                                 $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
                                 $$.translation += "\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
                                 $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
@@ -557,7 +545,6 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				/*controle do continue e do break*/
 				flagContinue = false;
 				flagBreak = false;
-				exprBeforeContinue = false;
 
 				/*desempilha o escopo (para os casos de declaração dentro do for)*/
                                 declarations += getDeclarations();
@@ -575,12 +562,14 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 	        		YYSTYPE op; /*operação de incremento*/
 				YYSTYPE ass; /*atribuição*/
 
-                                string labelBeginFor = stackBeginLabels.front();
+                                string labelBeginFor = generateLabel();
+                                string labelIncreaseFor = stackBeginLabels.front();
                                 string labelEndFor = stackEndLabels.front();
 
-				size_t pos;
-				string stat = $7.translation;
-				string afterContinue;
+
+				/*notifica caso os limitantes não sejam inteiros*/
+				if(($3.type != "int") || ($5.type != "int"))
+					yywarning("counter is not an integer");
 
 				/*realiza o teste lógico (negado)*/
 				expr = runBasicOperation($3, $5, ">");
@@ -605,27 +594,12 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
 				$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
 
-				//$$.translation += $7.translation; /*tradução: STATEMENT*/
 
-				if(exprBeforeContinue == true)
-				{
-					pos = $7.translation.find(translationContinue);
-					stat = $7.translation.substr(0,  pos = (pos == 0 ? pos : pos - 1));
-
-					afterContinue = $7.translation.substr(pos, $7.translation.size());
-				}
-
-                                $$.translation += stat + "\n"; /*tradução: STATEMENT*/
-
-				if(exprBeforeContinue == true)
-				{
-	                                $$.translation += ass.translation + "\n"; /*tradução: da atualização do identicador (atribuição)*/
-					$$.translation += afterContinue; /*tradução do continue e dos comandos após (quando há)*/
-				}
-
+				$$.translation += $7.translation + "\n"; /*tradução: STATEMENT*/
+                                $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
 				$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
-				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginWhile*/
-				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndWhile:*/                                
+				$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
+				$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/                                
 
 
 				/*desempilha os labels*/
@@ -635,7 +609,6 @@ FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';'
 				/*controle do continue e do break*/
 				flagContinue = false;
 				flagBreak = false;
-				exprBeforeContinue = false;
 
 				/*desempilha o escopo (para os casos de declaração dentro do for)*/
                                 declarations += getDeclarations();
@@ -702,9 +675,6 @@ CONTINUE		: TK_CONTINUE
 					/*obtém o primeiro label da pilha de Begins*/
 					string label = stackBeginLabels.front();
 					$$.translation = "\tgoto " + label + ";\n";
-
-					exprBeforeContinue = true;
-					translationContinue = $$.translation;
 				}
 			}
 			;
@@ -764,8 +734,8 @@ E_C			: E
                                         flagIncreaseTranslation = false;
                                         auxIncreaseTranslation = "";
                                 }
-
 			}
+			;
 
 
 
@@ -793,6 +763,7 @@ E                       : '(' E ')'
                         | '(' TYPE ')' TERMINAL /*cast*/
                         {
                                 $$ = runCast($4, $2);
+				$$.translation = $4.translation + $$.translation;
                         }
                         | E TK_OP_SUM E
                         {
@@ -1084,7 +1055,6 @@ COUT                        : TK_COUT '(' E_C ')'
 DECLARATIONS            : DECLARATIONS DECLARATION ';' 
                         {
                                 $$.translation = $1.translation + $2.translation;
-                                declarations += getDeclarations();
                         }
                         |
                         {
@@ -1502,7 +1472,7 @@ TERMINAL        :       TK_INT
                         ;
 
 
-SIGNAL                :        TK_OP_SUM | TK_OP_SUB
+SIGNAL                	: TK_OP_SUM | TK_OP_SUB
                         ;
 
 
@@ -1576,7 +1546,7 @@ void relationalControl(YYSTYPE operation)
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 {
-        YYSTYPE* res;
+        YYSTYPE* res; /*resultado da operação*/
 
         res = new YYSTYPE();
         
@@ -1651,23 +1621,16 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
         else
         {
                 
-                if(to.type == "string")
-                {
-                        res = NULL;//ainda deve ser implementado
-                }
-                else
-                {
-                        modifier = to.modifier;
-                        modifier += (modifier != "" ? " " : "");
+		modifier = to.modifier;
+		modifier += (modifier != "" ? " " : "");
 
-                        res->label = generateID();
-                        res->type = to.type;
-                        res->modifier = to.modifier;
+		res->label = generateID();
+		res->type = to.type;
+		res->modifier = to.modifier;
 
-                        res->translation = from.translation + "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + "\n;";
+		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + "\n;";
 
-                        declare(res->label, res->modifier + res->type, 1);
-                }
+		declare(res->label, res->modifier + res->type, 1); 
         }
 
         return *res;
@@ -1675,39 +1638,34 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
 
 bool verifyCast(string from, string to)
 {
-        if(from == "int" && to == "int")
+        if((from == "int") && (to == "int"))
                 return true;
-        if(from == "float" && to == "float")
+        if((from == "float") && (to == "float"))
                 return true;
-        if(from == "double" && to == "double")
+        if((from == "double") && (to == "double"))
                 return true;
-        if(from == "char" && to == "char")
-                return true;
-
-
-        if ((from == "int" && to == "float") || (from == "float" && to == "int"))
-                return true;
-        if ((from == "int" && to == "double") || (from == "double" && to == "int"))
-                return true;
-        if ((from == "int" && to == "char") || (from == "char" && to == "int"))
+        if((from == "char") && (to == "char"))
                 return true;
 
-        if ((from == "char" && to == "float") || (from == "float" && to == "char"))
+
+        if (((from == "int") && (to == "float")) || ((from == "float") && (to == "int")))
                 return true;
-        if ((from == "char" && to == "double") || (from == "double" && to == "char"))
+        if (((from == "int") && (to == "double")) || ((from == "double") && (to == "int")))
+                return true;
+        if (((from == "int") && (to == "char")) || ((from == "char") && (to == "int")))
                 return true;
 
-        if ((from == "float" && to == "string"))
+        if (((from == "char") && (to == "float") || ((from == "float" && to == "char"))))
                 return true;
-        if ((from == "float" && to == "double") || (from == "double" && to == "float"))
+        if (((from == "char") && (to == "double") || ((from == "double" && to == "char"))))
                 return true;
 
-        if ((from == "double" && to == "string"))
-                return "string";
-        if ((from == "char" && to == "string"))
-                return "string";
-        if ((from == "int" && to == "string"))
-                return "string";
+        if ((from == "float") && (to == "string"))
+                return true;
+        if (((from == "float") && (to == "double")) || ((from == "double") && (to == "float")))
+                return true;
+
+	return false;
 }
 
 
@@ -1758,11 +1716,14 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         id_struct* identifier = findID(id.label);
 
         if(identifier == NULL)
-                yyerror("identifier: '" + id.label + "'  was not declared in this scope.");
+                yyerror("identifier: '" + id.label + "'  was not declared in this scope");
 
         if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
         {
                 //aqui deve-se verificar quais casts são possíveis
+		if(verifyCast(exp.type, id.type) == false)		
+	                yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
+
                 if(id.modifier != "")
                         cast = "(" + identifier->modifier + " " + identifier->type + ") ";
                 else
