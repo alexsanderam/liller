@@ -110,6 +110,9 @@ bool flagDeclarationNotAllowedAux = false;
 bool flagContinue = false;
 bool flagBreak = false;
 
+/*controle para verificar se há uma não constante
+em uma expressão, utilizado no CASE*/
+bool flagNotConstant = false;
 
 int yylex(void);
 void yyerror(string);
@@ -134,7 +137,6 @@ void verifyLabels();
 string getDeclarations();
 void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
-id_struct* defineKeyOperating(string, string, string, string);
 string verifyStrongType(string, string);
 void loadOpearationsMap(void);
 
@@ -644,6 +646,20 @@ LABEL			: TK_ID TK_GO_LABEL
 
 				$$.translation = "\t" + $$.label + ":\n";
 			}
+			| TK_CASE E_C TK_GO_LABEL
+			{
+				/*verifica-se a presença uma não constante na expressão*/
+				if(flagNotConstant)
+					yyerror("case label does not reduce to an integer constant");
+
+				
+				//yyerror("duplicate case value");
+			}
+			| TK_DEFAULT TK_GO_LABEL
+			{
+
+
+			}
 			;
 
 
@@ -734,6 +750,10 @@ E_C			: E
                                         flagIncreaseTranslation = false;
                                         auxIncreaseTranslation = "";
                                 }
+
+				/*controle para verificar se há uma não constante
+				em uma expressão, utilizado no CASE*/
+				flagNotConstant = false;
 			}
 			;
 
@@ -747,22 +767,14 @@ E                       : '(' E ')'
                                 $$.modifier = $2.modifier;                
                         }
                         | TERMINAL
-                        {
-                                $$.translation = $1.translation;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
                         | ATTRIBUITION
-                        {
-                                    $$.translation = $1.translation;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
                         | '(' TYPE ')' TERMINAL /*cast*/
                         {
-                                $$ = runCast($4, $2);
+	                        $$ = runCast($4, $2);
+
+				if($$.label == "")
+			                yyerror("cast from " + $4.type + " to " + $2.type + " not allowed");
+
 				$$.translation = $4.translation + $$.translation;
                         }
                         | E TK_OP_SUM E
@@ -868,26 +880,15 @@ E                       : '(' E ')'
                                 declare($$.label, $$.type, 1);
                         }
                         | INCREASE
-                        {
-                                $$.translation = $1.translation;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
                         | PREV_INCREASE
-                        {
-                                       $$.translation = $1.translation;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
                         ;
+
 
 
 
 INCREASE                : TK_ID TK_OP_INCREASE
                         {
-                                       id_struct* id;
+                                id_struct* id;
                                 string operation;
 
                                 YYSTYPE ass;
@@ -969,7 +970,7 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
 
 
 
-ATTRIBUITION        : TK_ID TK_ASSIGN E
+ATTRIBUITION       	: TK_ID TK_ASSIGN E
                         {
                                 if(findID($1.label) == NULL)
                                         yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
@@ -977,12 +978,6 @@ ATTRIBUITION        : TK_ID TK_ASSIGN E
                                         $$ = assign(voidStr, $1, $3);
                         }
                         | OP_ASSIGN
-                        {
-                                $$.translation = $1.translation;
-                                $$.label = $1.label;
-                                $$.type = $1.type;
-                                $$.modifier = $1.modifier;
-                        }
                         ;      
 
 
@@ -1092,7 +1087,6 @@ DECLARATION        : DECLARATION ',' TK_ID
                         }
                         | DECLARATION ',' TK_ID TK_ASSIGN E
                         {
-                                string cast = "";
                                 string ATTRIBUITION = "";
                                 
                                  identifiers_map* IDMap = stackIDMap.front();
@@ -1431,7 +1425,7 @@ TERMINAL        :       TK_INT
                                 else
                                         $$.translation = "\t" + $$.label + " = 0;\n"; /*false*/
 
-                                declare($$.label, $$.type, 1);
+                                declare($$.label, $$.modifier + " " + $$.type, 1);
                         }
                         | TK_ID
                         {
@@ -1446,6 +1440,10 @@ TERMINAL        :       TK_INT
                                         $$.modifier = id->modifier;
                                         $$.translation = "";
                                 }
+
+				/*controle para verificar se há uma não constante
+				em uma expressão, utilizado no CASE*/
+				flagNotConstant = true;
                         }
                         | SIGNAL TK_ID
                         {
@@ -1468,6 +1466,10 @@ TERMINAL        :       TK_INT
 			
 					declare($$.label, modifier + $$.type, 1);
                                 }
+
+				/*controle para verificar se há uma não constante
+				em uma expressão, utilizado no CASE*/
+				flagNotConstant = true;
                         }
                         ;
 
@@ -1534,7 +1536,7 @@ void relationalControl(YYSTYPE operation)
                 else
                         MSG = "comparisons like ‘X<=Y<=Z’ do not have their mathematical meaning";
 
-                yywarning(MSG);
+                //yywarning(MSG);
                 relationalCounter --;
         }
 
@@ -1547,18 +1549,21 @@ void relationalControl(YYSTYPE operation)
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 {
         YYSTYPE* res; /*resultado da operação*/
-
         res = new YYSTYPE();
         
         string resultOperationType;
-        id_struct* keyOperating;
-        string weakOperatingLabel;
-        string strongOperatingLabel;
+
+	/*operando chave - operando em que o cast 
+	será atribuído, qual este for necessário*/
+        YYSTYPE keyOperating;
+
+	//Tipo forte
+	string strongType;	
 
         res->label = generateID();
-
         res->translation = operand1.translation + operand2.translation;
 
+	/*verifica-se a operação é permitida*/
         resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation);
 
         /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
@@ -1570,37 +1575,28 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
         declare(res->label, res->type, 1);
 
-        if((operand1.modifier == operand2.modifier) && (operand1.type == operand2.type))
+        if(((operand1.modifier == operand2.modifier) || ((operand1.modifier == "") || (operand2.modifier == ""))) && (operand1.type == operand2.type))
         {
                 res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + operand2.label + ";\n";
         }
         else
         {
-                keyOperating = defineKeyOperating(operand1.type, operand1.modifier, operand2.type, operand2.modifier);
+                strongType = verifyStrongType(operand1.type, operand2.type);
 
-
-                string modifier = keyOperating->modifier;
-                modifier += (modifier != "" ? " " : "");
-
-                if(keyOperating->type == operand1.type)
+                if(operand1.type == strongType)
                 {
-                        weakOperatingLabel = operand2.label;
-                        strongOperatingLabel = operand1.label;
+			keyOperating = runCast(operand2, operand1);
 
-                        res->translation += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                        res->translation += "\t" + res->label + " = " + strongOperatingLabel + " " + operation + " " + keyOperating->label + ";\n";
+			res->translation += keyOperating.translation;
+                        res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + keyOperating.label + ";\n";
                 }
                 else
                 {
-                        weakOperatingLabel = operand1.label;
-                        strongOperatingLabel = operand2.label;
+			keyOperating = runCast(operand1, operand2);
 
-                        res->translation += "\t" + keyOperating->label + " = (" + modifier + keyOperating->type + ") " + weakOperatingLabel + ";\n";
-                        res->translation += "\t" + res->label + " = " + keyOperating->label + " " + operation + " " + strongOperatingLabel + ";\n";
+			res->translation += keyOperating.translation;
+                        res->translation += "\t" + res->label + " = " + keyOperating.label + " " + operation + " " + operand2.label + ";\n";
                 }
-
-
-                declare(keyOperating->label, modifier + keyOperating->type, 1);
         }
 
         return *res;
@@ -1612,25 +1608,23 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
 {
         YYSTYPE* res;
 
-        string modifier ;
+        string modifier = "";
 
         res = new YYSTYPE();
 
-        if(!verifyCast(from.type, to.type))
-                yyerror("cast from " + from.type + " to " + to.type + " not allowed.");
-        else
+        if(verifyCast(from.type, to.type))
         {
                 
 		modifier = to.modifier;
-		modifier += (modifier != "" ? " " : "");
+                modifier += (modifier != "" ? " " : "");
 
 		res->label = generateID();
 		res->type = to.type;
 		res->modifier = to.modifier;
 
-		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + "\n;";
+		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
 
-		declare(res->label, res->modifier + res->type, 1); 
+		declare(res->label, modifier + res->type, 1); 
         }
 
         return *res;
@@ -1640,32 +1634,30 @@ bool verifyCast(string from, string to)
 {
         if((from == "int") && (to == "int"))
                 return true;
-        if((from == "float") && (to == "float"))
+        else if((from == "float") && (to == "float"))
                 return true;
-        if((from == "double") && (to == "double"))
+        else if((from == "double") && (to == "double"))
                 return true;
-        if((from == "char") && (to == "char"))
-                return true;
-
-
-        if (((from == "int") && (to == "float")) || ((from == "float") && (to == "int")))
-                return true;
-        if (((from == "int") && (to == "double")) || ((from == "double") && (to == "int")))
-                return true;
-        if (((from == "int") && (to == "char")) || ((from == "char") && (to == "int")))
+        else if((from == "char") && (to == "char"))
                 return true;
 
-        if (((from == "char") && (to == "float") || ((from == "float" && to == "char"))))
+
+        else if (((from == "int") && (to == "float")) || ((from == "float") && (to == "int")))
                 return true;
-        if (((from == "char") && (to == "double") || ((from == "double" && to == "char"))))
+        else if (((from == "int") && (to == "double")) || ((from == "double") && (to == "int")))
+                return true;
+        else if (((from == "int") && (to == "char")) || ((from == "char") && (to == "int")))
                 return true;
 
-        if ((from == "float") && (to == "string"))
+        else if (((from == "char") && (to == "float") || ((from == "float" && to == "char"))))
                 return true;
-        if (((from == "float") && (to == "double")) || ((from == "double") && (to == "float")))
+        else if (((from == "char") && (to == "double") || ((from == "double" && to == "char"))))
                 return true;
 
-	return false;
+        else if (((from == "float") && (to == "double")) || ((from == "double") && (to == "float")))
+                return true;
+	else
+		return false;
 }
 
 
@@ -1709,34 +1701,35 @@ bool isDeclaredCurrentScope(string label)
 
 YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
-        YYSTYPE* res;        
+        YYSTYPE* res; 
         res = new YYSTYPE();
-        string cast = "";
+        YYSTYPE cast;
 
         id_struct* identifier = findID(id.label);
 
         if(identifier == NULL)
                 yyerror("identifier: '" + id.label + "'  was not declared in this scope");
 
-        if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
-        {
-                //aqui deve-se verificar quais casts são possíveis
-		if(verifyCast(exp.type, id.type) == false)		
-	                yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
-
-                if(id.modifier != "")
-                        cast = "(" + identifier->modifier + " " + identifier->type + ") ";
-                else
-                        cast += "(" + identifier->type + ") ";
-        }
-
         res->label = identifier->label;
-        res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + cast + exp.label + ";\n";
         res->type = identifier->type;
         res->modifier = identifier->modifier;
 
-        return *res;
 
+        if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
+        {	
+		cast = runCast(exp, *res); //ou outros testes
+		
+		if(cast.label == "")
+			yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
+
+
+	        res->translation = addtranslation + exp.translation + cast.translation + "\t" + res->label + " = " + cast.label + ";\n";
+        }
+	else
+	        res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
+
+
+        return *res;
 }
 
 
@@ -1877,22 +1870,6 @@ string verifyResultOperation(string op1Type, string op2Type, string sOperator)
         }
         
         return operationsMap[ops];
-}
-
-id_struct* defineKeyOperating(string op1Type, string op1Modifier, string op2Type, string op2Modifier)
-{
-        id_struct* keyOperating = new id_struct;
-        
-        keyOperating->label = generateID();
-
-        keyOperating->type = verifyStrongType(op1Type, op2Type);
-
-        if(keyOperating->type == op1Type)
-                keyOperating->modifier = op1Modifier;
-        else
-                keyOperating->modifier = op2Modifier;
-
-        return keyOperating;
 }
 
 
