@@ -139,6 +139,7 @@ void yywarning(string);
 void openNewScope();
 void closeCurrentScope();
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
+YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE runCast(YYSTYPE, YYSTYPE);
 bool verifyCast(string, string);
 YYSTYPE assign(string, YYSTYPE, YYSTYPE);
@@ -1651,10 +1652,14 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
 	/*operando chave - operando em que o cast 
 	será atribuído, qual este for necessário*/
-        YYSTYPE keyOperating;
+        YYSTYPE keyOperand;
 
 	//Tipo forte
 	string strongType;	
+
+	/*no caso de operação com strings*/
+	if((operand1.type == "string") || (operand2.type == "string"))
+		return stringOperation(operand1, operand2, operation);
 
         res->label = generateID();
         res->translation = operand1.translation + operand2.translation;
@@ -1671,32 +1676,149 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
         declare(res->label, res->type, 1);
 
+
         if(((operand1.modifier == operand2.modifier) || ((operand1.modifier == "") || (operand2.modifier == ""))) && (operand1.type == operand2.type))
         {
                 res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + operand2.label + ";\n";
         }
         else
-        {
-                strongType = verifyStrongType(operand1.type, operand2.type);
+        {	
+		strongType = verifyStrongType(operand1.type, operand2.type);
 
                 if(operand1.type == strongType)
                 {
-			keyOperating = runCast(operand2, operand1);
+			keyOperand = runCast(operand2, operand1);
 
-			res->translation += keyOperating.translation;
-                        res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + keyOperating.label + ";\n";
+			res->translation += keyOperand.translation;
+                        res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + keyOperand.label + ";\n";
                 }
                 else
                 {
-			keyOperating = runCast(operand1, operand2);
+			keyOperand = runCast(operand1, operand2);
 
-			res->translation += keyOperating.translation;
-                        res->translation += "\t" + res->label + " = " + keyOperating.label + " " + operation + " " + operand2.label + ";\n";
+			res->translation += keyOperand.translation;
+                        res->translation += "\t" + res->label + " = " + keyOperand.label + " " + operation + " " + operand2.label + ";\n";
                 }
         }
 
         return *res;
 }
+
+
+
+YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
+{
+
+	YYSTYPE* res;
+	YYSTYPE* auxCmp;
+	YYSTYPE value;
+	YYSTYPE op;
+
+	string resultOperationType;
+
+	/*verifica-se a operação é permitida*/
+        resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation);
+
+	/*se a operação é permitida*/
+	if(resultOperationType != "")
+	{
+		res->type = resultOperationType;
+		res->modifier = "";
+
+
+		/*caso um operando seja de tipo diferente, 
+		converte-o para string*/
+		if(operand1.type != "string")
+			toString(operand1); /*deve-se ainda implentar tal função*/
+		else if(operand2.type != "string")
+			toString(operand2); /*deve-se ainda implentar tal função*/
+
+
+		/*realiza a operação referente*/
+		if(operation == "+")
+		{
+			res->label = generateID();			
+			res->translation += "\tstrcpy(" + res->label + ", " + operand1.label + ");\n";
+			res->translation += "\tstrcat(" + res->label + ", " + operand2.label + ");\n";
+		}
+		else /*no caso de operações relacionais*/
+		{
+			auxCmp = new YYSTYPE();			
+			auxCmp->type = res->type;			
+			auxCmp->modifier = res->modifier;
+			auxCmp->label = generateID();
+
+			auxCmp->translation = "\tstrcmp(" + operand1.label + ", " + operand2.label + ");\n";
+
+			/*realiza a declaração da variável auxiliar*/
+			declare(auxCmp->label, auxCmp->type, 1);	
+
+			/*realiza as comparações devidas*/
+			if(operation == "<")
+			{
+				value = generateIntValue(-1);				
+				op = runBasicOperation(*auxCmp, value, "==");
+
+				res->translation += auxCmp->translation + op.translation;
+				res->label = op.label;
+			}
+			else if(operation == ">")
+			{
+				value = generateIntValue(1);				
+				op = runBasicOperation(*auxCmp, value, "==");
+
+				res->translation += auxCmp->translation + op.translation;
+				res->label = op.label;
+			}
+			else if(operation == "==")
+			{
+				value = generateIntValue(0);				
+				op = runBasicOperation(*auxCmp, value, "==");
+
+				res->translation += auxCmp->translation + op.translation;
+				res->label = op.label;
+			}
+			else if(operation == "<=")
+			{
+				YYSTYPE op2;				
+				YYSTYPE opOr;
+
+				value = generateIntValue(-1);
+				op = runBasicOperation(*auxCmp, value, "==");
+				
+				value = generateIntValue(0);
+				op2 = runBasicOperation(*auxCmp, value, "==");
+
+				opOr = runBasicOperation(*auxCmp, value, "||");
+
+				res->translation += auxCmp->translation + op.translation + op2.translation + opOr.translation;
+				res->label = opOr.label;
+			}
+			else if(operation == ">=")
+			{
+				YYSTYPE op2;				
+				YYSTYPE opOr;
+
+				value = generateIntValue(1);
+				op = runBasicOperation(*auxCmp, value, "==");
+				
+				value = generateIntValue(0);
+				op2 = runBasicOperation(*auxCmp, value, "==");
+
+				opOr = runBasicOperation(*auxCmp, value, "||");
+
+				res->translation += auxCmp->translation + op.translation + op2.translation + opOr.translation;
+				res->label = opOr.label;
+			}
+
+		}		
+		
+		declare(res->label, res->type, 1);
+	}
+			
+	return *res;
+}
+
 
 
 

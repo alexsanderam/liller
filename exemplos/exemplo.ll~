@@ -4,18 +4,7 @@ int main()
 {	
 	int i = 0;
 
-	switch(i+1)
-	{
-		case 0:
-			cout(22222222);
-		case 1:
-			cout(333333);
-		case 2:
-			cout(2);
-		default:
-			cout("desconhecido");
-			
-	}
+	for(int j; j < 10; j++);
 
 	return 0;
 }
