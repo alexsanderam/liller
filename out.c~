@@ -7,124 +7,81 @@
 using namespace std;
 
 /*============Variáveis globais==============*/
-	int _temp0;
-	int _temp1;
 
 int main()
 {
-	int _temp10;
-	string _temp11;
-	int _temp12;
-	int _temp13;
-	string _temp14;
-	string _temp15;
-	int _temp16;
-	int _temp8;
-	int _temp9;
-	int _temp17;
-	int _temp18;
-	string _temp19;
-	int _temp2;
-	string _temp20;
-	int _temp21;
-	int _temp22;
-	int _temp23;
-	int _temp24;
-	string _temp25;
-	int _temp26;
-	int _temp27;
-	int _temp3;
+	string _temp10;
 	int _temp4;
 	int _temp5;
 	int _temp6;
 	int _temp7;
+	int _temp8;
+	int _temp9;
+	int _temp0;
+	int _temp1;
+	int _temp11;
+	int _temp12;
+	int _temp13;
+	int _temp14;
+	int _temp2;
+	int _temp3;
 
-	_temp0 = 150;
+
+	_temp0 = 0;
 	_temp1 = _temp0;
 
 	_temp2 = 1;
-	_temp3 = _temp2;
-
+	_temp3 = _temp1 + _temp2;
+	_temp2 = 1;
+	_temp3 = _temp1 + _temp2;
 	_temp4 = 0;
-	_temp5 = _temp4;
-
-	_temp6 = 2;
-	_temp7 = _temp3 < _temp6;
-	_temp22 = !_temp7;
-
-	if(_temp22)
-		goto _tempLabel4;
-
-
-	_temp9 = 2;
-	_temp10 = _temp5 + _temp9;
-	_temp5 = _temp10;
-
-	_temp11 = "Entrou no If(1)";
-
-	cout << _temp11 << endl;
-
-	_temp12 = 3;
-	_temp13 = _temp5 > _temp12;
-	_temp16 = !_temp13;
-
-	if(_temp16)
-		goto _tempLabel0;
-
-	_temp14 = "Entrou no If(1.2)";
-
-	cout << _temp14 << endl;
+	_temp11 = _temp3 == _temp4;
+	if(_temp11)
 
 		goto _tempLabel1;
+	_temp2 = 1;
+	_temp3 = _temp1 + _temp2;
+	_temp6 = 1;
+	_temp12 = _temp3 == _temp6;
+	if(_temp12)
 
-	_tempLabel0:
-	_temp15 = "Entrou no Else(1.2)";
-
-	cout << _temp15 << endl;
-
-	_tempLabel1:
-
-
-		goto _tempLabel5;
-
-	_tempLabel4:
-	_temp17 = 2;
-	_temp18 = _temp3 == _temp17;
-	_temp21 = !_temp18;
-
-	if(_temp21)
 		goto _tempLabel2;
-
-	_temp19 = "Entrou no ElseIf(1.1)";
-
-	cout << _temp19 << endl;
+	_temp2 = 1;
+	_temp3 = _temp1 + _temp2;
+	_temp8 = 2;
+	_temp13 = _temp3 == _temp8;
+	if(_temp13)
 
 		goto _tempLabel3;
 
+	goto _default;
+	_temp4 = 0;
+	_tempLabel1:
+	_temp5 = 22222222;
+
+	cout << _temp5 << endl;
+
+	_temp6 = 1;
 	_tempLabel2:
-	_temp20 = "Entrou no Else(1)";
+	_temp7 = 333333;
 
-	cout << _temp20 << endl;
+	cout << _temp7 << endl;
 
+	_temp8 = 2;
 	_tempLabel3:
+	_temp9 = 2;
 
-	_tempLabel5:
+	cout << _temp9 << endl;
 
-	_temp23 = 3;
-	_temp24 = _temp3 != _temp23;
-	_temp26 = !_temp24;
+	_default:
+	_temp10 = "desconhecido";
 
-	if(_temp26)
-		goto _tempLabel6;
+	cout << _temp10 << endl;
 
-	_temp25 = "Entrou no If(2), pois i == 3";
+	_tempLabel0:
 
-	cout << _temp25 << endl;
+	_temp14 = 0;
 
-	_tempLabel6:
-
-	_temp27 = 0;
-
-	return _temp27;
+	return _temp14;
 }
 

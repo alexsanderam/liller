@@ -29,6 +29,7 @@ typedef struct
 	unsigned int line;
 } label_struct;
 
+
 struct args
 {
         string label;
@@ -63,9 +64,19 @@ typedef struct
         unsigned int size; /*nos casos de string*/
 } variable_declarations_struct;
 
+
+typedef struct
+{
+	string newLabel;
+	YYSTYPE defCase;
+} case_label_struct;
+
+
 typedef map<string, id_struct> identifiers_map;
 typedef map<string, variable_declarations_struct> declarations_map;
 typedef map<string, label_struct> labels_map;
+typedef map<string, case_label_struct> case_label_map;
+				
 
 
 /*pilhas para controle de escopo*/
@@ -75,9 +86,12 @@ list<declarations_map*> stackDeclarationsMap;
 /*mapa de rótulos*/
 labels_map labelMap;
 
-/*pilhas (na verdade lsitas) de rótulos - usado nos comandos break e continue*/
+/*pilhas (na verdade listas) de rótulos - usado nos comandos break e continue*/
 list<string> stackBeginLabels;
 list<string> stackEndLabels;
+
+/*pilha de rótulos para o comando case*/
+list<case_label_map*>  stackCaseLabel;
 
 /*mapa de operações permititdas*/
 map<operation_struct, string> operationsMap;
@@ -113,6 +127,10 @@ bool flagBreak = false;
 /*controle para verificar se há uma não constante
 em uma expressão, utilizado no CASE*/
 bool flagNotConstant = false;
+
+/*controle para verificar se há um CASE (ou um DEFAULT)
+fora de um switch*/
+bool flagWithinSwitch = false;
 
 int yylex(void);
 void yyerror(string);
@@ -268,6 +286,7 @@ COMMANDS        	: STATEMENT COMMANDS
                         ;
 
 
+
 STATEMENT               : E_C ';'
                         | RETURN ';'
                         | COUT ';'
@@ -288,10 +307,14 @@ STATEMENT               : E_C ';'
 			| LABEL STATEMENT
 			{
 				$$.translation = $1.translation + $2.translation;
+				$$.label = $2.label;
+				$$.type = $2.type;
+				$$.modifier = $2.modifier;
 			}
 			| GOTO ';'
 			| CONTINUE ';'
 			| BREAK ';'
+			| SWITCH
                         | ';'
                         {
                                 $$.translation = "";
@@ -651,17 +674,49 @@ LABEL			: TK_ID TK_GO_LABEL
 			}
 			| TK_CASE E_C TK_GO_LABEL
 			{
-				/*verifica-se a presença uma não constante na expressão*/
-				if(flagNotConstant)
+				case_label_map* caseLabelMap = stackCaseLabel.front();
+				string newLabel;
+
+
+				/*verifica-se a presença de uma não constante na expressão*/
+				if(flagNotConstant == true)
 					yyerror("case label does not reduce to an integer constant");
 
-				
-				//yyerror("duplicate case value");
+				/*verifica se o case está dentro de um switch*/
+				else if (flagWithinSwitch == false)
+					yyerror("case label not within a switch statement");
+
+				/*verifica se já existe um case com o mesmo valor*/
+				else if (caseLabelMap->find($2.label) != caseLabelMap->end())
+					yyerror("duplicate case value");
+				else
+				{
+					newLabel = generateLabel();
+
+					$$.translation = $2.translation + "\t" + newLabel + ":\n";
+					caseLabelMap->insert(case_label_map::value_type($2.label, {newLabel, $2}));
+				}
 			}
 			| TK_DEFAULT TK_GO_LABEL
 			{
+				case_label_map* caseLabelMap = stackCaseLabel.front();
+				string newLabel;
 
+				/*verifica se o default está dentro de um switch*/
+				if (flagWithinSwitch == false)
+					yyerror("‘default’ label not within a switch statement");
 
+				/*verifica se já existe um outro default no switch*/
+				else if (caseLabelMap->find($1.translation) != caseLabelMap->end())
+					yyerror("multiple default labels in one switch");
+
+				else
+				{
+					newLabel = "_default";				
+					
+					$$.translation = "\t" + newLabel + ":\n"; 
+					caseLabelMap->insert(case_label_map::value_type($1.translation, {newLabel, $1}));
+				}
 			}
 			;
 
@@ -714,31 +769,69 @@ BREAK			: TK_BREAK
 			;
 
 
-/*SWITCH_C		: TK_SWITCH
+SWITCH_C		: TK_SWITCH
 			{
 				/*controle do break*/
-/*				flagBreak = true;
+				flagBreak = true;
+				
+				/*controle do case e do default*/
+				flagWithinSwitch = true;
+
+                                string labelEndSwitch = generateLabel();
+
+				/*empilha os labels*/
+				stackEndLabels.push_front(labelEndSwitch);
+
+				/*insere um novo mapa de rótulos de case na pilha*/
+				case_label_map* caseLabelMap = new case_label_map();
+				stackCaseLabel.push_front(caseLabelMap);
 			}
 			;
 
 
-SWITCH			: TK_SWITCH '(' E_C ')' CASES
+SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
 			{
+				YYSTYPE ass;
+				YYSTYPE op;
+
+				string labelEndSwitch = stackEndLabels.front();
+
+				$$.translation = $3.translation;
+
+				case_label_map* caseLabelMap = stackCaseLabel.front();
+				case_label_map::iterator i;
+        
+				for(i = caseLabelMap->begin(); i != caseLabelMap->end(); i++)
+				{                        
+					if(i->first != "default")
+					{
+						op = runBasicOperation($3, i->second.defCase, "==");
+	  									
+						$$.translation += op.translation + "\tif(" + op.label + ")\n";
+						$$.translation += "\n\t\tgoto " + i->second.newLabel + ";\n";
+					}
+					else
+						$$.translation += "\n\tgoto " + i->second.newLabel + ";\n";
+				}
+
+				$$.translation += $5.translation; /*tradução do statement*/
+				$$.translation += "\t" + labelEndSwitch + ":\n";
+
+
+				/*desempilha o label de fim*/
+				stackEndLabels.pop_front();
+	
+				/*desempilha o case*/
+				stackCaseLabel.pop_front();
+
 				/*controle do break*/
-/*				flagBreak = false;
+				flagBreak = false;
+
+				/*controle do case e do default*/
+				flagWithinSwitch = false;
 			}
 			;
 
-
-CASES			: CASES CASE
-			| TK_DEFAULT ':' COMMANDS
-			| STATEMENT
-			;
-
-CASE			: TK_CASE E_C ':' COMMANDS
-			|
-			;
-*/
 
 
 E_C			: E
