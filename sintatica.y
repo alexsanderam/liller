@@ -285,7 +285,10 @@ STATEMENT               : E_C ';'
                         | WHILE
                         | DO_WHILE
                         | FOR
-			| LABEL
+			| LABEL STATEMENT
+			{
+				$$.translation = $1.translation + $2.translation;
+			}
 			| GOTO ';'
 			| CONTINUE ';'
 			| BREAK ';'

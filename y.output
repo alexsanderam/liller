@@ -3,14 +3,12 @@ Terminals unused in grammar
    TK_END
    TK_ERROR
    TK_SWITCH
-   TK_CASE
-   TK_DEFAULT
    TK_EACH
    TK_OP_LESS_LESS
    ELSE
 
 
-State 197 conflicts: 1 shift/reduce
+State 203 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -42,7 +40,7 @@ Grammar
    16          | WHILE
    17          | DO_WHILE
    18          | FOR
-   19          | LABEL
+   19          | LABEL STATEMENT
    20          | GOTO ';'
    21          | CONTINUE ';'
    22          | BREAK ';'
@@ -78,175 +76,177 @@ Grammar
    40    | FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
 
    41 LABEL: TK_ID TK_GO_LABEL
+   42      | TK_CASE E_C TK_GO_LABEL
+   43      | TK_DEFAULT TK_GO_LABEL
 
-   42 GOTO: TK_GOTO TK_ID
+   44 GOTO: TK_GOTO TK_ID
 
-   43 CONTINUE: TK_CONTINUE
+   45 CONTINUE: TK_CONTINUE
 
-   44 BREAK: TK_BREAK
+   46 BREAK: TK_BREAK
 
-   45 E_C: E
+   47 E_C: E
 
-   46 E: '(' E ')'
-   47  | TERMINAL
-   48  | ATTRIBUITION
-   49  | '(' TYPE ')' TERMINAL
-   50  | E TK_OP_SUM E
-   51  | E TK_OP_SUB E
-   52  | E TK_OP_MUL E
-   53  | E TK_OP_DIV E
-   54  | E TK_OP_MOD E
-   55  | E TK_OP_LOGIC_OR E
-   56  | E TK_OP_LOGIC_AND E
-   57  | E TK_OP_REL_EQ E
-   58  | E TK_OP_REL_DIFF E
-   59  | E TK_OP_REL_LESS E
-   60  | E TK_OP_REL_GREATER E
-   61  | E TK_OP_REL_EQLESS E
-   62  | E TK_OP_REL_EQGREATER E
-   63  | E TK_OP_BIN_AND E
-   64  | E TK_OP_BIN_OR E
-   65  | E TK_OP_BIN_XOR E
-   66  | E TK_OP_BIN_SHIFTR E
-   67  | E TK_OP_BIN_SHIFTL E
-   68  | TK_OP_LOGIC_NOT E
-   69  | TK_OP_BIN_NOT E
-   70  | INCREASE
-   71  | PREV_INCREASE
+   48 E: '(' E ')'
+   49  | TERMINAL
+   50  | ATTRIBUITION
+   51  | '(' TYPE ')' TERMINAL
+   52  | E TK_OP_SUM E
+   53  | E TK_OP_SUB E
+   54  | E TK_OP_MUL E
+   55  | E TK_OP_DIV E
+   56  | E TK_OP_MOD E
+   57  | E TK_OP_LOGIC_OR E
+   58  | E TK_OP_LOGIC_AND E
+   59  | E TK_OP_REL_EQ E
+   60  | E TK_OP_REL_DIFF E
+   61  | E TK_OP_REL_LESS E
+   62  | E TK_OP_REL_GREATER E
+   63  | E TK_OP_REL_EQLESS E
+   64  | E TK_OP_REL_EQGREATER E
+   65  | E TK_OP_BIN_AND E
+   66  | E TK_OP_BIN_OR E
+   67  | E TK_OP_BIN_XOR E
+   68  | E TK_OP_BIN_SHIFTR E
+   69  | E TK_OP_BIN_SHIFTL E
+   70  | TK_OP_LOGIC_NOT E
+   71  | TK_OP_BIN_NOT E
+   72  | INCREASE
+   73  | PREV_INCREASE
 
-   72 INCREASE: TK_ID TK_OP_INCREASE
+   74 INCREASE: TK_ID TK_OP_INCREASE
 
-   73 PREV_INCREASE: TK_OP_INCREASE TK_ID
+   75 PREV_INCREASE: TK_OP_INCREASE TK_ID
 
-   74 ATTRIBUITION: TK_ID TK_ASSIGN E
-   75             | OP_ASSIGN
+   76 ATTRIBUITION: TK_ID TK_ASSIGN E
+   77             | OP_ASSIGN
 
-   76 OP_ASSIGN: TK_ID TK_OP_ASSIGN E
+   78 OP_ASSIGN: TK_ID TK_OP_ASSIGN E
 
-   77 COUT: TK_COUT '(' E_C ')'
+   79 COUT: TK_COUT '(' E_C ')'
 
-   78 DECLARATIONS: DECLARATIONS DECLARATION ';'
-   79             | /* empty */
+   80 DECLARATIONS: DECLARATIONS DECLARATION ';'
+   81             | /* empty */
 
-   80 DECLARATION: DECLARATION ',' TK_ID
-   81            | DECLARATION ',' TK_ID TK_ASSIGN E
-   82            | TYPE TK_ID
-   83            | TYPE TK_ID TK_ASSIGN E
+   82 DECLARATION: DECLARATION ',' TK_ID
+   83            | DECLARATION ',' TK_ID TK_ASSIGN E
+   84            | TYPE TK_ID
+   85            | TYPE TK_ID TK_ASSIGN E
 
-   84 TYPE: TK_TYPE_CHAR
-   85     | TK_TYPE_STRING
-   86     | TK_TYPE_INT
-   87     | TK_TYPE_VOID
-   88     | TK_TYPE_FLOAT
-   89     | TK_TYPE_DOUBLE
-   90     | TK_TYPE_BOOL
-   91     | TK_MODIFIER_UNSIGNED TK_TYPE_CHAR
-   92     | TK_MODIFIER_SIGNED TK_TYPE_CHAR
-   93     | TK_MODIFIER_UNSIGNED TK_TYPE_INT
-   94     | TK_MODIFIER_SIGNED TK_TYPE_INT
-   95     | TK_MODIFIER_SHORT TK_TYPE_INT
-   96     | TK_MODIFIER_LONG TK_TYPE_INT
-   97     | TK_MODIFIER_LONG TK_TYPE_DOUBLE
-   98     | TK_MODIFIER_SHORT
-   99     | TK_MODIFIER_LONG
-  100     | TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT
-  101     | TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT
-  102     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT
-  103     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT
-  104     | TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-  105     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-  106     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-  107     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
-  108     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
+   86 TYPE: TK_TYPE_CHAR
+   87     | TK_TYPE_STRING
+   88     | TK_TYPE_INT
+   89     | TK_TYPE_VOID
+   90     | TK_TYPE_FLOAT
+   91     | TK_TYPE_DOUBLE
+   92     | TK_TYPE_BOOL
+   93     | TK_MODIFIER_UNSIGNED TK_TYPE_CHAR
+   94     | TK_MODIFIER_SIGNED TK_TYPE_CHAR
+   95     | TK_MODIFIER_UNSIGNED TK_TYPE_INT
+   96     | TK_MODIFIER_SIGNED TK_TYPE_INT
+   97     | TK_MODIFIER_SHORT TK_TYPE_INT
+   98     | TK_MODIFIER_LONG TK_TYPE_INT
+   99     | TK_MODIFIER_LONG TK_TYPE_DOUBLE
+  100     | TK_MODIFIER_SHORT
+  101     | TK_MODIFIER_LONG
+  102     | TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT
+  103     | TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT
+  104     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT
+  105     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT
+  106     | TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+  107     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+  108     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+  109     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
+  110     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG
 
-  109 TERMINAL: TK_INT
-  110         | TK_FLOAT
-  111         | TK_SCIENTIFIC
-  112         | TK_CHAR
-  113         | SIGNAL TK_INT
-  114         | SIGNAL TK_FLOAT
-  115         | SIGNAL TK_SCIENTIFIC
-  116         | SIGNAL TK_CHAR
-  117         | TK_STRING
-  118         | TK_BOOL
-  119         | TK_ID
-  120         | SIGNAL TK_ID
+  111 TERMINAL: TK_INT
+  112         | TK_FLOAT
+  113         | TK_SCIENTIFIC
+  114         | TK_CHAR
+  115         | SIGNAL TK_INT
+  116         | SIGNAL TK_FLOAT
+  117         | SIGNAL TK_SCIENTIFIC
+  118         | SIGNAL TK_CHAR
+  119         | TK_STRING
+  120         | TK_BOOL
+  121         | TK_ID
+  122         | SIGNAL TK_ID
 
-  121 SIGNAL: TK_OP_SUM
-  122       | TK_OP_SUB
+  123 SIGNAL: TK_OP_SUM
+  124       | TK_OP_SUB
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 3 4 26 27 29 31 39 40 46 49 77
-')' (41) 3 4 26 27 29 31 39 40 46 49 77
-',' (44) 80 81
-';' (59) 10 11 12 13 20 21 22 23 31 39 78
+'(' (40) 3 4 26 27 29 31 39 40 48 51 79
+')' (41) 3 4 26 27 29 31 39 40 48 51 79
+',' (44) 82 83
+';' (59) 10 11 12 13 20 21 22 23 31 39 80
 '{' (123) 6
 '}' (125) 7
 error (256)
-TK_INT (258) 109 113
-TK_FLOAT (259) 110 114
-TK_SCIENTIFIC (260) 111 115
-TK_CHAR (261) 112 116
-TK_STRING (262) 117
-TK_BOOL (263) 118
+TK_INT (258) 111 115
+TK_FLOAT (259) 112 116
+TK_SCIENTIFIC (260) 113 117
+TK_CHAR (261) 114 118
+TK_STRING (262) 119
+TK_BOOL (263) 120
 TK_MAIN (264) 3 4
-TK_ID (265) 41 42 72 73 74 76 80 81 82 83 119 120
-TK_TYPE_CHAR (266) 84 91 92
-TK_TYPE_STRING (267) 85
-TK_TYPE_INT (268) 3 4 86 93 94 95 96 100 101 102 103 104 105 106
-TK_TYPE_VOID (269) 3 87
-TK_TYPE_FLOAT (270) 88
-TK_TYPE_DOUBLE (271) 89 97
-TK_TYPE_BOOL (272) 90
-TK_MODIFIER_UNSIGNED (273) 91 93 100 102 105 107
-TK_MODIFIER_SIGNED (274) 92 94 101 103 106 108
-TK_MODIFIER_SHORT (275) 95 98 100 101
-TK_MODIFIER_LONG (276) 96 97 99 102 103 104 105 106 107 108
+TK_ID (265) 41 44 74 75 76 78 82 83 84 85 121 122
+TK_TYPE_CHAR (266) 86 93 94
+TK_TYPE_STRING (267) 87
+TK_TYPE_INT (268) 3 4 88 95 96 97 98 102 103 104 105 106 107 108
+TK_TYPE_VOID (269) 3 89
+TK_TYPE_FLOAT (270) 90
+TK_TYPE_DOUBLE (271) 91 99
+TK_TYPE_BOOL (272) 92
+TK_MODIFIER_UNSIGNED (273) 93 95 102 104 107 109
+TK_MODIFIER_SIGNED (274) 94 96 103 105 108 110
+TK_MODIFIER_SHORT (275) 97 100 102 103
+TK_MODIFIER_LONG (276) 98 99 101 104 105 106 107 108 109 110
 TK_END (277)
 TK_ERROR (278)
-TK_OP_SUM (279) 50 121
-TK_OP_SUB (280) 51 122
-TK_OP_MUL (281) 52
-TK_OP_DIV (282) 53
-TK_OP_MOD (283) 54
-TK_OP_REL_LESS (284) 59
-TK_OP_REL_GREATER (285) 60
-TK_OP_REL_EQLESS (286) 61
-TK_OP_REL_EQGREATER (287) 62
-TK_OP_REL_EQ (288) 57
-TK_OP_REL_DIFF (289) 58
-TK_OP_LOGIC_AND (290) 56
-TK_OP_LOGIC_OR (291) 55
-TK_OP_LOGIC_NOT (292) 68
-TK_OP_BIN_AND (293) 63
-TK_OP_BIN_OR (294) 64
-TK_OP_BIN_XOR (295) 65
-TK_OP_BIN_NOT (296) 69
-TK_OP_BIN_SHIFTR (297) 66
-TK_OP_BIN_SHIFTL (298) 67
-TK_ASSIGN (299) 74 81 83
+TK_OP_SUM (279) 52 123
+TK_OP_SUB (280) 53 124
+TK_OP_MUL (281) 54
+TK_OP_DIV (282) 55
+TK_OP_MOD (283) 56
+TK_OP_REL_LESS (284) 61
+TK_OP_REL_GREATER (285) 62
+TK_OP_REL_EQLESS (286) 63
+TK_OP_REL_EQGREATER (287) 64
+TK_OP_REL_EQ (288) 59
+TK_OP_REL_DIFF (289) 60
+TK_OP_LOGIC_AND (290) 58
+TK_OP_LOGIC_OR (291) 57
+TK_OP_LOGIC_NOT (292) 70
+TK_OP_BIN_AND (293) 65
+TK_OP_BIN_OR (294) 66
+TK_OP_BIN_XOR (295) 67
+TK_OP_BIN_NOT (296) 71
+TK_OP_BIN_SHIFTR (297) 68
+TK_OP_BIN_SHIFTL (298) 69
+TK_ASSIGN (299) 76 83 85
 TK_RETURN (300) 24
-TK_COUT (301) 77
+TK_COUT (301) 79
 TK_IF (302) 25
 TK_ELSE (303) 27
 TK_SWITCH (304)
-TK_CASE (305)
-TK_DEFAULT (306)
+TK_CASE (305) 42
+TK_DEFAULT (306) 43
 TK_FOR (307) 38
 TK_EACH (308)
 TK_WHILE (309) 28 31
 TK_DO (310) 30
-TK_BREAK (311) 44
-TK_CONTINUE (312) 43
-TK_GOTO (313) 42
-TK_OP_INCREASE (314) 72 73
+TK_BREAK (311) 46
+TK_CONTINUE (312) 45
+TK_GOTO (313) 44
+TK_OP_INCREASE (314) 74 75
 TK_OP_LESS_LESS (315)
-TK_OP_ASSIGN (316) 76
+TK_OP_ASSIGN (316) 78
 TK_DOT_DOT (317) 40
-TK_GO_LABEL (318) 41
+TK_GO_LABEL (318) 41 42 43
 IFX (319)
 ELSE (320)
 
@@ -271,7 +271,7 @@ COMMANDS (79)
     on left: 8 9, on right: 5 8
 STATEMENT (80)
     on left: 10 11 12 13 14 15 16 17 18 19 20 21 22 23, on right: 8
-    26 27 29 31 39 40
+    19 26 27 29 31 39 40
 RETURN (81)
     on left: 24, on right: 11
 IF_C (82)
@@ -297,41 +297,41 @@ FOR_C (91)
 FOR (92)
     on left: 39 40, on right: 18
 LABEL (93)
-    on left: 41, on right: 19
+    on left: 41 42 43, on right: 19
 GOTO (94)
-    on left: 42, on right: 20
+    on left: 44, on right: 20
 CONTINUE (95)
-    on left: 43, on right: 21
+    on left: 45, on right: 21
 BREAK (96)
-    on left: 44, on right: 22
+    on left: 46, on right: 22
 E_C (97)
-    on left: 45, on right: 10 24 26 27 29 31 32 77
+    on left: 47, on right: 10 24 26 27 29 31 32 42 79
 E (98)
-    on left: 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
-    64 65 66 67 68 69 70 71, on right: 45 46 50 51 52 53 54 55 56 57
-    58 59 60 61 62 63 64 65 66 67 68 69 74 76 81 83
+    on left: 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65
+    66 67 68 69 70 71 72 73, on right: 47 48 52 53 54 55 56 57 58 59
+    60 61 62 63 64 65 66 67 68 69 70 71 76 78 83 85
 INCREASE (99)
-    on left: 72, on right: 70
+    on left: 74, on right: 72
 PREV_INCREASE (100)
-    on left: 73, on right: 71
+    on left: 75, on right: 73
 ATTRIBUITION (101)
-    on left: 74 75, on right: 36 48
+    on left: 76 77, on right: 36 50
 OP_ASSIGN (102)
-    on left: 76, on right: 75
+    on left: 78, on right: 77
 COUT (103)
-    on left: 77, on right: 12
+    on left: 79, on right: 12
 DECLARATIONS (104)
-    on left: 78 79, on right: 1 78
+    on left: 80 81, on right: 1 80
 DECLARATION (105)
-    on left: 80 81 82 83, on right: 13 35 78 80 81
+    on left: 82 83 84 85, on right: 13 35 80 82 83
 TYPE (106)
-    on left: 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101
-    102 103 104 105 106 107 108, on right: 49 82 83
+    on left: 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102
+    103 104 105 106 107 108 109 110, on right: 51 84 85
 TERMINAL (107)
-    on left: 109 110 111 112 113 114 115 116 117 118 119 120, on right:
-    37 40 47 49
+    on left: 111 112 113 114 115 116 117 118 119 120 121 122, on right:
+    37 40 49 51
 SIGNAL (108)
-    on left: 121 122, on right: 113 114 115 116 120
+    on left: 123 124, on right: 115 116 117 118 122
 
 
 state 0
@@ -355,7 +355,7 @@ state 2
 
     1 BEGIN: START . DECLARATIONS MAIN SCOPE
 
-    $default  reduce using rule 79 (DECLARATIONS)
+    $default  reduce using rule 81 (DECLARATIONS)
 
     DECLARATIONS  go to state 4
 
@@ -370,7 +370,7 @@ state 3
 state 4
 
     1 BEGIN: START DECLARATIONS . MAIN SCOPE
-   78 DECLARATIONS: DECLARATIONS . DECLARATION ';'
+   80 DECLARATIONS: DECLARATIONS . DECLARATION ';'
 
     TK_TYPE_CHAR          shift, and go to state 5
     TK_TYPE_STRING        shift, and go to state 6
@@ -391,65 +391,65 @@ state 4
 
 state 5
 
-   84 TYPE: TK_TYPE_CHAR .
+   86 TYPE: TK_TYPE_CHAR .
 
-    $default  reduce using rule 84 (TYPE)
+    $default  reduce using rule 86 (TYPE)
 
 
 state 6
 
-   85 TYPE: TK_TYPE_STRING .
+   87 TYPE: TK_TYPE_STRING .
 
-    $default  reduce using rule 85 (TYPE)
+    $default  reduce using rule 87 (TYPE)
 
 
 state 7
 
     3 MAIN: TK_TYPE_INT . TK_MAIN '(' TK_TYPE_VOID ')'
     4     | TK_TYPE_INT . TK_MAIN '(' ')'
-   86 TYPE: TK_TYPE_INT .
+   88 TYPE: TK_TYPE_INT .
 
     TK_MAIN  shift, and go to state 19
-
-    $default  reduce using rule 86 (TYPE)
-
-
-state 8
-
-   87 TYPE: TK_TYPE_VOID .
-
-    $default  reduce using rule 87 (TYPE)
-
-
-state 9
-
-   88 TYPE: TK_TYPE_FLOAT .
 
     $default  reduce using rule 88 (TYPE)
 
 
-state 10
+state 8
 
-   89 TYPE: TK_TYPE_DOUBLE .
+   89 TYPE: TK_TYPE_VOID .
 
     $default  reduce using rule 89 (TYPE)
 
 
-state 11
+state 9
 
-   90 TYPE: TK_TYPE_BOOL .
+   90 TYPE: TK_TYPE_FLOAT .
 
     $default  reduce using rule 90 (TYPE)
 
 
+state 10
+
+   91 TYPE: TK_TYPE_DOUBLE .
+
+    $default  reduce using rule 91 (TYPE)
+
+
+state 11
+
+   92 TYPE: TK_TYPE_BOOL .
+
+    $default  reduce using rule 92 (TYPE)
+
+
 state 12
 
-   91 TYPE: TK_MODIFIER_UNSIGNED . TK_TYPE_CHAR
-   93     | TK_MODIFIER_UNSIGNED . TK_TYPE_INT
-  100     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_SHORT TK_TYPE_INT
-  102     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_TYPE_INT
-  105     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-  107     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG
+   93 TYPE: TK_MODIFIER_UNSIGNED . TK_TYPE_CHAR
+   95     | TK_MODIFIER_UNSIGNED . TK_TYPE_INT
+  102     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_SHORT TK_TYPE_INT
+  104     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_TYPE_INT
+  107     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+  109     | TK_MODIFIER_UNSIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG
 
     TK_TYPE_CHAR       shift, and go to state 20
     TK_TYPE_INT        shift, and go to state 21
@@ -459,12 +459,12 @@ state 12
 
 state 13
 
-   92 TYPE: TK_MODIFIER_SIGNED . TK_TYPE_CHAR
-   94     | TK_MODIFIER_SIGNED . TK_TYPE_INT
-  101     | TK_MODIFIER_SIGNED . TK_MODIFIER_SHORT TK_TYPE_INT
-  103     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_TYPE_INT
-  106     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
-  108     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG
+   94 TYPE: TK_MODIFIER_SIGNED . TK_TYPE_CHAR
+   96     | TK_MODIFIER_SIGNED . TK_TYPE_INT
+  103     | TK_MODIFIER_SIGNED . TK_MODIFIER_SHORT TK_TYPE_INT
+  105     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_TYPE_INT
+  108     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT
+  110     | TK_MODIFIER_SIGNED . TK_MODIFIER_LONG TK_MODIFIER_LONG
 
     TK_TYPE_CHAR       shift, and go to state 24
     TK_TYPE_INT        shift, and go to state 25
@@ -474,26 +474,26 @@ state 13
 
 state 14
 
-   95 TYPE: TK_MODIFIER_SHORT . TK_TYPE_INT
-   98     | TK_MODIFIER_SHORT .
+   97 TYPE: TK_MODIFIER_SHORT . TK_TYPE_INT
+  100     | TK_MODIFIER_SHORT .
 
     TK_TYPE_INT  shift, and go to state 28
 
-    $default  reduce using rule 98 (TYPE)
+    $default  reduce using rule 100 (TYPE)
 
 
 state 15
 
-   96 TYPE: TK_MODIFIER_LONG . TK_TYPE_INT
-   97     | TK_MODIFIER_LONG . TK_TYPE_DOUBLE
-   99     | TK_MODIFIER_LONG .
-  104     | TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
+   98 TYPE: TK_MODIFIER_LONG . TK_TYPE_INT
+   99     | TK_MODIFIER_LONG . TK_TYPE_DOUBLE
+  101     | TK_MODIFIER_LONG .
+  106     | TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
 
     TK_TYPE_INT       shift, and go to state 29
     TK_TYPE_DOUBLE    shift, and go to state 30
     TK_MODIFIER_LONG  shift, and go to state 31
 
-    $default  reduce using rule 99 (TYPE)
+    $default  reduce using rule 101 (TYPE)
 
 
 state 16
@@ -508,9 +508,9 @@ state 16
 
 state 17
 
-   78 DECLARATIONS: DECLARATIONS DECLARATION . ';'
-   80 DECLARATION: DECLARATION . ',' TK_ID
-   81            | DECLARATION . ',' TK_ID TK_ASSIGN E
+   80 DECLARATIONS: DECLARATIONS DECLARATION . ';'
+   82 DECLARATION: DECLARATION . ',' TK_ID
+   83            | DECLARATION . ',' TK_ID TK_ASSIGN E
 
     ';'  shift, and go to state 35
     ','  shift, and go to state 36
@@ -518,8 +518,8 @@ state 17
 
 state 18
 
-   82 DECLARATION: TYPE . TK_ID
-   83            | TYPE . TK_ID TK_ASSIGN E
+   84 DECLARATION: TYPE . TK_ID
+   85            | TYPE . TK_ID TK_ASSIGN E
 
     TK_ID  shift, and go to state 37
 
@@ -534,30 +534,30 @@ state 19
 
 state 20
 
-   91 TYPE: TK_MODIFIER_UNSIGNED TK_TYPE_CHAR .
-
-    $default  reduce using rule 91 (TYPE)
-
-
-state 21
-
-   93 TYPE: TK_MODIFIER_UNSIGNED TK_TYPE_INT .
+   93 TYPE: TK_MODIFIER_UNSIGNED TK_TYPE_CHAR .
 
     $default  reduce using rule 93 (TYPE)
 
 
+state 21
+
+   95 TYPE: TK_MODIFIER_UNSIGNED TK_TYPE_INT .
+
+    $default  reduce using rule 95 (TYPE)
+
+
 state 22
 
-  100 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT . TK_TYPE_INT
+  102 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT . TK_TYPE_INT
 
     TK_TYPE_INT  shift, and go to state 39
 
 
 state 23
 
-  102 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_TYPE_INT
-  105     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
-  107     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG
+  104 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_TYPE_INT
+  107     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
+  109     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG
 
     TK_TYPE_INT       shift, and go to state 40
     TK_MODIFIER_LONG  shift, and go to state 41
@@ -565,30 +565,30 @@ state 23
 
 state 24
 
-   92 TYPE: TK_MODIFIER_SIGNED TK_TYPE_CHAR .
-
-    $default  reduce using rule 92 (TYPE)
-
-
-state 25
-
-   94 TYPE: TK_MODIFIER_SIGNED TK_TYPE_INT .
+   94 TYPE: TK_MODIFIER_SIGNED TK_TYPE_CHAR .
 
     $default  reduce using rule 94 (TYPE)
 
 
+state 25
+
+   96 TYPE: TK_MODIFIER_SIGNED TK_TYPE_INT .
+
+    $default  reduce using rule 96 (TYPE)
+
+
 state 26
 
-  101 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_SHORT . TK_TYPE_INT
+  103 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_SHORT . TK_TYPE_INT
 
     TK_TYPE_INT  shift, and go to state 42
 
 
 state 27
 
-  103 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_TYPE_INT
-  106     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
-  108     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG
+  105 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_TYPE_INT
+  108     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG TK_TYPE_INT
+  110     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG . TK_MODIFIER_LONG
 
     TK_TYPE_INT       shift, and go to state 43
     TK_MODIFIER_LONG  shift, and go to state 44
@@ -596,28 +596,28 @@ state 27
 
 state 28
 
-   95 TYPE: TK_MODIFIER_SHORT TK_TYPE_INT .
-
-    $default  reduce using rule 95 (TYPE)
-
-
-state 29
-
-   96 TYPE: TK_MODIFIER_LONG TK_TYPE_INT .
-
-    $default  reduce using rule 96 (TYPE)
-
-
-state 30
-
-   97 TYPE: TK_MODIFIER_LONG TK_TYPE_DOUBLE .
+   97 TYPE: TK_MODIFIER_SHORT TK_TYPE_INT .
 
     $default  reduce using rule 97 (TYPE)
 
 
+state 29
+
+   98 TYPE: TK_MODIFIER_LONG TK_TYPE_INT .
+
+    $default  reduce using rule 98 (TYPE)
+
+
+state 30
+
+   99 TYPE: TK_MODIFIER_LONG TK_TYPE_DOUBLE .
+
+    $default  reduce using rule 99 (TYPE)
+
+
 state 31
 
-  104 TYPE: TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
+  106 TYPE: TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
 
     TK_TYPE_INT  shift, and go to state 45
 
@@ -665,72 +665,74 @@ state 34
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
     $default  reduce using rule 9 (COMMANDS)
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    COMMANDS       go to state 71
-    STATEMENT      go to state 72
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    COMMANDS       go to state 73
+    STATEMENT      go to state 74
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 35
 
-   78 DECLARATIONS: DECLARATIONS DECLARATION ';' .
+   80 DECLARATIONS: DECLARATIONS DECLARATION ';' .
 
-    $default  reduce using rule 78 (DECLARATIONS)
+    $default  reduce using rule 80 (DECLARATIONS)
 
 
 state 36
 
-   80 DECLARATION: DECLARATION ',' . TK_ID
-   81            | DECLARATION ',' . TK_ID TK_ASSIGN E
+   82 DECLARATION: DECLARATION ',' . TK_ID
+   83            | DECLARATION ',' . TK_ID TK_ASSIGN E
 
-    TK_ID  shift, and go to state 96
+    TK_ID  shift, and go to state 98
 
 
 state 37
 
-   82 DECLARATION: TYPE TK_ID .
-   83            | TYPE TK_ID . TK_ASSIGN E
+   84 DECLARATION: TYPE TK_ID .
+   85            | TYPE TK_ID . TK_ASSIGN E
 
-    TK_ASSIGN  shift, and go to state 97
+    TK_ASSIGN  shift, and go to state 99
 
-    $default  reduce using rule 82 (DECLARATION)
+    $default  reduce using rule 84 (DECLARATION)
 
 
 state 38
@@ -738,147 +740,147 @@ state 38
     3 MAIN: TK_TYPE_INT TK_MAIN '(' . TK_TYPE_VOID ')'
     4     | TK_TYPE_INT TK_MAIN '(' . ')'
 
-    TK_TYPE_VOID  shift, and go to state 98
-    ')'           shift, and go to state 99
+    TK_TYPE_VOID  shift, and go to state 100
+    ')'           shift, and go to state 101
 
 
 state 39
 
-  100 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT .
-
-    $default  reduce using rule 100 (TYPE)
-
-
-state 40
-
-  102 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT .
+  102 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_SHORT TK_TYPE_INT .
 
     $default  reduce using rule 102 (TYPE)
 
 
-state 41
+state 40
 
-  105 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
-  107     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
-
-    TK_TYPE_INT  shift, and go to state 100
-
-    $default  reduce using rule 107 (TYPE)
-
-
-state 42
-
-  101 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT .
-
-    $default  reduce using rule 101 (TYPE)
-
-
-state 43
-
-  103 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT .
-
-    $default  reduce using rule 103 (TYPE)
-
-
-state 44
-
-  106 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
-  108     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
-
-    TK_TYPE_INT  shift, and go to state 101
-
-    $default  reduce using rule 108 (TYPE)
-
-
-state 45
-
-  104 TYPE: TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
+  104 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_TYPE_INT .
 
     $default  reduce using rule 104 (TYPE)
 
 
+state 41
+
+  107 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
+  109     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
+
+    TK_TYPE_INT  shift, and go to state 102
+
+    $default  reduce using rule 109 (TYPE)
+
+
+state 42
+
+  103 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_SHORT TK_TYPE_INT .
+
+    $default  reduce using rule 103 (TYPE)
+
+
+state 43
+
+  105 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_TYPE_INT .
+
+    $default  reduce using rule 105 (TYPE)
+
+
+state 44
+
+  108 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
+  110     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
+
+    TK_TYPE_INT  shift, and go to state 103
+
+    $default  reduce using rule 110 (TYPE)
+
+
+state 45
+
+  106 TYPE: TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
+
+    $default  reduce using rule 106 (TYPE)
+
+
 state 46
 
-  109 TERMINAL: TK_INT .
-
-    $default  reduce using rule 109 (TERMINAL)
-
-
-state 47
-
-  110 TERMINAL: TK_FLOAT .
-
-    $default  reduce using rule 110 (TERMINAL)
-
-
-state 48
-
-  111 TERMINAL: TK_SCIENTIFIC .
+  111 TERMINAL: TK_INT .
 
     $default  reduce using rule 111 (TERMINAL)
 
 
-state 49
+state 47
 
-  112 TERMINAL: TK_CHAR .
+  112 TERMINAL: TK_FLOAT .
 
     $default  reduce using rule 112 (TERMINAL)
 
 
+state 48
+
+  113 TERMINAL: TK_SCIENTIFIC .
+
+    $default  reduce using rule 113 (TERMINAL)
+
+
+state 49
+
+  114 TERMINAL: TK_CHAR .
+
+    $default  reduce using rule 114 (TERMINAL)
+
+
 state 50
 
-  117 TERMINAL: TK_STRING .
+  119 TERMINAL: TK_STRING .
 
-    $default  reduce using rule 117 (TERMINAL)
+    $default  reduce using rule 119 (TERMINAL)
 
 
 state 51
 
-  118 TERMINAL: TK_BOOL .
+  120 TERMINAL: TK_BOOL .
 
-    $default  reduce using rule 118 (TERMINAL)
+    $default  reduce using rule 120 (TERMINAL)
 
 
 state 52
 
    41 LABEL: TK_ID . TK_GO_LABEL
-   72 INCREASE: TK_ID . TK_OP_INCREASE
-   74 ATTRIBUITION: TK_ID . TK_ASSIGN E
-   76 OP_ASSIGN: TK_ID . TK_OP_ASSIGN E
-  119 TERMINAL: TK_ID .
+   74 INCREASE: TK_ID . TK_OP_INCREASE
+   76 ATTRIBUITION: TK_ID . TK_ASSIGN E
+   78 OP_ASSIGN: TK_ID . TK_OP_ASSIGN E
+  121 TERMINAL: TK_ID .
 
-    TK_ASSIGN       shift, and go to state 102
-    TK_OP_INCREASE  shift, and go to state 103
-    TK_OP_ASSIGN    shift, and go to state 104
-    TK_GO_LABEL     shift, and go to state 105
+    TK_ASSIGN       shift, and go to state 104
+    TK_OP_INCREASE  shift, and go to state 105
+    TK_OP_ASSIGN    shift, and go to state 106
+    TK_GO_LABEL     shift, and go to state 107
 
-    $default  reduce using rule 119 (TERMINAL)
+    $default  reduce using rule 121 (TERMINAL)
 
 
 state 53
 
-   86 TYPE: TK_TYPE_INT .
+   88 TYPE: TK_TYPE_INT .
 
-    $default  reduce using rule 86 (TYPE)
+    $default  reduce using rule 88 (TYPE)
 
 
 state 54
 
-  121 SIGNAL: TK_OP_SUM .
+  123 SIGNAL: TK_OP_SUM .
 
-    $default  reduce using rule 121 (SIGNAL)
+    $default  reduce using rule 123 (SIGNAL)
 
 
 state 55
 
-  122 SIGNAL: TK_OP_SUB .
+  124 SIGNAL: TK_OP_SUB .
 
-    $default  reduce using rule 122 (SIGNAL)
+    $default  reduce using rule 124 (SIGNAL)
 
 
 state 56
 
-   68 E: TK_OP_LOGIC_NOT . E
+   70 E: TK_OP_LOGIC_NOT . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -886,26 +888,26 @@ state 56
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 107
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 109
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 57
 
-   69 E: TK_OP_BIN_NOT . E
+   71 E: TK_OP_BIN_NOT . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -913,21 +915,21 @@ state 57
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 108
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 110
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 58
@@ -940,29 +942,29 @@ state 58
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E_C            go to state 109
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E_C            go to state 111
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 59
 
-   77 COUT: TK_COUT . '(' E_C ')'
+   79 COUT: TK_COUT . '(' E_C ')'
 
-    '('  shift, and go to state 110
+    '('  shift, and go to state 112
 
 
 state 60
@@ -974,57 +976,92 @@ state 60
 
 state 61
 
+   42 LABEL: TK_CASE . E_C TK_GO_LABEL
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E_C            go to state 113
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 62
+
+   43 LABEL: TK_DEFAULT . TK_GO_LABEL
+
+    TK_GO_LABEL  shift, and go to state 114
+
+
+state 63
+
    38 FOR_C: TK_FOR .
 
     $default  reduce using rule 38 (FOR_C)
 
 
-state 62
+state 64
 
    28 WHILE_C: TK_WHILE .
 
     $default  reduce using rule 28 (WHILE_C)
 
 
-state 63
+state 65
 
    30 DO_WHILE_C: TK_DO .
 
     $default  reduce using rule 30 (DO_WHILE_C)
 
 
-state 64
-
-   44 BREAK: TK_BREAK .
-
-    $default  reduce using rule 44 (BREAK)
-
-
-state 65
-
-   43 CONTINUE: TK_CONTINUE .
-
-    $default  reduce using rule 43 (CONTINUE)
-
-
 state 66
 
-   42 GOTO: TK_GOTO . TK_ID
+   46 BREAK: TK_BREAK .
 
-    TK_ID  shift, and go to state 111
+    $default  reduce using rule 46 (BREAK)
 
 
 state 67
 
-   73 PREV_INCREASE: TK_OP_INCREASE . TK_ID
+   45 CONTINUE: TK_CONTINUE .
 
-    TK_ID  shift, and go to state 112
+    $default  reduce using rule 45 (CONTINUE)
 
 
 state 68
 
-   46 E: '(' . E ')'
-   49  | '(' . TYPE ')' TERMINAL
+   44 GOTO: TK_GOTO . TK_ID
+
+    TK_ID  shift, and go to state 115
+
+
+state 69
+
+   75 PREV_INCREASE: TK_OP_INCREASE . TK_ID
+
+    TK_ID  shift, and go to state 116
+
+
+state 70
+
+   48 E: '(' . E ')'
+   51  | '(' . TYPE ')' TERMINAL
 
     TK_INT                shift, and go to state 46
     TK_FLOAT              shift, and go to state 47
@@ -1032,7 +1069,7 @@ state 68
     TK_CHAR               shift, and go to state 49
     TK_STRING             shift, and go to state 50
     TK_BOOL               shift, and go to state 51
-    TK_ID                 shift, and go to state 106
+    TK_ID                 shift, and go to state 108
     TK_TYPE_CHAR          shift, and go to state 5
     TK_TYPE_STRING        shift, and go to state 6
     TK_TYPE_INT           shift, and go to state 53
@@ -1048,43 +1085,43 @@ state 68
     TK_OP_SUB             shift, and go to state 55
     TK_OP_LOGIC_NOT       shift, and go to state 56
     TK_OP_BIN_NOT         shift, and go to state 57
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
 
-    E              go to state 113
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TYPE           go to state 114
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 117
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TYPE           go to state 118
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 69
+state 71
 
    23 STATEMENT: ';' .
 
     $default  reduce using rule 23 (STATEMENT)
 
 
-state 70
+state 72
 
    14 STATEMENT: SCOPE .
 
     $default  reduce using rule 14 (STATEMENT)
 
 
-state 71
+state 73
 
     5 SCOPE: BEGIN_SCOPE COMMANDS . END_SCOPE
 
-    '}'  shift, and go to state 115
+    '}'  shift, and go to state 119
 
-    END_SCOPE  go to state 116
+    END_SCOPE  go to state 120
 
 
-state 72
+state 74
 
     8 COMMANDS: STATEMENT . COMMANDS
 
@@ -1113,86 +1150,88 @@ state 72
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
     $default  reduce using rule 9 (COMMANDS)
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    COMMANDS       go to state 117
-    STATEMENT      go to state 72
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    COMMANDS       go to state 121
+    STATEMENT      go to state 74
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 73
+state 75
 
    11 STATEMENT: RETURN . ';'
 
-    ';'  shift, and go to state 118
+    ';'  shift, and go to state 122
 
 
-state 74
+state 76
 
    26 IF: IF_C . '(' E_C ')' STATEMENT
    27   | IF_C . '(' E_C ')' STATEMENT TK_ELSE STATEMENT
 
-    '('  shift, and go to state 119
+    '('  shift, and go to state 123
 
 
-state 75
+state 77
 
    15 STATEMENT: IF .
 
     $default  reduce using rule 15 (STATEMENT)
 
 
-state 76
+state 78
 
    29 WHILE: WHILE_C . '(' E_C ')' STATEMENT
 
-    '('  shift, and go to state 120
+    '('  shift, and go to state 124
 
 
-state 77
+state 79
 
    16 STATEMENT: WHILE .
 
     $default  reduce using rule 16 (STATEMENT)
 
 
-state 78
+state 80
 
    31 DO_WHILE: DO_WHILE_C . STATEMENT TK_WHILE '(' E_C ')' ';'
 
@@ -1221,606 +1260,73 @@ state 78
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 121
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 125
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 79
+state 81
 
    17 STATEMENT: DO_WHILE .
 
     $default  reduce using rule 17 (STATEMENT)
 
 
-state 80
+state 82
 
    39 FOR: FOR_C . '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
    40    | FOR_C . '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
 
-    '('  shift, and go to state 122
+    '('  shift, and go to state 126
 
 
-state 81
+state 83
 
    18 STATEMENT: FOR .
 
     $default  reduce using rule 18 (STATEMENT)
 
 
-state 82
-
-   19 STATEMENT: LABEL .
-
-    $default  reduce using rule 19 (STATEMENT)
-
-
-state 83
-
-   20 STATEMENT: GOTO . ';'
-
-    ';'  shift, and go to state 123
-
-
 state 84
 
-   21 STATEMENT: CONTINUE . ';'
-
-    ';'  shift, and go to state 124
-
-
-state 85
-
-   22 STATEMENT: BREAK . ';'
-
-    ';'  shift, and go to state 125
-
-
-state 86
-
-   10 STATEMENT: E_C . ';'
-
-    ';'  shift, and go to state 126
-
-
-state 87
-
-   45 E_C: E .
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 45 (E_C)
-
-
-state 88
-
-   70 E: INCREASE .
-
-    $default  reduce using rule 70 (E)
-
-
-state 89
-
-   71 E: PREV_INCREASE .
-
-    $default  reduce using rule 71 (E)
-
-
-state 90
-
-   48 E: ATTRIBUITION .
-
-    $default  reduce using rule 48 (E)
-
-
-state 91
-
-   75 ATTRIBUITION: OP_ASSIGN .
-
-    $default  reduce using rule 75 (ATTRIBUITION)
-
-
-state 92
-
-   12 STATEMENT: COUT . ';'
-
-    ';'  shift, and go to state 145
-
-
-state 93
-
-   13 STATEMENT: DECLARATION . ';'
-   80 DECLARATION: DECLARATION . ',' TK_ID
-   81            | DECLARATION . ',' TK_ID TK_ASSIGN E
-
-    ';'  shift, and go to state 146
-    ','  shift, and go to state 36
-
-
-state 94
-
-   47 E: TERMINAL .
-
-    $default  reduce using rule 47 (E)
-
-
-state 95
-
-  113 TERMINAL: SIGNAL . TK_INT
-  114         | SIGNAL . TK_FLOAT
-  115         | SIGNAL . TK_SCIENTIFIC
-  116         | SIGNAL . TK_CHAR
-  120         | SIGNAL . TK_ID
-
-    TK_INT         shift, and go to state 147
-    TK_FLOAT       shift, and go to state 148
-    TK_SCIENTIFIC  shift, and go to state 149
-    TK_CHAR        shift, and go to state 150
-    TK_ID          shift, and go to state 151
-
-
-state 96
-
-   80 DECLARATION: DECLARATION ',' TK_ID .
-   81            | DECLARATION ',' TK_ID . TK_ASSIGN E
-
-    TK_ASSIGN  shift, and go to state 152
-
-    $default  reduce using rule 80 (DECLARATION)
-
-
-state 97
-
-   83 DECLARATION: TYPE TK_ID TK_ASSIGN . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 153
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 98
-
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID . ')'
-
-    ')'  shift, and go to state 154
-
-
-state 99
-
-    4 MAIN: TK_TYPE_INT TK_MAIN '(' ')' .
-
-    $default  reduce using rule 4 (MAIN)
-
-
-state 100
-
-  105 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
-
-    $default  reduce using rule 105 (TYPE)
-
-
-state 101
-
-  106 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
-
-    $default  reduce using rule 106 (TYPE)
-
-
-state 102
-
-   74 ATTRIBUITION: TK_ID TK_ASSIGN . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 155
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 103
-
-   72 INCREASE: TK_ID TK_OP_INCREASE .
-
-    $default  reduce using rule 72 (INCREASE)
-
-
-state 104
-
-   76 OP_ASSIGN: TK_ID TK_OP_ASSIGN . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 156
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 105
-
-   41 LABEL: TK_ID TK_GO_LABEL .
-
-    $default  reduce using rule 41 (LABEL)
-
-
-state 106
-
-   72 INCREASE: TK_ID . TK_OP_INCREASE
-   74 ATTRIBUITION: TK_ID . TK_ASSIGN E
-   76 OP_ASSIGN: TK_ID . TK_OP_ASSIGN E
-  119 TERMINAL: TK_ID .
-
-    TK_ASSIGN       shift, and go to state 102
-    TK_OP_INCREASE  shift, and go to state 103
-    TK_OP_ASSIGN    shift, and go to state 104
-
-    $default  reduce using rule 119 (TERMINAL)
-
-
-state 107
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   68  | TK_OP_LOGIC_NOT E .
-
-    $default  reduce using rule 68 (E)
-
-
-state 108
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   69  | TK_OP_BIN_NOT E .
-
-    $default  reduce using rule 69 (E)
-
-
-state 109
-
-   24 RETURN: TK_RETURN E_C .
-
-    $default  reduce using rule 24 (RETURN)
-
-
-state 110
-
-   77 COUT: TK_COUT '(' . E_C ')'
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E_C            go to state 157
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 111
-
-   42 GOTO: TK_GOTO TK_ID .
-
-    $default  reduce using rule 42 (GOTO)
-
-
-state 112
-
-   73 PREV_INCREASE: TK_OP_INCREASE TK_ID .
-
-    $default  reduce using rule 73 (PREV_INCREASE)
-
-
-state 113
-
-   46 E: '(' E . ')'
-   50  | E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-    ')'                  shift, and go to state 158
-
-
-state 114
-
-   49 E: '(' TYPE . ')' TERMINAL
-
-    ')'  shift, and go to state 159
-
-
-state 115
-
-    7 END_SCOPE: '}' .
-
-    $default  reduce using rule 7 (END_SCOPE)
-
-
-state 116
-
-    5 SCOPE: BEGIN_SCOPE COMMANDS END_SCOPE .
-
-    $default  reduce using rule 5 (SCOPE)
-
-
-state 117
-
-    8 COMMANDS: STATEMENT COMMANDS .
-
-    $default  reduce using rule 8 (COMMANDS)
-
-
-state 118
-
-   11 STATEMENT: RETURN ';' .
-
-    $default  reduce using rule 11 (STATEMENT)
-
-
-state 119
-
-   26 IF: IF_C '(' . E_C ')' STATEMENT
-   27   | IF_C '(' . E_C ')' STATEMENT TK_ELSE STATEMENT
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E_C            go to state 160
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 120
-
-   29 WHILE: WHILE_C '(' . E_C ')' STATEMENT
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E_C            go to state 161
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 121
-
-   31 DO_WHILE: DO_WHILE_C STATEMENT . TK_WHILE '(' E_C ')' ';'
-
-    TK_WHILE  shift, and go to state 162
-
-
-state 122
-
-   39 FOR: FOR_C '(' . OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
-   40    | FOR_C '(' . ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
+   19 STATEMENT: LABEL . STATEMENT
 
     TK_INT                shift, and go to state 46
     TK_FLOAT              shift, and go to state 47
@@ -1828,7 +1334,7 @@ state 122
     TK_CHAR               shift, and go to state 49
     TK_STRING             shift, and go to state 50
     TK_BOOL               shift, and go to state 51
-    TK_ID                 shift, and go to state 106
+    TK_ID                 shift, and go to state 52
     TK_TYPE_CHAR          shift, and go to state 5
     TK_TYPE_STRING        shift, and go to state 6
     TK_TYPE_INT           shift, and go to state 53
@@ -1844,192 +1350,677 @@ state 122
     TK_OP_SUB             shift, and go to state 55
     TK_OP_LOGIC_NOT       shift, and go to state 56
     TK_OP_BIN_NOT         shift, and go to state 57
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_RETURN             shift, and go to state 58
+    TK_COUT               shift, and go to state 59
+    TK_IF                 shift, and go to state 60
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
+    '{'                   shift, and go to state 32
+    ';'                   shift, and go to state 71
 
-    $default  reduce using rule 33 (OPTIONAL_E)
+    SCOPE          go to state 72
+    BEGIN_SCOPE    go to state 34
+    STATEMENT      go to state 127
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
+    TYPE           go to state 18
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
-    OPTIONAL_E                 go to state 163
-    OPTIONAL_E_OR_DECLARATION  go to state 164
-    ATTRIBUITION_OR_TERMINAL   go to state 165
-    E_C                        go to state 166
-    E                          go to state 87
-    INCREASE                   go to state 88
-    PREV_INCREASE              go to state 89
-    ATTRIBUITION               go to state 167
-    OP_ASSIGN                  go to state 91
-    DECLARATION                go to state 168
-    TYPE                       go to state 18
-    TERMINAL                   go to state 169
-    SIGNAL                     go to state 95
+
+state 85
+
+   20 STATEMENT: GOTO . ';'
+
+    ';'  shift, and go to state 128
+
+
+state 86
+
+   21 STATEMENT: CONTINUE . ';'
+
+    ';'  shift, and go to state 129
+
+
+state 87
+
+   22 STATEMENT: BREAK . ';'
+
+    ';'  shift, and go to state 130
+
+
+state 88
+
+   10 STATEMENT: E_C . ';'
+
+    ';'  shift, and go to state 131
+
+
+state 89
+
+   47 E_C: E .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
+
+    $default  reduce using rule 47 (E_C)
+
+
+state 90
+
+   72 E: INCREASE .
+
+    $default  reduce using rule 72 (E)
+
+
+state 91
+
+   73 E: PREV_INCREASE .
+
+    $default  reduce using rule 73 (E)
+
+
+state 92
+
+   50 E: ATTRIBUITION .
+
+    $default  reduce using rule 50 (E)
+
+
+state 93
+
+   77 ATTRIBUITION: OP_ASSIGN .
+
+    $default  reduce using rule 77 (ATTRIBUITION)
+
+
+state 94
+
+   12 STATEMENT: COUT . ';'
+
+    ';'  shift, and go to state 150
+
+
+state 95
+
+   13 STATEMENT: DECLARATION . ';'
+   82 DECLARATION: DECLARATION . ',' TK_ID
+   83            | DECLARATION . ',' TK_ID TK_ASSIGN E
+
+    ';'  shift, and go to state 151
+    ','  shift, and go to state 36
+
+
+state 96
+
+   49 E: TERMINAL .
+
+    $default  reduce using rule 49 (E)
+
+
+state 97
+
+  115 TERMINAL: SIGNAL . TK_INT
+  116         | SIGNAL . TK_FLOAT
+  117         | SIGNAL . TK_SCIENTIFIC
+  118         | SIGNAL . TK_CHAR
+  122         | SIGNAL . TK_ID
+
+    TK_INT         shift, and go to state 152
+    TK_FLOAT       shift, and go to state 153
+    TK_SCIENTIFIC  shift, and go to state 154
+    TK_CHAR        shift, and go to state 155
+    TK_ID          shift, and go to state 156
+
+
+state 98
+
+   82 DECLARATION: DECLARATION ',' TK_ID .
+   83            | DECLARATION ',' TK_ID . TK_ASSIGN E
+
+    TK_ASSIGN  shift, and go to state 157
+
+    $default  reduce using rule 82 (DECLARATION)
+
+
+state 99
+
+   85 DECLARATION: TYPE TK_ID TK_ASSIGN . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 158
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 100
+
+    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID . ')'
+
+    ')'  shift, and go to state 159
+
+
+state 101
+
+    4 MAIN: TK_TYPE_INT TK_MAIN '(' ')' .
+
+    $default  reduce using rule 4 (MAIN)
+
+
+state 102
+
+  107 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
+
+    $default  reduce using rule 107 (TYPE)
+
+
+state 103
+
+  108 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
+
+    $default  reduce using rule 108 (TYPE)
+
+
+state 104
+
+   76 ATTRIBUITION: TK_ID TK_ASSIGN . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 160
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 105
+
+   74 INCREASE: TK_ID TK_OP_INCREASE .
+
+    $default  reduce using rule 74 (INCREASE)
+
+
+state 106
+
+   78 OP_ASSIGN: TK_ID TK_OP_ASSIGN . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 161
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 107
+
+   41 LABEL: TK_ID TK_GO_LABEL .
+
+    $default  reduce using rule 41 (LABEL)
+
+
+state 108
+
+   74 INCREASE: TK_ID . TK_OP_INCREASE
+   76 ATTRIBUITION: TK_ID . TK_ASSIGN E
+   78 OP_ASSIGN: TK_ID . TK_OP_ASSIGN E
+  121 TERMINAL: TK_ID .
+
+    TK_ASSIGN       shift, and go to state 104
+    TK_OP_INCREASE  shift, and go to state 105
+    TK_OP_ASSIGN    shift, and go to state 106
+
+    $default  reduce using rule 121 (TERMINAL)
+
+
+state 109
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   70  | TK_OP_LOGIC_NOT E .
+
+    $default  reduce using rule 70 (E)
+
+
+state 110
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   71  | TK_OP_BIN_NOT E .
+
+    $default  reduce using rule 71 (E)
+
+
+state 111
+
+   24 RETURN: TK_RETURN E_C .
+
+    $default  reduce using rule 24 (RETURN)
+
+
+state 112
+
+   79 COUT: TK_COUT '(' . E_C ')'
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E_C            go to state 162
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 113
+
+   42 LABEL: TK_CASE E_C . TK_GO_LABEL
+
+    TK_GO_LABEL  shift, and go to state 163
+
+
+state 114
+
+   43 LABEL: TK_DEFAULT TK_GO_LABEL .
+
+    $default  reduce using rule 43 (LABEL)
+
+
+state 115
+
+   44 GOTO: TK_GOTO TK_ID .
+
+    $default  reduce using rule 44 (GOTO)
+
+
+state 116
+
+   75 PREV_INCREASE: TK_OP_INCREASE TK_ID .
+
+    $default  reduce using rule 75 (PREV_INCREASE)
+
+
+state 117
+
+   48 E: '(' E . ')'
+   52  | E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
+    ')'                  shift, and go to state 164
+
+
+state 118
+
+   51 E: '(' TYPE . ')' TERMINAL
+
+    ')'  shift, and go to state 165
+
+
+state 119
+
+    7 END_SCOPE: '}' .
+
+    $default  reduce using rule 7 (END_SCOPE)
+
+
+state 120
+
+    5 SCOPE: BEGIN_SCOPE COMMANDS END_SCOPE .
+
+    $default  reduce using rule 5 (SCOPE)
+
+
+state 121
+
+    8 COMMANDS: STATEMENT COMMANDS .
+
+    $default  reduce using rule 8 (COMMANDS)
+
+
+state 122
+
+   11 STATEMENT: RETURN ';' .
+
+    $default  reduce using rule 11 (STATEMENT)
 
 
 state 123
+
+   26 IF: IF_C '(' . E_C ')' STATEMENT
+   27   | IF_C '(' . E_C ')' STATEMENT TK_ELSE STATEMENT
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E_C            go to state 166
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 124
+
+   29 WHILE: WHILE_C '(' . E_C ')' STATEMENT
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E_C            go to state 167
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 125
+
+   31 DO_WHILE: DO_WHILE_C STATEMENT . TK_WHILE '(' E_C ')' ';'
+
+    TK_WHILE  shift, and go to state 168
+
+
+state 126
+
+   39 FOR: FOR_C '(' . OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
+   40    | FOR_C '(' . ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
+
+    TK_INT                shift, and go to state 46
+    TK_FLOAT              shift, and go to state 47
+    TK_SCIENTIFIC         shift, and go to state 48
+    TK_CHAR               shift, and go to state 49
+    TK_STRING             shift, and go to state 50
+    TK_BOOL               shift, and go to state 51
+    TK_ID                 shift, and go to state 108
+    TK_TYPE_CHAR          shift, and go to state 5
+    TK_TYPE_STRING        shift, and go to state 6
+    TK_TYPE_INT           shift, and go to state 53
+    TK_TYPE_VOID          shift, and go to state 8
+    TK_TYPE_FLOAT         shift, and go to state 9
+    TK_TYPE_DOUBLE        shift, and go to state 10
+    TK_TYPE_BOOL          shift, and go to state 11
+    TK_MODIFIER_UNSIGNED  shift, and go to state 12
+    TK_MODIFIER_SIGNED    shift, and go to state 13
+    TK_MODIFIER_SHORT     shift, and go to state 14
+    TK_MODIFIER_LONG      shift, and go to state 15
+    TK_OP_SUM             shift, and go to state 54
+    TK_OP_SUB             shift, and go to state 55
+    TK_OP_LOGIC_NOT       shift, and go to state 56
+    TK_OP_BIN_NOT         shift, and go to state 57
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
+
+    $default  reduce using rule 33 (OPTIONAL_E)
+
+    OPTIONAL_E                 go to state 169
+    OPTIONAL_E_OR_DECLARATION  go to state 170
+    ATTRIBUITION_OR_TERMINAL   go to state 171
+    E_C                        go to state 172
+    E                          go to state 89
+    INCREASE                   go to state 90
+    PREV_INCREASE              go to state 91
+    ATTRIBUITION               go to state 173
+    OP_ASSIGN                  go to state 93
+    DECLARATION                go to state 174
+    TYPE                       go to state 18
+    TERMINAL                   go to state 175
+    SIGNAL                     go to state 97
+
+
+state 127
+
+   19 STATEMENT: LABEL STATEMENT .
+
+    $default  reduce using rule 19 (STATEMENT)
+
+
+state 128
 
    20 STATEMENT: GOTO ';' .
 
     $default  reduce using rule 20 (STATEMENT)
 
 
-state 124
+state 129
 
    21 STATEMENT: CONTINUE ';' .
 
     $default  reduce using rule 21 (STATEMENT)
 
 
-state 125
+state 130
 
    22 STATEMENT: BREAK ';' .
 
     $default  reduce using rule 22 (STATEMENT)
 
 
-state 126
+state 131
 
    10 STATEMENT: E_C ';' .
 
     $default  reduce using rule 10 (STATEMENT)
 
 
-state 127
-
-   50 E: E TK_OP_SUM . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 170
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 128
-
-   51 E: E TK_OP_SUB . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 171
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 129
-
-   52 E: E TK_OP_MUL . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 172
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 130
-
-   53 E: E TK_OP_DIV . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 173
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 131
-
-   54 E: E TK_OP_MOD . E
-
-    TK_INT           shift, and go to state 46
-    TK_FLOAT         shift, and go to state 47
-    TK_SCIENTIFIC    shift, and go to state 48
-    TK_CHAR          shift, and go to state 49
-    TK_STRING        shift, and go to state 50
-    TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
-    TK_OP_SUM        shift, and go to state 54
-    TK_OP_SUB        shift, and go to state 55
-    TK_OP_LOGIC_NOT  shift, and go to state 56
-    TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
-
-    E              go to state 174
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
 state 132
 
-   59 E: E TK_OP_REL_LESS . E
+   52 E: E TK_OP_SUM . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2037,26 +2028,26 @@ state 132
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 175
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 176
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 133
 
-   60 E: E TK_OP_REL_GREATER . E
+   53 E: E TK_OP_SUB . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2064,26 +2055,26 @@ state 133
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 176
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 177
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 134
 
-   61 E: E TK_OP_REL_EQLESS . E
+   54 E: E TK_OP_MUL . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2091,26 +2082,26 @@ state 134
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 177
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 178
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 135
 
-   62 E: E TK_OP_REL_EQGREATER . E
+   55 E: E TK_OP_DIV . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2118,26 +2109,26 @@ state 135
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 178
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 179
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 136
 
-   57 E: E TK_OP_REL_EQ . E
+   56 E: E TK_OP_MOD . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2145,26 +2136,26 @@ state 136
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 179
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 180
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 137
 
-   58 E: E TK_OP_REL_DIFF . E
+   61 E: E TK_OP_REL_LESS . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2172,26 +2163,26 @@ state 137
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 180
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 181
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 138
 
-   56 E: E TK_OP_LOGIC_AND . E
+   62 E: E TK_OP_REL_GREATER . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2199,26 +2190,26 @@ state 138
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 181
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 182
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 139
 
-   55 E: E TK_OP_LOGIC_OR . E
+   63 E: E TK_OP_REL_EQLESS . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2226,26 +2217,26 @@ state 139
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 182
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 183
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 140
 
-   63 E: E TK_OP_BIN_AND . E
+   64 E: E TK_OP_REL_EQGREATER . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2253,26 +2244,26 @@ state 140
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 183
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 184
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 141
 
-   64 E: E TK_OP_BIN_OR . E
+   59 E: E TK_OP_REL_EQ . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2280,26 +2271,26 @@ state 141
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 184
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 185
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 142
 
-   65 E: E TK_OP_BIN_XOR . E
+   60 E: E TK_OP_REL_DIFF . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2307,26 +2298,26 @@ state 142
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 185
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 186
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 143
 
-   66 E: E TK_OP_BIN_SHIFTR . E
+   58 E: E TK_OP_LOGIC_AND . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2334,26 +2325,26 @@ state 143
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 186
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 187
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 144
 
-   67 E: E TK_OP_BIN_SHIFTL . E
+   57 E: E TK_OP_LOGIC_OR . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2361,75 +2352,210 @@ state 144
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 187
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E              go to state 188
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
 state 145
+
+   65 E: E TK_OP_BIN_AND . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 189
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 146
+
+   66 E: E TK_OP_BIN_OR . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 190
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 147
+
+   67 E: E TK_OP_BIN_XOR . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 191
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 148
+
+   68 E: E TK_OP_BIN_SHIFTR . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 192
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 149
+
+   69 E: E TK_OP_BIN_SHIFTL . E
+
+    TK_INT           shift, and go to state 46
+    TK_FLOAT         shift, and go to state 47
+    TK_SCIENTIFIC    shift, and go to state 48
+    TK_CHAR          shift, and go to state 49
+    TK_STRING        shift, and go to state 50
+    TK_BOOL          shift, and go to state 51
+    TK_ID            shift, and go to state 108
+    TK_OP_SUM        shift, and go to state 54
+    TK_OP_SUB        shift, and go to state 55
+    TK_OP_LOGIC_NOT  shift, and go to state 56
+    TK_OP_BIN_NOT    shift, and go to state 57
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
+
+    E              go to state 193
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
+
+
+state 150
 
    12 STATEMENT: COUT ';' .
 
     $default  reduce using rule 12 (STATEMENT)
 
 
-state 146
+state 151
 
    13 STATEMENT: DECLARATION ';' .
 
     $default  reduce using rule 13 (STATEMENT)
 
 
-state 147
+state 152
 
-  113 TERMINAL: SIGNAL TK_INT .
-
-    $default  reduce using rule 113 (TERMINAL)
-
-
-state 148
-
-  114 TERMINAL: SIGNAL TK_FLOAT .
-
-    $default  reduce using rule 114 (TERMINAL)
-
-
-state 149
-
-  115 TERMINAL: SIGNAL TK_SCIENTIFIC .
+  115 TERMINAL: SIGNAL TK_INT .
 
     $default  reduce using rule 115 (TERMINAL)
 
 
-state 150
+state 153
 
-  116 TERMINAL: SIGNAL TK_CHAR .
+  116 TERMINAL: SIGNAL TK_FLOAT .
 
     $default  reduce using rule 116 (TERMINAL)
 
 
-state 151
+state 154
 
-  120 TERMINAL: SIGNAL TK_ID .
+  117 TERMINAL: SIGNAL TK_SCIENTIFIC .
 
-    $default  reduce using rule 120 (TERMINAL)
+    $default  reduce using rule 117 (TERMINAL)
 
 
-state 152
+state 155
 
-   81 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN . E
+  118 TERMINAL: SIGNAL TK_CHAR .
+
+    $default  reduce using rule 118 (TERMINAL)
+
+
+state 156
+
+  122 TERMINAL: SIGNAL TK_ID .
+
+    $default  reduce using rule 122 (TERMINAL)
+
+
+state 157
+
+   83 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN . E
 
     TK_INT           shift, and go to state 46
     TK_FLOAT         shift, and go to state 47
@@ -2437,179 +2563,186 @@ state 152
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E              go to state 188
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
-
-
-state 153
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   83 DECLARATION: TYPE TK_ID TK_ASSIGN E .
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 83 (DECLARATION)
+    E              go to state 194
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 154
+state 158
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   85 DECLARATION: TYPE TK_ID TK_ASSIGN E .
+
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
+
+    $default  reduce using rule 85 (DECLARATION)
+
+
+state 159
 
     3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' .
 
     $default  reduce using rule 3 (MAIN)
 
 
-state 155
+state 160
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   74 ATTRIBUITION: TK_ID TK_ASSIGN E .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   76 ATTRIBUITION: TK_ID TK_ASSIGN E .
 
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
 
-    $default  reduce using rule 74 (ATTRIBUITION)
-
-
-state 156
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   76 OP_ASSIGN: TK_ID TK_OP_ASSIGN E .
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 76 (OP_ASSIGN)
+    $default  reduce using rule 76 (ATTRIBUITION)
 
 
-state 157
+state 161
 
-   77 COUT: TK_COUT '(' E_C . ')'
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   78 OP_ASSIGN: TK_ID TK_OP_ASSIGN E .
 
-    ')'  shift, and go to state 189
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
+
+    $default  reduce using rule 78 (OP_ASSIGN)
 
 
-state 158
+state 162
 
-   46 E: '(' E ')' .
+   79 COUT: TK_COUT '(' E_C . ')'
 
-    $default  reduce using rule 46 (E)
+    ')'  shift, and go to state 195
 
 
-state 159
+state 163
 
-   49 E: '(' TYPE ')' . TERMINAL
+   42 LABEL: TK_CASE E_C TK_GO_LABEL .
+
+    $default  reduce using rule 42 (LABEL)
+
+
+state 164
+
+   48 E: '(' E ')' .
+
+    $default  reduce using rule 48 (E)
+
+
+state 165
+
+   51 E: '(' TYPE ')' . TERMINAL
 
     TK_INT         shift, and go to state 46
     TK_FLOAT       shift, and go to state 47
@@ -2617,761 +2750,761 @@ state 159
     TK_CHAR        shift, and go to state 49
     TK_STRING      shift, and go to state 50
     TK_BOOL        shift, and go to state 51
-    TK_ID          shift, and go to state 190
+    TK_ID          shift, and go to state 196
     TK_OP_SUM      shift, and go to state 54
     TK_OP_SUB      shift, and go to state 55
 
-    TERMINAL  go to state 191
-    SIGNAL    go to state 95
+    TERMINAL  go to state 197
+    SIGNAL    go to state 97
 
 
-state 160
+state 166
 
    26 IF: IF_C '(' E_C . ')' STATEMENT
    27   | IF_C '(' E_C . ')' STATEMENT TK_ELSE STATEMENT
 
-    ')'  shift, and go to state 192
+    ')'  shift, and go to state 198
 
 
-state 161
+state 167
 
    29 WHILE: WHILE_C '(' E_C . ')' STATEMENT
 
-    ')'  shift, and go to state 193
+    ')'  shift, and go to state 199
 
 
-state 162
+state 168
 
    31 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE . '(' E_C ')' ';'
 
-    '('  shift, and go to state 194
+    '('  shift, and go to state 200
 
 
-state 163
+state 169
 
    34 OPTIONAL_E_OR_DECLARATION: OPTIONAL_E .
 
     $default  reduce using rule 34 (OPTIONAL_E_OR_DECLARATION)
 
 
-state 164
+state 170
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION . ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
 
-    ';'  shift, and go to state 195
+    ';'  shift, and go to state 201
 
 
-state 165
+state 171
 
    40 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL . TK_DOT_DOT TERMINAL ')' STATEMENT
 
-    TK_DOT_DOT  shift, and go to state 196
+    TK_DOT_DOT  shift, and go to state 202
 
 
-state 166
+state 172
 
    32 OPTIONAL_E: E_C .
 
     $default  reduce using rule 32 (OPTIONAL_E)
 
 
-state 167
+state 173
 
    36 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION .
-   48 E: ATTRIBUITION .
+   50 E: ATTRIBUITION .
 
     TK_DOT_DOT  reduce using rule 36 (ATTRIBUITION_OR_TERMINAL)
-    $default    reduce using rule 48 (E)
+    $default    reduce using rule 50 (E)
 
 
-state 168
+state 174
 
    35 OPTIONAL_E_OR_DECLARATION: DECLARATION .
-   80 DECLARATION: DECLARATION . ',' TK_ID
-   81            | DECLARATION . ',' TK_ID TK_ASSIGN E
+   82 DECLARATION: DECLARATION . ',' TK_ID
+   83            | DECLARATION . ',' TK_ID TK_ASSIGN E
 
     ','  shift, and go to state 36
 
     $default  reduce using rule 35 (OPTIONAL_E_OR_DECLARATION)
 
 
-state 169
-
-   37 ATTRIBUITION_OR_TERMINAL: TERMINAL .
-   47 E: TERMINAL .
-
-    TK_DOT_DOT  reduce using rule 37 (ATTRIBUITION_OR_TERMINAL)
-    $default    reduce using rule 47 (E)
-
-
-state 170
-
-   50 E: E . TK_OP_SUM E
-   50  | E TK_OP_SUM E .
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
-
-    $default  reduce using rule 50 (E)
-
-
-state 171
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   51  | E TK_OP_SUB E .
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
-
-    $default  reduce using rule 51 (E)
-
-
-state 172
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   52  | E TK_OP_MUL E .
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
-
-    $default  reduce using rule 52 (E)
-
-
-state 173
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   53  | E TK_OP_DIV E .
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_MOD  shift, and go to state 131
-
-    $default  reduce using rule 53 (E)
-
-
-state 174
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   54  | E TK_OP_MOD E .
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    $default  reduce using rule 54 (E)
-
-
 state 175
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   59  | E TK_OP_REL_LESS E .
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   37 ATTRIBUITION_OR_TERMINAL: TERMINAL .
+   49 E: TERMINAL .
 
-    TK_OP_SUM         shift, and go to state 127
-    TK_OP_SUB         shift, and go to state 128
-    TK_OP_MUL         shift, and go to state 129
-    TK_OP_DIV         shift, and go to state 130
-    TK_OP_MOD         shift, and go to state 131
-    TK_OP_BIN_AND     shift, and go to state 140
-    TK_OP_BIN_OR      shift, and go to state 141
-    TK_OP_BIN_XOR     shift, and go to state 142
-    TK_OP_BIN_SHIFTR  shift, and go to state 143
-    TK_OP_BIN_SHIFTL  shift, and go to state 144
-
-    $default  reduce using rule 59 (E)
+    TK_DOT_DOT  reduce using rule 37 (ATTRIBUITION_OR_TERMINAL)
+    $default    reduce using rule 49 (E)
 
 
 state 176
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   60  | E TK_OP_REL_GREATER E .
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   52  | E TK_OP_SUM E .
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         shift, and go to state 127
-    TK_OP_SUB         shift, and go to state 128
-    TK_OP_MUL         shift, and go to state 129
-    TK_OP_DIV         shift, and go to state 130
-    TK_OP_MOD         shift, and go to state 131
-    TK_OP_BIN_AND     shift, and go to state 140
-    TK_OP_BIN_OR      shift, and go to state 141
-    TK_OP_BIN_XOR     shift, and go to state 142
-    TK_OP_BIN_SHIFTR  shift, and go to state 143
-    TK_OP_BIN_SHIFTL  shift, and go to state 144
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
 
-    $default  reduce using rule 60 (E)
+    $default  reduce using rule 52 (E)
 
 
 state 177
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   61  | E TK_OP_REL_EQLESS E .
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   53  | E TK_OP_SUB E .
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         shift, and go to state 127
-    TK_OP_SUB         shift, and go to state 128
-    TK_OP_MUL         shift, and go to state 129
-    TK_OP_DIV         shift, and go to state 130
-    TK_OP_MOD         shift, and go to state 131
-    TK_OP_BIN_AND     shift, and go to state 140
-    TK_OP_BIN_OR      shift, and go to state 141
-    TK_OP_BIN_XOR     shift, and go to state 142
-    TK_OP_BIN_SHIFTR  shift, and go to state 143
-    TK_OP_BIN_SHIFTL  shift, and go to state 144
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
 
-    $default  reduce using rule 61 (E)
+    $default  reduce using rule 53 (E)
 
 
 state 178
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   62  | E TK_OP_REL_EQGREATER E .
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   54  | E TK_OP_MUL E .
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         shift, and go to state 127
-    TK_OP_SUB         shift, and go to state 128
-    TK_OP_MUL         shift, and go to state 129
-    TK_OP_DIV         shift, and go to state 130
-    TK_OP_MOD         shift, and go to state 131
-    TK_OP_BIN_AND     shift, and go to state 140
-    TK_OP_BIN_OR      shift, and go to state 141
-    TK_OP_BIN_XOR     shift, and go to state 142
-    TK_OP_BIN_SHIFTR  shift, and go to state 143
-    TK_OP_BIN_SHIFTL  shift, and go to state 144
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
 
-    $default  reduce using rule 62 (E)
+    $default  reduce using rule 54 (E)
 
 
 state 179
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   57  | E TK_OP_REL_EQ E .
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   55  | E TK_OP_DIV E .
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 57 (E)
-
-
-state 180
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   58  | E TK_OP_REL_DIFF E .
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 58 (E)
-
-
-state 181
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   56  | E TK_OP_LOGIC_AND E .
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
-
-    $default  reduce using rule 56 (E)
-
-
-state 182
-
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   55  | E TK_OP_LOGIC_OR E .
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
+    TK_OP_MOD  shift, and go to state 136
 
     $default  reduce using rule 55 (E)
 
 
+state 180
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   56  | E TK_OP_MOD E .
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    $default  reduce using rule 56 (E)
+
+
+state 181
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   61  | E TK_OP_REL_LESS E .
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM         shift, and go to state 132
+    TK_OP_SUB         shift, and go to state 133
+    TK_OP_MUL         shift, and go to state 134
+    TK_OP_DIV         shift, and go to state 135
+    TK_OP_MOD         shift, and go to state 136
+    TK_OP_BIN_AND     shift, and go to state 145
+    TK_OP_BIN_OR      shift, and go to state 146
+    TK_OP_BIN_XOR     shift, and go to state 147
+    TK_OP_BIN_SHIFTR  shift, and go to state 148
+    TK_OP_BIN_SHIFTL  shift, and go to state 149
+
+    $default  reduce using rule 61 (E)
+
+
+state 182
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   62  | E TK_OP_REL_GREATER E .
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM         shift, and go to state 132
+    TK_OP_SUB         shift, and go to state 133
+    TK_OP_MUL         shift, and go to state 134
+    TK_OP_DIV         shift, and go to state 135
+    TK_OP_MOD         shift, and go to state 136
+    TK_OP_BIN_AND     shift, and go to state 145
+    TK_OP_BIN_OR      shift, and go to state 146
+    TK_OP_BIN_XOR     shift, and go to state 147
+    TK_OP_BIN_SHIFTR  shift, and go to state 148
+    TK_OP_BIN_SHIFTL  shift, and go to state 149
+
+    $default  reduce using rule 62 (E)
+
+
 state 183
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   63  | E TK_OP_BIN_AND E .
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   63  | E TK_OP_REL_EQLESS E .
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  shift, and go to state 127
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
+    TK_OP_SUM         shift, and go to state 132
+    TK_OP_SUB         shift, and go to state 133
+    TK_OP_MUL         shift, and go to state 134
+    TK_OP_DIV         shift, and go to state 135
+    TK_OP_MOD         shift, and go to state 136
+    TK_OP_BIN_AND     shift, and go to state 145
+    TK_OP_BIN_OR      shift, and go to state 146
+    TK_OP_BIN_XOR     shift, and go to state 147
+    TK_OP_BIN_SHIFTR  shift, and go to state 148
+    TK_OP_BIN_SHIFTL  shift, and go to state 149
 
     $default  reduce using rule 63 (E)
 
 
 state 184
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   64  | E TK_OP_BIN_OR E .
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   64  | E TK_OP_REL_EQGREATER E .
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  shift, and go to state 127
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
+    TK_OP_SUM         shift, and go to state 132
+    TK_OP_SUB         shift, and go to state 133
+    TK_OP_MUL         shift, and go to state 134
+    TK_OP_DIV         shift, and go to state 135
+    TK_OP_MOD         shift, and go to state 136
+    TK_OP_BIN_AND     shift, and go to state 145
+    TK_OP_BIN_OR      shift, and go to state 146
+    TK_OP_BIN_XOR     shift, and go to state 147
+    TK_OP_BIN_SHIFTR  shift, and go to state 148
+    TK_OP_BIN_SHIFTL  shift, and go to state 149
 
     $default  reduce using rule 64 (E)
 
 
 state 185
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   65  | E TK_OP_BIN_XOR E .
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   59  | E TK_OP_REL_EQ E .
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  shift, and go to state 127
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
 
-    $default  reduce using rule 65 (E)
+    $default  reduce using rule 59 (E)
 
 
 state 186
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   66  | E TK_OP_BIN_SHIFTR E .
-   67  | E . TK_OP_BIN_SHIFTL E
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   60  | E TK_OP_REL_DIFF E .
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  shift, and go to state 127
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
 
-    $default  reduce using rule 66 (E)
+    $default  reduce using rule 60 (E)
 
 
 state 187
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   67  | E TK_OP_BIN_SHIFTL E .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   58  | E TK_OP_LOGIC_AND E .
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  shift, and go to state 127
-    TK_OP_SUB  shift, and go to state 128
-    TK_OP_MUL  shift, and go to state 129
-    TK_OP_DIV  shift, and go to state 130
-    TK_OP_MOD  shift, and go to state 131
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
 
-    $default  reduce using rule 67 (E)
+    $default  reduce using rule 58 (E)
 
 
 state 188
 
-   50 E: E . TK_OP_SUM E
-   51  | E . TK_OP_SUB E
-   52  | E . TK_OP_MUL E
-   53  | E . TK_OP_DIV E
-   54  | E . TK_OP_MOD E
-   55  | E . TK_OP_LOGIC_OR E
-   56  | E . TK_OP_LOGIC_AND E
-   57  | E . TK_OP_REL_EQ E
-   58  | E . TK_OP_REL_DIFF E
-   59  | E . TK_OP_REL_LESS E
-   60  | E . TK_OP_REL_GREATER E
-   61  | E . TK_OP_REL_EQLESS E
-   62  | E . TK_OP_REL_EQGREATER E
-   63  | E . TK_OP_BIN_AND E
-   64  | E . TK_OP_BIN_OR E
-   65  | E . TK_OP_BIN_XOR E
-   66  | E . TK_OP_BIN_SHIFTR E
-   67  | E . TK_OP_BIN_SHIFTL E
-   81 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN E .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   57  | E TK_OP_LOGIC_OR E .
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            shift, and go to state 127
-    TK_OP_SUB            shift, and go to state 128
-    TK_OP_MUL            shift, and go to state 129
-    TK_OP_DIV            shift, and go to state 130
-    TK_OP_MOD            shift, and go to state 131
-    TK_OP_REL_LESS       shift, and go to state 132
-    TK_OP_REL_GREATER    shift, and go to state 133
-    TK_OP_REL_EQLESS     shift, and go to state 134
-    TK_OP_REL_EQGREATER  shift, and go to state 135
-    TK_OP_REL_EQ         shift, and go to state 136
-    TK_OP_REL_DIFF       shift, and go to state 137
-    TK_OP_LOGIC_AND      shift, and go to state 138
-    TK_OP_LOGIC_OR       shift, and go to state 139
-    TK_OP_BIN_AND        shift, and go to state 140
-    TK_OP_BIN_OR         shift, and go to state 141
-    TK_OP_BIN_XOR        shift, and go to state 142
-    TK_OP_BIN_SHIFTR     shift, and go to state 143
-    TK_OP_BIN_SHIFTL     shift, and go to state 144
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
 
-    $default  reduce using rule 81 (DECLARATION)
+    $default  reduce using rule 57 (E)
 
 
 state 189
 
-   77 COUT: TK_COUT '(' E_C ')' .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   65  | E TK_OP_BIN_AND E .
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    $default  reduce using rule 77 (COUT)
+    TK_OP_SUM  shift, and go to state 132
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
+
+    $default  reduce using rule 65 (E)
 
 
 state 190
 
-  119 TERMINAL: TK_ID .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   66  | E TK_OP_BIN_OR E .
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    $default  reduce using rule 119 (TERMINAL)
+    TK_OP_SUM  shift, and go to state 132
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
+
+    $default  reduce using rule 66 (E)
 
 
 state 191
 
-   49 E: '(' TYPE ')' TERMINAL .
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   67  | E TK_OP_BIN_XOR E .
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
 
-    $default  reduce using rule 49 (E)
+    TK_OP_SUM  shift, and go to state 132
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
+
+    $default  reduce using rule 67 (E)
 
 
 state 192
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   68  | E TK_OP_BIN_SHIFTR E .
+   69  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM  shift, and go to state 132
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
+
+    $default  reduce using rule 68 (E)
+
+
+state 193
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   69  | E TK_OP_BIN_SHIFTL E .
+
+    TK_OP_SUM  shift, and go to state 132
+    TK_OP_SUB  shift, and go to state 133
+    TK_OP_MUL  shift, and go to state 134
+    TK_OP_DIV  shift, and go to state 135
+    TK_OP_MOD  shift, and go to state 136
+
+    $default  reduce using rule 69 (E)
+
+
+state 194
+
+   52 E: E . TK_OP_SUM E
+   53  | E . TK_OP_SUB E
+   54  | E . TK_OP_MUL E
+   55  | E . TK_OP_DIV E
+   56  | E . TK_OP_MOD E
+   57  | E . TK_OP_LOGIC_OR E
+   58  | E . TK_OP_LOGIC_AND E
+   59  | E . TK_OP_REL_EQ E
+   60  | E . TK_OP_REL_DIFF E
+   61  | E . TK_OP_REL_LESS E
+   62  | E . TK_OP_REL_GREATER E
+   63  | E . TK_OP_REL_EQLESS E
+   64  | E . TK_OP_REL_EQGREATER E
+   65  | E . TK_OP_BIN_AND E
+   66  | E . TK_OP_BIN_OR E
+   67  | E . TK_OP_BIN_XOR E
+   68  | E . TK_OP_BIN_SHIFTR E
+   69  | E . TK_OP_BIN_SHIFTL E
+   83 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN E .
+
+    TK_OP_SUM            shift, and go to state 132
+    TK_OP_SUB            shift, and go to state 133
+    TK_OP_MUL            shift, and go to state 134
+    TK_OP_DIV            shift, and go to state 135
+    TK_OP_MOD            shift, and go to state 136
+    TK_OP_REL_LESS       shift, and go to state 137
+    TK_OP_REL_GREATER    shift, and go to state 138
+    TK_OP_REL_EQLESS     shift, and go to state 139
+    TK_OP_REL_EQGREATER  shift, and go to state 140
+    TK_OP_REL_EQ         shift, and go to state 141
+    TK_OP_REL_DIFF       shift, and go to state 142
+    TK_OP_LOGIC_AND      shift, and go to state 143
+    TK_OP_LOGIC_OR       shift, and go to state 144
+    TK_OP_BIN_AND        shift, and go to state 145
+    TK_OP_BIN_OR         shift, and go to state 146
+    TK_OP_BIN_XOR        shift, and go to state 147
+    TK_OP_BIN_SHIFTR     shift, and go to state 148
+    TK_OP_BIN_SHIFTL     shift, and go to state 149
+
+    $default  reduce using rule 83 (DECLARATION)
+
+
+state 195
+
+   79 COUT: TK_COUT '(' E_C ')' .
+
+    $default  reduce using rule 79 (COUT)
+
+
+state 196
+
+  121 TERMINAL: TK_ID .
+
+    $default  reduce using rule 121 (TERMINAL)
+
+
+state 197
+
+   51 E: '(' TYPE ')' TERMINAL .
+
+    $default  reduce using rule 51 (E)
+
+
+state 198
 
    26 IF: IF_C '(' E_C ')' . STATEMENT
    27   | IF_C '(' E_C ')' . STATEMENT TK_ELSE STATEMENT
@@ -3401,47 +3534,49 @@ state 192
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 197
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 203
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 193
+state 199
 
    29 WHILE: WHILE_C '(' E_C ')' . STATEMENT
 
@@ -3470,47 +3605,49 @@ state 193
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 198
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 204
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 194
+state 200
 
    31 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' . E_C ')' ';'
 
@@ -3520,25 +3657,25 @@ state 194
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
-    E_C            go to state 199
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    E_C            go to state 205
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 195
+state 201
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' . OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
 
@@ -3548,28 +3685,28 @@ state 195
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
     $default  reduce using rule 33 (OPTIONAL_E)
 
-    OPTIONAL_E     go to state 200
-    E_C            go to state 166
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    OPTIONAL_E     go to state 206
+    E_C            go to state 172
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 196
+state 202
 
    40 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT . TERMINAL ')' STATEMENT
 
@@ -3579,54 +3716,54 @@ state 196
     TK_CHAR        shift, and go to state 49
     TK_STRING      shift, and go to state 50
     TK_BOOL        shift, and go to state 51
-    TK_ID          shift, and go to state 190
+    TK_ID          shift, and go to state 196
     TK_OP_SUM      shift, and go to state 54
     TK_OP_SUB      shift, and go to state 55
 
-    TERMINAL  go to state 201
-    SIGNAL    go to state 95
+    TERMINAL  go to state 207
+    SIGNAL    go to state 97
 
 
-state 197
+state 203
 
    26 IF: IF_C '(' E_C ')' STATEMENT .
    27   | IF_C '(' E_C ')' STATEMENT . TK_ELSE STATEMENT
 
-    TK_ELSE  shift, and go to state 202
+    TK_ELSE  shift, and go to state 208
 
     TK_ELSE   [reduce using rule 26 (IF)]
     $default  reduce using rule 26 (IF)
 
 
-state 198
+state 204
 
    29 WHILE: WHILE_C '(' E_C ')' STATEMENT .
 
     $default  reduce using rule 29 (WHILE)
 
 
-state 199
+state 205
 
    31 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C . ')' ';'
 
-    ')'  shift, and go to state 203
+    ')'  shift, and go to state 209
 
 
-state 200
+state 206
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E . ';' OPTIONAL_E ')' STATEMENT
 
-    ';'  shift, and go to state 204
+    ';'  shift, and go to state 210
 
 
-state 201
+state 207
 
    40 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL . ')' STATEMENT
 
-    ')'  shift, and go to state 205
+    ')'  shift, and go to state 211
 
 
-state 202
+state 208
 
    27 IF: IF_C '(' E_C ')' STATEMENT TK_ELSE . STATEMENT
 
@@ -3655,54 +3792,56 @@ state 202
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 206
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 212
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 203
+state 209
 
    31 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' . ';'
 
-    ';'  shift, and go to state 207
+    ';'  shift, and go to state 213
 
 
-state 204
+state 210
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' . OPTIONAL_E ')' STATEMENT
 
@@ -3712,28 +3851,28 @@ state 204
     TK_CHAR          shift, and go to state 49
     TK_STRING        shift, and go to state 50
     TK_BOOL          shift, and go to state 51
-    TK_ID            shift, and go to state 106
+    TK_ID            shift, and go to state 108
     TK_OP_SUM        shift, and go to state 54
     TK_OP_SUB        shift, and go to state 55
     TK_OP_LOGIC_NOT  shift, and go to state 56
     TK_OP_BIN_NOT    shift, and go to state 57
-    TK_OP_INCREASE   shift, and go to state 67
-    '('              shift, and go to state 68
+    TK_OP_INCREASE   shift, and go to state 69
+    '('              shift, and go to state 70
 
     $default  reduce using rule 33 (OPTIONAL_E)
 
-    OPTIONAL_E     go to state 208
-    E_C            go to state 166
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    OPTIONAL_E     go to state 214
+    E_C            go to state 172
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 205
+state 211
 
    40 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' . STATEMENT
 
@@ -3762,75 +3901,77 @@ state 205
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 209
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 215
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 206
+state 212
 
    27 IF: IF_C '(' E_C ')' STATEMENT TK_ELSE STATEMENT .
 
     $default  reduce using rule 27 (IF)
 
 
-state 207
+state 213
 
    31 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' ';' .
 
     $default  reduce using rule 31 (DO_WHILE)
 
 
-state 208
+state 214
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E . ')' STATEMENT
 
-    ')'  shift, and go to state 210
+    ')'  shift, and go to state 216
 
 
-state 209
+state 215
 
    40 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT .
 
     $default  reduce using rule 40 (FOR)
 
 
-state 210
+state 216
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' . STATEMENT
 
@@ -3859,47 +4000,49 @@ state 210
     TK_RETURN             shift, and go to state 58
     TK_COUT               shift, and go to state 59
     TK_IF                 shift, and go to state 60
-    TK_FOR                shift, and go to state 61
-    TK_WHILE              shift, and go to state 62
-    TK_DO                 shift, and go to state 63
-    TK_BREAK              shift, and go to state 64
-    TK_CONTINUE           shift, and go to state 65
-    TK_GOTO               shift, and go to state 66
-    TK_OP_INCREASE        shift, and go to state 67
-    '('                   shift, and go to state 68
+    TK_CASE               shift, and go to state 61
+    TK_DEFAULT            shift, and go to state 62
+    TK_FOR                shift, and go to state 63
+    TK_WHILE              shift, and go to state 64
+    TK_DO                 shift, and go to state 65
+    TK_BREAK              shift, and go to state 66
+    TK_CONTINUE           shift, and go to state 67
+    TK_GOTO               shift, and go to state 68
+    TK_OP_INCREASE        shift, and go to state 69
+    '('                   shift, and go to state 70
     '{'                   shift, and go to state 32
-    ';'                   shift, and go to state 69
+    ';'                   shift, and go to state 71
 
-    SCOPE          go to state 70
+    SCOPE          go to state 72
     BEGIN_SCOPE    go to state 34
-    STATEMENT      go to state 211
-    RETURN         go to state 73
-    IF_C           go to state 74
-    IF             go to state 75
-    WHILE_C        go to state 76
-    WHILE          go to state 77
-    DO_WHILE_C     go to state 78
-    DO_WHILE       go to state 79
-    FOR_C          go to state 80
-    FOR            go to state 81
-    LABEL          go to state 82
-    GOTO           go to state 83
-    CONTINUE       go to state 84
-    BREAK          go to state 85
-    E_C            go to state 86
-    E              go to state 87
-    INCREASE       go to state 88
-    PREV_INCREASE  go to state 89
-    ATTRIBUITION   go to state 90
-    OP_ASSIGN      go to state 91
-    COUT           go to state 92
-    DECLARATION    go to state 93
+    STATEMENT      go to state 217
+    RETURN         go to state 75
+    IF_C           go to state 76
+    IF             go to state 77
+    WHILE_C        go to state 78
+    WHILE          go to state 79
+    DO_WHILE_C     go to state 80
+    DO_WHILE       go to state 81
+    FOR_C          go to state 82
+    FOR            go to state 83
+    LABEL          go to state 84
+    GOTO           go to state 85
+    CONTINUE       go to state 86
+    BREAK          go to state 87
+    E_C            go to state 88
+    E              go to state 89
+    INCREASE       go to state 90
+    PREV_INCREASE  go to state 91
+    ATTRIBUITION   go to state 92
+    OP_ASSIGN      go to state 93
+    COUT           go to state 94
+    DECLARATION    go to state 95
     TYPE           go to state 18
-    TERMINAL       go to state 94
-    SIGNAL         go to state 95
+    TERMINAL       go to state 96
+    SIGNAL         go to state 97
 
 
-state 211
+state 217
 
    39 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT .
 
