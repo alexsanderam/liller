@@ -36,6 +36,7 @@ struct args
         string translation;
         string type; /*auxiliar*/
         string modifier; /*auxiliar*/
+	bool   isConstant; /*auxiliar*/
 };
 
 typedef struct opStruct
@@ -61,7 +62,7 @@ typedef struct opStruct
 typedef struct
 {
         string dIType; /*tipo com modificador das variáveis intermediárias*/
-        unsigned int size; /*nos casos de string*/
+        unsigned int length; /*nos casos de string*/
 } variable_declarations_struct;
 
 
@@ -124,10 +125,6 @@ bool flagDeclarationNotAllowedAux = false;
 bool flagContinue = false;
 bool flagBreak = false;
 
-/*controle para verificar se há uma não constante
-em uma expressão, utilizado no CASE*/
-bool flagNotConstant = false;
-
 /*controle para verificar se há um CASE (ou um DEFAULT)
 fora de um switch*/
 bool flagWithinSwitch = false;
@@ -140,6 +137,7 @@ void openNewScope();
 void closeCurrentScope();
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
+YYSTYPE toString(YYSTYPE);
 YYSTYPE runCast(YYSTYPE, YYSTYPE);
 bool verifyCast(string, string);
 YYSTYPE assign(string, YYSTYPE, YYSTYPE);
@@ -152,6 +150,8 @@ id_struct* findID(string);
 label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string label);
 void declare(string, string, unsigned int);
+unsigned int getDeclarationLength(YYSTYPE);
+bool setDeclarationLength(YYSTYPE, unsigned int);
 void verifyLabels();
 string getDeclarations();
 void findAndReplace(string*, const string, const string);
@@ -677,10 +677,10 @@ LABEL			: TK_ID TK_GO_LABEL
 			{
 				case_label_map* caseLabelMap = stackCaseLabel.front();
 				string newLabel;
-
+			
 
 				/*verifica-se a presença de uma não constante na expressão*/
-				if(flagNotConstant == true)
+				if($2.isConstant == false)
 					yyerror("case label does not reduce to an integer constant");
 
 				/*verifica se o case está dentro de um switch*/
@@ -720,6 +720,8 @@ LABEL			: TK_ID TK_GO_LABEL
 				}
 			}
 			;
+
+
 
 
 GOTO			: TK_GOTO TK_ID
@@ -848,9 +850,6 @@ E_C			: E
                                         auxIncreaseTranslation = "";
                                 }
 
-				/*controle para verificar se há uma não constante
-				em uma expressão, utilizado no CASE*/
-				flagNotConstant = false;
 			}
 			;
 
@@ -862,6 +861,7 @@ E                       : '(' E ')'
                                 $$.label = $2.label;
                                 $$.type = $2.type;
                                 $$.modifier = $2.modifier;                
+                                $$.isConstant = $2.isConstant; 
                         }
                         | TERMINAL
                         | ATTRIBUITION
@@ -1419,6 +1419,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
  
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
@@ -1430,6 +1431,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "float";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
   
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
 
@@ -1440,6 +1442,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "float"; //poderia ser double
                                 $$.modifier = "";
+                               	$$.isConstant = true;
           
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
@@ -1451,6 +1454,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "char";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
               
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";                                
@@ -1462,6 +1466,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
  
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + ";\n";
@@ -1473,6 +1478,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "float";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
   
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + ";\n";
 
@@ -1483,6 +1489,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "float"; //poderia ser double
                                 $$.modifier = "";
+                               	$$.isConstant = true;
           
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + ";\n";
@@ -1494,6 +1501,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "char";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
               
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + ";\n";                                
@@ -1505,6 +1513,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "string";
                                 $$.modifier = "";
+                               	$$.isConstant = true;
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";                                
 
@@ -1515,6 +1524,7 @@ TERMINAL        :       TK_INT
                                 $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "unsigned short";
+                               	$$.isConstant = true;
 
 
                                 if ($1.translation == "true")                        
@@ -1538,9 +1548,7 @@ TERMINAL        :       TK_INT
                                         $$.translation = "";
                                 }
 
-				/*controle para verificar se há uma não constante
-				em uma expressão, utilizado no CASE*/
-				flagNotConstant = true;
+                               	$$.isConstant = false;
                         }
                         | SIGNAL TK_ID
                         {
@@ -1564,9 +1572,7 @@ TERMINAL        :       TK_INT
 					declare($$.label, modifier + $$.type, 1);
                                 }
 
-				/*controle para verificar se há uma não constante
-				em uma expressão, utilizado no CASE*/
-				flagNotConstant = true;
+                               	$$.isConstant = false;
                         }
                         ;
 
@@ -1673,6 +1679,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
         res->type = resultOperationType;
         res->modifier = ""; /*desconsidera-se os modificadores*/
+	res->isConstant = operand1.isConstant && operand2.isConstant;
 
         declare(res->label, res->type, 1);
 
@@ -1713,6 +1720,12 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 	YYSTYPE* auxCmp;
 	YYSTYPE value;
 	YYSTYPE op;
+	YYSTYPE op1Str = operand1;
+	YYSTYPE op2Str = operand2;
+
+	/*tamanho da string resultante
+	por padrão, o valor é 1*/
+	unsigned int length = 1;
 
 	string resultOperationType;
 
@@ -1724,31 +1737,35 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 	{
 		res->type = resultOperationType;
 		res->modifier = "";
+		res->isConstant = operand1.isConstant && operand2.isConstant;
 
 
 		/*caso um operando seja de tipo diferente, 
 		converte-o para string*/
 		if(operand1.type != "string")
-			toString(operand1); /*deve-se ainda implentar tal função*/
+			op1Str = toString(operand1); /*deve-se ainda implentar tal função*/
 		else if(operand2.type != "string")
-			toString(operand2); /*deve-se ainda implentar tal função*/
+			op2Str = toString(operand2); /*deve-se ainda implentar tal função*/
 
+		res->translation = op1Str.translation + op2Str.translation;
 
 		/*realiza a operação referente*/
 		if(operation == "+")
 		{
 			res->label = generateID();			
-			res->translation += "\tstrcpy(" + res->label + ", " + operand1.label + ");\n";
-			res->translation += "\tstrcat(" + res->label + ", " + operand2.label + ");\n";
+			res->translation += "\tstrcpy(" + res->label + ", " + op1Str.label + ");\n";
+			res->translation += "\tstrcat(" + res->label + ", " + op2Str.label + ");\n";
+
+			length = getDeclarationLength(op1Str) + getDeclarationLength(op2Str);
 		}
 		else /*no caso de operações relacionais*/
 		{
 			auxCmp = new YYSTYPE();			
-			auxCmp->type = res->type;			
-			auxCmp->modifier = res->modifier;
+			auxCmp->type = "int";			
+			auxCmp->modifier = "short";
 			auxCmp->label = generateID();
 
-			auxCmp->translation = "\tstrcmp(" + operand1.label + ", " + operand2.label + ");\n";
+			auxCmp->translation = "\t" + auxCmp->label + " = " + "strcmp(" + op1Str.label + ", " + op2Str.label + ");\n";
 
 			/*realiza a declaração da variável auxiliar*/
 			declare(auxCmp->label, auxCmp->type, 1);	
@@ -1813,13 +1830,36 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
 		}		
 		
-		declare(res->label, res->type, 1);
+		declare(res->label, res->type, length);
 	}
 			
 	return *res;
 }
 
 
+YYSTYPE toString(YYSTYPE operand)
+{
+	YYSTYPE* res;
+
+	if(operand.type == "int")
+	{
+		
+	}
+	else if(operand.type == "char")
+	{
+		
+	}
+	else if(operand.type == "float")
+	{
+		
+	}
+	else if(operand.type == "double")
+	{
+		
+	}
+
+	return *res;
+}
 
 
 YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
@@ -1839,6 +1879,7 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
 		res->label = generateID();
 		res->type = to.type;
 		res->modifier = to.modifier;
+		res->isConstant = from.isConstant && to.isConstant;
 
 		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
 
@@ -1931,6 +1972,7 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         res->label = identifier->label;
         res->type = identifier->type;
         res->modifier = identifier->modifier;
+        res->isConstant = false;
 
 
         if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
@@ -1959,6 +2001,7 @@ YYSTYPE assignNotExpression(YYSTYPE expr)
         res->label = generateID();
         res->type = expr.type;
         res->modifier = expr.modifier;
+        res->isConstant = false;
         res->translation = "\t" + res->label + " = !" + expr.label + ";\n";
 
         if(modifier != "")
@@ -1980,6 +2023,7 @@ YYSTYPE generateIntValue(int value)
         valueTkn->translation = "\t" + valueTkn->label + " = " + valueString.str() + ";\n";
         valueTkn->type = "int";
         valueTkn->modifier = "";
+        valueTkn->isConstant = true;
 
         declare(valueTkn->label, valueTkn->type, 1);
         
@@ -2025,7 +2069,7 @@ void verifyLabels()
 }
 
 
-void declare(string label, string dIType, unsigned int size)
+void declare(string label, string dIType, unsigned int length)
 {
         string finalType = dIType;
         
@@ -2034,7 +2078,7 @@ void declare(string label, string dIType, unsigned int size)
         if (dIType == "string")
                 finalType = "string"; //tem que mudar para char ainda
 
-         declarationsMap->insert(declarations_map::value_type(label, {finalType, size}));
+         declarationsMap->insert(declarations_map::value_type(label, {finalType, length}));
 } 
 
 string getDeclarations()
@@ -2050,14 +2094,47 @@ string getDeclarations()
 
                 declarations << " " + i->first; /*label*/
                 
-                if (i->second.size > 1)
-                        declarations << "[" + i->second.size << "]"; /*tamanho*/
+                if (i->second.length > 1)
+                        declarations << "[" + i->second.length << "]"; /*tamanho*/
 
                 declarations << ";\n";
         }
 
         return declarations.str();
 }
+
+unsigned int getDeclarationLength(YYSTYPE id)
+{
+	variable_declarations_struct* declaredID;
+
+	declarations_map* declarationsMap = stackDeclarationsMap.front();
+	declaredID = &declarationsMap->find(id.label)->second;
+	
+	
+	if(declaredID != NULL)
+		return declaredID->length;
+
+
+	return 0;
+}
+
+bool setDeclarationLength(YYSTYPE id, unsigned int length)
+{
+	variable_declarations_struct* declaredID;
+
+	declarations_map* declarationsMap = stackDeclarationsMap.front();
+	declaredID = &declarationsMap->find(id.label)->second;
+	
+	
+	if(declaredID == NULL)
+		return false;
+
+
+	declaredID->length = length;
+
+	return true;
+}
+
 
 void findAndReplace(string* source, const string find, const string replace)
 {
@@ -2152,6 +2229,18 @@ void loadOpearationsMap(void)
 
         ops = new operation_struct;
         ops->op1Type = "char";
+        ops->op2Type = "string";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "string";
+
+        ops = new operation_struct;
+        ops->op1Type = "float";
+        ops->op2Type = "string";
+        ops->sOperator = "+";
+        operationsMap[*ops] = "string";
+
+        ops = new operation_struct;
+        ops->op1Type = "double";
         ops->op2Type = "string";
         ops->sOperator = "+";
         operationsMap[*ops] = "string";

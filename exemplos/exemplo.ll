@@ -8,7 +8,7 @@ int main()
 	{
 		case 0:
 			cout(22222222);
-		case 1:
+		case i:
 			cout(333333);
 		case 2:
 			cout(2);
