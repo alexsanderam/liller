@@ -132,15 +132,17 @@ bool flagWithinSwitch = false;
 int yylex(void);
 void yyerror(string);
 void yywarning(string);
+string intToString(int);
 
 void openNewScope();
 void closeCurrentScope();
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE toString(YYSTYPE);
-YYSTYPE runCast(YYSTYPE, YYSTYPE);
+YYSTYPE* runCast(YYSTYPE, YYSTYPE);
 bool verifyCast(string, string);
 YYSTYPE assign(string, YYSTYPE, YYSTYPE);
+YYSTYPE stringAssign(string, YYSTYPE, YYSTYPE);
 YYSTYPE assignNotExpression(YYSTYPE);
 YYSTYPE generateIntValue(int);
 string generateID();
@@ -867,7 +869,7 @@ E                       : '(' E ')'
                         | ATTRIBUITION
                         | '(' TYPE ')' TERMINAL /*cast*/
                         {
-	                        $$ = runCast($4, $2);
+	                        $$ = *runCast($4, $2);
 
 				if($$.label == "")
 			                yyerror("cast from " + $4.type + " to " + $2.type + " not allowed");
@@ -1176,6 +1178,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 $$.modifier = (*IDMap)[$3.label].modifier;
                                 $$.translation = $1.translation;
 
+
                                 if ($$.modifier != "")
                                         declare($$.label, $$.modifier + " " + $$.type, 1);
                                 else
@@ -1185,6 +1188,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                         | DECLARATION ',' TK_ID TK_ASSIGN E
                         {
                                 string ATTRIBUITION = "";
+				unsigned int length;
                                 
                                  identifiers_map* IDMap = stackIDMap.front();
 
@@ -1197,19 +1201,20 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $3.label + "'  previously declared here.");
                         
+				length = getDeclarationLength($5);
 
                                 $$ = assign($1.translation, $3, $5);
 
                                 if ($$.modifier != "")
-                                        declare($$.label, $$.modifier + " " + $$.type, 1);
+                                        declare($$.label, $$.modifier + " " + $$.type, length);
                                 else
-                                        declare($$.label, $$.type, 1);
+                                        declare($$.label, $$.type, length);
                                                         
                         }
                         | TYPE TK_ID
                         {
 
-                                 identifiers_map* IDMap = stackIDMap.front();
+                                identifiers_map* IDMap = stackIDMap.front();
 
                                 if(!isDeclaredCurrentScope($2.label))
                                 {
@@ -1236,6 +1241,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                         | TYPE TK_ID TK_ASSIGN E
                         {
 
+				unsigned int length;
                                 identifiers_map* IDMap = stackIDMap.front();
 
                                 if(!isDeclaredCurrentScope($2.label))
@@ -1247,13 +1253,14 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
+				length = getDeclarationLength($4.label);
+
                                 $$ = assign(voidStr, $2, $4);
 
-
                                 if ($$.modifier != "")
-                                        declare($$.label, $$.modifier + " " + $$.type, 1);
+                                        declare($$.label, $$.modifier + " " + $$.type, length);
                                 else
-                                        declare($$.label, $$.type, 1);
+                                        declare($$.label, $$.type, length);
 
                         }
                         ;
@@ -1515,9 +1522,10 @@ TERMINAL        :       TK_INT
                                 $$.modifier = "";
                                	$$.isConstant = true;
 
-                                $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";                                
+				$$.translation = "\tmemcpy(" + $$.label + ", " + $1.translation + ");\n";                           
 
-                                declare($$.label, $$.type, 1);
+				/*comprimento da string '-2' por conta das aspas*/
+                                declare($$.label, $$.type, $1.translation.length() - 2);
                         }
                         | TK_BOOL
                         {
@@ -1608,6 +1616,14 @@ void yywarning(string MSG)
         cerr << ":" << yylineno << ": warning: " + MSG << endl;
 }
 
+string intToString(int n)
+{
+	stringstream declarations;
+	
+	declarations << n;
+	declarations.str();
+}
+
 
 void openNewScope()
 {
@@ -1694,14 +1710,14 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
                 if(operand1.type == strongType)
                 {
-			keyOperand = runCast(operand2, operand1);
+			keyOperand = *runCast(operand2, operand1);
 
 			res->translation += keyOperand.translation;
                         res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + keyOperand.label + ";\n";
                 }
                 else
                 {
-			keyOperand = runCast(operand1, operand2);
+			keyOperand = *runCast(operand1, operand2);
 
 			res->translation += keyOperand.translation;
                         res->translation += "\t" + res->label + " = " + keyOperand.label + " " + operation + " " + operand2.label + ";\n";
@@ -1839,7 +1855,8 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
 YYSTYPE toString(YYSTYPE operand)
 {
-	YYSTYPE* res;
+	YYSTYPE* res = new YYSTYPE();
+	unsigned int length;
 
 	if(operand.type == "int")
 	{
@@ -1858,11 +1875,13 @@ YYSTYPE toString(YYSTYPE operand)
 		
 	}
 
+	//declare(res->label, "string", length);
+
 	return *res;
 }
 
 
-YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
+YYSTYPE* runCast(YYSTYPE from, YYSTYPE to)
 {
         YYSTYPE* res;
 
@@ -1870,23 +1889,23 @@ YYSTYPE runCast(YYSTYPE from, YYSTYPE to)
 
         res = new YYSTYPE();
 
-        if(verifyCast(from.type, to.type))
-        {
-                
-		modifier = to.modifier;
-                modifier += (modifier != "" ? " " : "");
+        if(!verifyCast(from.type, to.type))
+		return NULL;
 
-		res->label = generateID();
-		res->type = to.type;
-		res->modifier = to.modifier;
-		res->isConstant = from.isConstant && to.isConstant;
+	
+	modifier = to.modifier;
+        modifier += (modifier != "" ? " " : "");
 
-		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
+	res->label = generateID();
+	res->type = to.type;
+	res->modifier = to.modifier;
+	res->isConstant = from.isConstant && to.isConstant;
 
-		declare(res->label, modifier + res->type, 1); 
-        }
+	res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
 
-        return *res;
+	declare(res->label, modifier + res->type, 1); 
+
+	return res;        
 }
 
 bool verifyCast(string from, string to)
@@ -1962,7 +1981,8 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
         YYSTYPE* res; 
         res = new YYSTYPE();
-        YYSTYPE cast;
+        YYSTYPE* cast;
+	YYSTYPE yID;
 
         id_struct* identifier = findID(id.label);
 
@@ -1973,17 +1993,20 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         res->type = identifier->type;
         res->modifier = identifier->modifier;
         res->isConstant = false;
-
+	
+	/*no caso de operação com strings*/
+	if(identifier->type == "string")
+		return stringAssign(addtranslation, *res, exp);
 
         if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
         {	
-		cast = runCast(exp, *res); //ou outros testes
-		
-		if(cast.label == "")
+		cast = runCast(exp, *res);
+
+		if(cast == NULL)
 			yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
 
 
-	        res->translation = addtranslation + exp.translation + cast.translation + "\t" + res->label + " = " + cast.label + ";\n";
+	        res->translation = addtranslation + exp.translation + cast->translation + "\t" + res->label + " = " + cast->label + ";\n";
         }
 	else
 	        res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
@@ -1992,6 +2015,22 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         return *res;
 }
 
+
+YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
+{
+	YYSTYPE* res; 
+        res = new YYSTYPE();
+
+	res->label = id.label;
+	res->type = id.type;
+	res->modifier = id.modifier;
+	res->isConstant = id.isConstant;
+
+	res->translation = addtranslation + exp.translation + ";\n";
+	res->translation += "\tmemcpy(" + id.label + ", " + exp.label + ");\n";
+
+	return *res;
+}
 
 YYSTYPE assignNotExpression(YYSTYPE expr)
 {
@@ -2076,31 +2115,29 @@ void declare(string label, string dIType, unsigned int length)
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
         if (dIType == "string")
-                finalType = "string"; //tem que mudar para char ainda
+                finalType = "char"; //tem que mudar para char ainda
 
          declarationsMap->insert(declarations_map::value_type(label, {finalType, length}));
 } 
 
 string getDeclarations()
 {
-        stringstream declarations;
+        string declarations = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::iterator i;        
         
         for(i = declarationsMap.begin(); i != declarationsMap.end(); i++)
         {                        
-                declarations << "\t" + i->second.dIType; /*tipo com modificadores*/
-
-                declarations << " " + i->first; /*label*/
+                declarations += "\t" + i->second.dIType + " " + i->first;
                 
                 if (i->second.length > 1)
-                        declarations << "[" + i->second.length << "]"; /*tamanho*/
+                        declarations += "[" + intToString(i->second.length) + "]";
 
-                declarations << ";\n";
+		declarations += ";\n";
         }
 
-        return declarations.str();
+        return declarations;
 }
 
 unsigned int getDeclarationLength(YYSTYPE id)
