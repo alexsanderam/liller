@@ -973,6 +973,9 @@ E                       : '(' E ')'
                                 $$.modifier = "unsigned short";
 
                                 $$.translation = $2.translation + "\t" + $$.label + " = " + $1.translation + " " + $2.label + ";\n";                                
+                                
+                                if($2.type == "int")
+                                	$$.intValue = !$2.intValue;
 
                                 declare($$.label, $$.type, 1);
                         }
@@ -986,7 +989,11 @@ E                       : '(' E ')'
                                 $$.translation = $2.translation + "\t" + $$.label + " = " + $1.translation + " " + $2.label + ";\n";
 
                                 $$.type = $2.type;
-                                $$.modifier = $2.type;
+                                $$.modifier = $2.type
+                                
+                                
+                                if($2.type == "int")
+                                	$$.intValue = ~$2.intValue;
 
                                 declare($$.label, $$.type, 1);
                         }
@@ -1936,7 +1943,7 @@ YYSTYPE toString(YYSTYPE n)
 	}
 	else if(n.type == "char")
 	{
-		length = 100;
+		length = 1;
 		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
 	}
 	else if(n.type == "float")
@@ -2204,7 +2211,7 @@ void declare(string label, string dIType, unsigned int length)
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
         if (dIType == "string")
-                finalType = "char"; //tem que mudar para char ainda
+                finalType = "char*"; //tem que mudar para char ainda
 
          declarationsMap->insert(declarations_map::value_type(label, {finalType, length}));
 } 
@@ -2220,9 +2227,9 @@ string getDeclarations()
         {                        
                 declarations += "\t" + i->second.dIType + " " + i->first;
                 
-                if ((i->second.dIType != "char") && (i->second.length > 1))
+                if ((i->second.dIType != "char*") && (i->second.length > 1))
                         declarations += "[" + intToString(i->second.length) + "]";
-		else if (i->second.dIType == "char")
+		else if (i->second.dIType == "char*")
                         declarations += "[" + intToString(i->second.length) + "]";
 
 		declarations += ";\n";
