@@ -2,19 +2,21 @@
 
 int main()
 {	
-        /*Aqui é um comentário
-        Este arquivo é de exemplo da Linguagem Liller
-        e do Compilador prescot-liller.*/
-        
-	bool x = true;
-	int y = 50, z = 20;
-	bool k = true;
+	int i = 0;
 
-	//y+z = 70	z-y = -30; -0.1*k*y = -5
-	k = y+z < 30 || (z-y < -0.1*k+y && 10 >= x*10);
+	switch(i+1)
+	{
+		case 0:
+			cout(22222222);
+		case 1:
+			cout(333333);
+			break;
+		case 3:
+			cout(2);
+		default:
+			cout("desconhecido");
+			
+	}
 
-	cout(k);
-
-	//resultado esperado: verdadeiro
 	return 0;
 }

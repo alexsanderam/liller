@@ -40,6 +40,8 @@ struct args
 
 	/*controle para alertar a recursão de operações relacionais*/
 	unsigned int relationalCounter;
+
+	int intValue; /*utlizado no case, que apenas permite constantes*/
 };
 
 typedef struct opStruct
@@ -136,6 +138,7 @@ string intToString(int);
 void openNewScope();
 void closeCurrentScope();
 YYSTYPE runBasicOperation(YYSTYPE, YYSTYPE, string);
+int runComputingIntValue(YYSTYPE, YYSTYPE, string);
 YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE toString(YYSTYPE);
 YYSTYPE* runCast(YYSTYPE, YYSTYPE);
@@ -678,7 +681,11 @@ LABEL			: TK_ID TK_GO_LABEL
 			{
 				case_label_map* caseLabelMap = stackCaseLabel.front();
 				string newLabel;
+				string key;
 			
+				/*chave do mapa de cases (labels) é dado por intValue*/
+				key = intToString($2.intValue);
+
 
 				/*verifica-se a presença de uma não constante na expressão*/
 				if($2.isConstant == false)
@@ -689,14 +696,14 @@ LABEL			: TK_ID TK_GO_LABEL
 					yyerror("case label not within a switch statement");
 
 				/*verifica se já existe um case com o mesmo valor*/
-				else if (caseLabelMap->find($2.label) != caseLabelMap->end())
+				else if (caseLabelMap->find(key) != caseLabelMap->end())
 					yyerror("duplicate case value");
 				else
 				{
 					newLabel = generateLabel();
 
 					$$.translation = $2.translation + "\t" + newLabel + ":\n";
-					caseLabelMap->insert(case_label_map::value_type($2.label, {newLabel, $2}));
+					caseLabelMap->insert(case_label_map::value_type(key, {newLabel, $2}));
 				}
 			}
 			| TK_DEFAULT TK_GO_LABEL
@@ -812,7 +819,7 @@ SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
 						op = runBasicOperation($3, i->second.defCase, "==");
 	  									
 						$$.translation += op.translation + "\tif(" + op.label + ")\n";
-						$$.translation += "\n\t\tgoto " + i->second.newLabel + ";\n";
+						$$.translation += "\t\tgoto " + i->second.newLabel + ";\n";
 					}
 					else
 						$$.translation += "\n\tgoto " + i->second.newLabel + ";\n";
@@ -911,33 +918,33 @@ E                       : '(' E ')'
                         }
                         | E TK_OP_REL_DIFF E
                         {
+                                $$ = runBasicOperation($1, $3, $2.translation);
 				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
                                 relationalControl(&$$, $2);
-                                $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_LESS E
                         {                                
-				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;                                
-				relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
+                                relationalControl(&$$, $2);
                         }
                         | E TK_OP_REL_GREATER E
                         {
+                                $$ = runBasicOperation($1, $3, $2.translation);
 				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
                                 relationalControl(&$$, $2);
-                                $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQLESS E
                         {
+                                $$ = runBasicOperation($1, $3, $2.translation);
 				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
                                 relationalControl(&$$, $2);
-                                $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQGREATER E
                         {
-				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;                                
-				relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
+                                relationalControl(&$$, $2);
                         }
                         | E TK_OP_BIN_AND E
                         {
@@ -1432,6 +1439,7 @@ TERMINAL        :       TK_INT
                                 $$.type = "int";
                                 $$.modifier = "";
                                	$$.isConstant = true;
+				$$.intValue = $1.intValue;
  
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
@@ -1692,6 +1700,11 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 	if((operand1.type == "string") || (operand2.type == "string"))
 		return stringOperation(operand1, operand2, operation);
 
+	/*no caso de inteiros, preenche-se o campo intValue*/
+	if(operand1.type == "int" && operand2.type == "int")
+		res->intValue = runComputingIntValue(operand1, operand2, operation);
+		
+
         res->label = generateID();
         res->translation = operand1.translation + operand2.translation;
 
@@ -1734,6 +1747,47 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
         }
 
         return *res;
+}
+
+
+int runComputingIntValue(YYSTYPE operand1, YYSTYPE operand2, string operation)
+{
+	if(operation == "+")
+		return operand1.intValue + operand2.intValue;
+	else if(operation == "-")
+		return operand1.intValue - operand2.intValue;
+	else if(operation == "*")
+		return operand1.intValue * operand2.intValue;
+	else if(operation == "/")
+		return operand1.intValue / operand2.intValue;
+	else if(operation == "%")
+		return operand1.intValue % operand2.intValue;
+	else if(operation == "<")
+		return operand1.intValue < operand2.intValue;
+	else if(operation == ">")
+		return operand1.intValue > operand2.intValue;
+	else if(operation == "<=")
+		return operand1.intValue <= operand2.intValue;
+	else if(operation == ">=")
+		return operand1.intValue >= operand2.intValue;
+	else if(operation == "==")
+		return operand1.intValue == operand2.intValue;
+	else if(operation == "!=")
+		return operand1.intValue != operand2.intValue;
+	else if(operation == "<<")
+		return operand1.intValue << operand2.intValue;
+	else if(operation == ">>")
+		return operand1.intValue >> operand2.intValue;
+	else if(operation == "&&")
+		return operand1.intValue && operand2.intValue;
+	else if(operation == "||")
+		return operand1.intValue || operand2.intValue;
+	else if(operation == "|")
+		return operand1.intValue | operand2.intValue;
+	else if(operation == "&")
+		return operand1.intValue & operand2.intValue;
+	else if(operation == "^")
+		return operand1.intValue ^ operand2.intValue;
 }
 
 

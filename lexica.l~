@@ -165,12 +165,12 @@ Assign "="
 
 {Assign}        { return TK_ASSIGN; }
 
-{Int}                { yylval.value = yytext; return TK_INT; }
-{Float}                { yylval.value = yytext; return TK_FLOAT; }
-{Scientific}        { yylval.value = yytext; return TK_SCIENTIFIC; }
-{Char}                { yylval.value = yytext; return TK_CHAR; }
-{String}        { yylval.value = yytext; return TK_STRING; }
-{Bool}                { yylval.value = yytext; return TK_BOOL; }
+{Int}                { yylval.intValue = atoi(yytext); yylval.translation = yytext; return TK_INT; }
+{Float}                { yylval.translation = yytext; return TK_FLOAT; }
+{Scientific}        { yylval.translation = yytext; return TK_SCIENTIFIC; }
+{Char}                { yylval.translation = yytext; return TK_CHAR; }
+{String}        { yylval.translation = yytext; return TK_STRING; }
+{Bool}                { yylval.translation = yytext; return TK_BOOL; }
 
 {TypeChar}         { yylval.translation = yytext; return TK_TYPE_CHAR; }
 {TypeString}         { yylval.translation = yytext; return TK_TYPE_STRING; }

@@ -1137,7 +1137,7 @@ YY_RULE_SETUP
 case 49:
 YY_RULE_SETUP
 #line 168 "lexica.l"
-{ yylval.translation = yytext; return TK_INT; }
+{ yylval.intValue = atoi(yytext); yylval.translation = yytext; return TK_INT; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP

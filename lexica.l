@@ -165,7 +165,7 @@ Assign "="
 
 {Assign}        { return TK_ASSIGN; }
 
-{Int}                { yylval.translation = yytext; return TK_INT; }
+{Int}                { yylval.intValue = atoi(yytext); yylval.translation = yytext; return TK_INT; }
 {Float}                { yylval.translation = yytext; return TK_FLOAT; }
 {Scientific}        { yylval.translation = yytext; return TK_SCIENTIFIC; }
 {Char}                { yylval.translation = yytext; return TK_CHAR; }
