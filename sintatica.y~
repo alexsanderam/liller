@@ -37,6 +37,9 @@ struct args
         string type; /*auxiliar*/
         string modifier; /*auxiliar*/
 	bool   isConstant; /*auxiliar*/
+
+	/*controle para alertar a recursão de operações relacionais*/
+	unsigned int relationalCounter;
 };
 
 typedef struct opStruct
@@ -109,10 +112,6 @@ bool error = false;
 bool warning = false;
 
 
-/*controle para alertar a recursão de operações relacionais*/
-unsigned int relationalCounter = 0;
-
-
 /*variáveis auxiliares para o controle da tradução do incremento/decremento*/
 string auxIncreaseTranslation = "";
 bool flagIncreaseTranslation = false;
@@ -147,7 +146,7 @@ YYSTYPE assignNotExpression(YYSTYPE);
 YYSTYPE generateIntValue(int);
 string generateID();
 string generateLabel();
-void relationalControl(YYSTYPE);
+void relationalControl(YYSTYPE*, YYSTYPE);
 id_struct* findID(string);
 label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string label);
@@ -842,7 +841,7 @@ SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
 E_C			: E
 			{
 				/*controle para alertar a recursão de operações relacionais*/
-                                relationalCounter = 0;     
+                                $$.relationalCounter = 0;
 
                                 /*controle da tradução do incremento/decremento*/
                                 if(flagIncreaseTranslation)
@@ -906,32 +905,38 @@ E                       : '(' E ')'
                         }
                         | E TK_OP_REL_EQ E
                         {
-                                relationalControl($2);
+
+                                relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_DIFF E
                         {
-                                relationalControl($2);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
+                                relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_LESS E
                         {                                
-                                relationalControl($2);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;                                
+				relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_GREATER E
                         {
-                                relationalControl($2);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
+                                relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQLESS E
                         {
-                                relationalControl($2);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;
+                                relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_REL_EQGREATER E
                         {
-                                relationalControl($2);
+				$$.relationalCounter = $1.relationalCounter + $2.relationalCounter;                                
+				relationalControl(&$$, $2);
                                 $$ = runBasicOperation($1, $3, $2.translation);
                         }
                         | E TK_OP_BIN_AND E
@@ -1641,12 +1646,13 @@ void closeCurrentScope()
         stackDeclarationsMap.pop_front();
 }
 
-void relationalControl(YYSTYPE operation)
+void relationalControl(YYSTYPE* expr, YYSTYPE operation)
 {
         static string lastOp = "";
         string MSG;
-        
-        if(relationalCounter > 0)
+
+
+        if(expr->relationalCounter > 0)
         {
                 if ((operation.translation == "==") || (operation.translation == "!=") || (lastOp == "==") || (lastOp == "!="))
                 {
@@ -1656,14 +1662,16 @@ void relationalControl(YYSTYPE operation)
                 else
                         MSG = "comparisons like ‘X<=Y<=Z’ do not have their mathematical meaning";
 
-                //yywarning(MSG);
-                relationalCounter --;
+                yywarning(MSG);
+                expr->relationalCounter = expr->relationalCounter - 1;
         }
 
-        if(relationalCounter == 0)
+        if(expr->relationalCounter == 0)
                 lastOp = operation.translation;
 
-        relationalCounter++;
+        expr->relationalCounter = expr->relationalCounter + 1;
+
+	cout << "//" << expr->relationalCounter << endl;
 }
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
