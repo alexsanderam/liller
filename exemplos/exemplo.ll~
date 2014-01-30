@@ -6,6 +6,7 @@ int main()
 	string b = "ab";
 
 	string c = b + "cd";
+	string d= 1;
 
 	c += "  )";
 

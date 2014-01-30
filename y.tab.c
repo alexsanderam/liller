@@ -1881,7 +1881,7 @@ yyreduce:
 				verifyLabels(); /*verifica se há erros relacionados à rótulos*/
 
 				if(!error)
-                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + globalDeclarations + "\n" + (yyvsp[(3) - (4)]).translation + "{\n" + declarations + "\n" + (yyvsp[(2) - (4)]).translation + "\n" + (yyvsp[(4) - (4)]).translation + "}\n" << endl;
+                                        cout << "/*Compiler prescot-liller*/\n\n" << "#include <stdio.h>\n#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\nusing namespace std;\n\n" + globalDeclarations + "\n" + (yyvsp[(3) - (4)]).translation + "{\n" + declarations + "\n" + (yyvsp[(2) - (4)]).translation + "\n" + (yyvsp[(4) - (4)]).translation + "}\n" << endl;
                                 else
                                         exit(1);
                         }
@@ -4013,9 +4013,9 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 		/*caso um operando seja de tipo diferente, 
 		converte-o para string*/
 		if(operand1.type != "string")
-			op1Str = toString(operand1); /*deve-se ainda implentar tal função*/
+			op1Str = toString(operand1); 
 		else if(operand2.type != "string")
-			op2Str = toString(operand2); /*deve-se ainda implentar tal função*/
+			op2Str = toString(operand2);
 
 		res->translation = op1Str.translation + op2Str.translation;
 
@@ -4107,29 +4107,41 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 }
 
 
-YYSTYPE toString(YYSTYPE operand)
+YYSTYPE toString(YYSTYPE n)
 {
 	YYSTYPE* res = new YYSTYPE();
 	unsigned int length;
 
-	if(operand.type == "int")
+	res->label = generateID();
+	res->type = "string";
+	res->modifier = "";
+	res->isConstant = false;
+
+	res->translation = n.translation;
+
+	if(n.type == "int")
 	{
-		
+		length = 100;
+		//res->translation += "\titoa(" + n.label + ", " + res->label + ", " + "10" + ");\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%d\", " + n.label + ");\n";
 	}
-	else if(operand.type == "char")
+	else if(n.type == "char")
 	{
-		
+		length = 100;
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
 	}
-	else if(operand.type == "float")
+	else if(n.type == "float")
 	{
-		
+		length = 100;
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";		
 	}
-	else if(operand.type == "double")
+	else if(n.type == "double")
 	{
-		
+		length = 100;
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";
 	}
 
-	//declare(res->label, "string", length);
+	declare(res->label, res->type, length);
 
 	return *res;
 }
@@ -4273,6 +4285,7 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res; 
+	YYSTYPE expStr; 
 	unsigned int length;
 
         res = new YYSTYPE();
@@ -4282,10 +4295,17 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 	res->modifier = id.modifier;
 	res->isConstant = id.isConstant;
 
+	expStr = exp; //por padrão (inicialmente)
+
+	if((exp.type != "string") && ((exp.type == "int") || (exp.type == "char") || (exp.type == "float") || (exp.type == "double")))
+		expStr = toString(exp); /*realiza conversão para o tipo string*/
+	else if (exp.type != "string")
+		yyerror("assign from " + exp.type + " to " + id.type + " not allowed");
+
 	length = getDeclarationLength(exp);
 
-	res->translation = addtranslation + exp.translation;
-	res->translation += "\tstrcpy(" + id.label + ", " + exp.label + ");\n";
+	res->translation = addtranslation + expStr.translation;
+	res->translation += "\tstrcpy(" + id.label + ", " + expStr.label + ");\n";
 
 	setDeclarationLength(id, length);
 
@@ -4391,7 +4411,9 @@ string getDeclarations()
         {                        
                 declarations += "\t" + i->second.dIType + " " + i->first;
                 
-                if (i->second.length > 1)
+                if ((i->second.dIType != "char") && (i->second.length > 1))
+                        declarations += "[" + intToString(i->second.length) + "]";
+		else if (i->second.dIType == "char")
                         declarations += "[" + intToString(i->second.length) + "]";
 
 		declarations += ";\n";
@@ -4423,10 +4445,7 @@ bool setDeclarationLength(YYSTYPE id, unsigned int length)
 	i = declarationsMap->find(id.label);
 
 	if(i == declarationsMap->end())
-	{
-		cout << "//null" << endl;
-			return false;
-	}
+		return false;
 
 	i->second.length = length;
 
