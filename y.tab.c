@@ -762,7 +762,7 @@ static const yytype_uint16 yyrline[] =
     1270,  1276,  1282,  1288,  1294,  1300,  1306,  1312,  1318,  1324,
     1330,  1336,  1342,  1348,  1354,  1360,  1366,  1372,  1378,  1384,
     1390,  1396,  1402,  1408,  1414,  1424,  1436,  1447,  1459,  1471,
-    1483,  1494,  1506,  1518,  1530,  1545,  1561,  1588,  1588
+    1483,  1494,  1506,  1518,  1531,  1546,  1562,  1589,  1589
 };
 #endif
 
@@ -3525,13 +3525,14 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 1519 "sintatica.y"
-    {
-                                (yyval).label = generateID();
+    {                        
+
+			        (yyval).label = generateID();
                                 (yyval).type = "string";
                                 (yyval).modifier = "";
                                	(yyval).isConstant = true;
 
-				(yyval).translation = "\tmemcpy(" + (yyval).label + ", " + (yyvsp[(1) - (1)]).translation + ");\n";                           
+				(yyval).translation = "\tstrcpy(" + (yyval).label + ", " + (yyvsp[(1) - (1)]).translation + ");\n";                           
 
 				/*comprimento da string '-2' por conta das aspas*/
                                 declare((yyval).label, (yyval).type, (yyvsp[(1) - (1)]).translation.length() - 2);
@@ -3541,7 +3542,7 @@ yyreduce:
   case 124:
 
 /* Line 1806 of yacc.c  */
-#line 1531 "sintatica.y"
+#line 1532 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "int";
@@ -3561,7 +3562,7 @@ yyreduce:
   case 125:
 
 /* Line 1806 of yacc.c  */
-#line 1546 "sintatica.y"
+#line 1547 "sintatica.y"
     {
                                 id_struct* id;
                         
@@ -3582,7 +3583,7 @@ yyreduce:
   case 126:
 
 /* Line 1806 of yacc.c  */
-#line 1562 "sintatica.y"
+#line 1563 "sintatica.y"
     {
                                 id_struct* id;
                         
@@ -3611,7 +3612,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 3615 "y.tab.c"
+#line 3616 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3842,7 +3843,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 1593 "sintatica.y"
+#line 1594 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -3874,7 +3875,7 @@ string intToString(int n)
 	stringstream declarations;
 	
 	declarations << n;
-	declarations.str();
+	return declarations.str();
 }
 
 
@@ -4272,6 +4273,8 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res; 
+	unsigned int length;
+
         res = new YYSTYPE();
 
 	res->label = id.label;
@@ -4279,8 +4282,12 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 	res->modifier = id.modifier;
 	res->isConstant = id.isConstant;
 
-	res->translation = addtranslation + exp.translation + ";\n";
-	res->translation += "\tmemcpy(" + id.label + ", " + exp.label + ");\n";
+	length = getDeclarationLength(exp);
+
+	res->translation = addtranslation + exp.translation;
+	res->translation += "\tstrcpy(" + id.label + ", " + exp.label + ");\n";
+
+	setDeclarationLength(id, length);
 
 	return *res;
 }
@@ -4410,17 +4417,18 @@ unsigned int getDeclarationLength(YYSTYPE id)
 
 bool setDeclarationLength(YYSTYPE id, unsigned int length)
 {
-	variable_declarations_struct* declaredID;
-
 	declarations_map* declarationsMap = stackDeclarationsMap.front();
-	declaredID = &declarationsMap->find(id.label)->second;
-	
-	
-	if(declaredID == NULL)
-		return false;
+	declarations_map::iterator i;
 
+	i = declarationsMap->find(id.label);
 
-	declaredID->length = length;
+	if(i == declarationsMap->end())
+	{
+		cout << "//null" << endl;
+			return false;
+	}
+
+	i->second.length = length;
 
 	return true;
 }

@@ -1253,7 +1253,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                 else
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
-				length = getDeclarationLength($4.label);
+				length = getDeclarationLength($4);
 
                                 $$ = assign(voidStr, $2, $4);
 
@@ -1516,13 +1516,14 @@ TERMINAL        :       TK_INT
                                 declare($$.label, $$.type, 1);
                         }
                         | TK_STRING
-                        {
-                                $$.label = generateID();
+                        {                        
+
+			        $$.label = generateID();
                                 $$.type = "string";
                                 $$.modifier = "";
                                	$$.isConstant = true;
 
-				$$.translation = "\tmemcpy(" + $$.label + ", " + $1.translation + ");\n";                           
+				$$.translation = "\tstrcpy(" + $$.label + ", " + $1.translation + ");\n";                           
 
 				/*comprimento da string '-2' por conta das aspas*/
                                 declare($$.label, $$.type, $1.translation.length() - 2);
@@ -1621,7 +1622,7 @@ string intToString(int n)
 	stringstream declarations;
 	
 	declarations << n;
-	declarations.str();
+	return declarations.str();
 }
 
 
@@ -2019,6 +2020,8 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res; 
+	unsigned int length;
+
         res = new YYSTYPE();
 
 	res->label = id.label;
@@ -2026,8 +2029,12 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 	res->modifier = id.modifier;
 	res->isConstant = id.isConstant;
 
-	res->translation = addtranslation + exp.translation + ";\n";
-	res->translation += "\tmemcpy(" + id.label + ", " + exp.label + ");\n";
+	length = getDeclarationLength(exp);
+
+	res->translation = addtranslation + exp.translation;
+	res->translation += "\tstrcpy(" + id.label + ", " + exp.label + ");\n";
+
+	setDeclarationLength(id, length);
 
 	return *res;
 }
@@ -2157,17 +2164,18 @@ unsigned int getDeclarationLength(YYSTYPE id)
 
 bool setDeclarationLength(YYSTYPE id, unsigned int length)
 {
-	variable_declarations_struct* declaredID;
-
 	declarations_map* declarationsMap = stackDeclarationsMap.front();
-	declaredID = &declarationsMap->find(id.label)->second;
-	
-	
-	if(declaredID == NULL)
-		return false;
+	declarations_map::iterator i;
 
+	i = declarationsMap->find(id.label);
 
-	declaredID->length = length;
+	if(i == declarationsMap->end())
+	{
+		cout << "//null" << endl;
+			return false;
+	}
+
+	i->second.length = length;
 
 	return true;
 }
