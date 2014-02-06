@@ -8,44 +8,56 @@
 using namespace std;
 
 /*============Variáveis globais==============*/
+	int _temp0;
+	int _temp1;
 
 int main()
 {
-	char _temp0[2];
-	char _temp1[2];
-	char _temp2[1];
-	char _temp3[1];
-	char _temp4[7];
-	char _temp5[9];
-	char _temp6[10];
-	int _temp7;
+	char _temp10[9];
+	char _temp11[10];
+	char _temp12[7];
+	char _temp13[17];
+	int _temp14;
+	int _temp2;
+	int _temp3;
+	char _temp4;
+	char _temp5;
+	char _temp6[4];
+	char _temp7[2];
+	char _temp8[6];
+	char _temp9[3];
 
+	_temp0 = 150;
+	_temp1 = _temp0;
 
-	strcpy(_temp0, "ab");
-	strcpy(_temp1, _temp0);
+	_temp2 = 0;
+	_temp3 = _temp2;
 
-	strcpy(_temp2, "0");
-	strcpy(_temp3, _temp2);
+	_temp4 = 'a';
+	_temp5 = _temp4;
 
-	strcpy(_temp4, "b+c+d: ");
-	strcpy(_temp5, _temp4);
 
 	cout << _temp5 << endl;
-	
-	strcat(_temp5, _temp1);
 
-	cout << _temp5 << endl;
+	strcpy(_temp6, "oi: ");
+	snprintf(_temp7, 2, "%c", _temp5);
+	_temp7[1] = '\0';
+	strcpy(_temp8, _temp6);
+	strcat(_temp8, _temp7);
+	strcpy(_temp9, "...");
+	strcpy(_temp10, _temp8);
+	strcat(_temp10, _temp9);
+	strcpy(_temp11, _temp10);
+	_temp11[9] = '\0';
 
-	strcpy(_temp6, _temp5);
+	strcpy(_temp12, "teste: ");
+	strcpy(_temp13, _temp12);
+	strcat(_temp13, _temp11);
 
-	cout << _temp6 << endl;
+	cout << _temp13 << endl;
 
-	strcat(_temp6, _temp3);
+	_temp14 = 0;
 
-	cout << _temp6 << endl;
-
-	_temp7 = 0;
-
-	return _temp7;
+	return _temp14;
 }
 

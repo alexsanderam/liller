@@ -1607,6 +1607,7 @@ SIGNAL                	: TK_OP_SUM | TK_OP_SUB
 
 
 
+
 %%
 
 #include "lex.yy.c"
@@ -1941,9 +1942,10 @@ YYSTYPE toString(YYSTYPE n)
 	}
 	else if(n.type == "char")
 	{
-		length = 1;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%s\", &" + n.label + ");\n";
-		//res->translation += "\t" + res->label + "[" + intToString(1) + "] = " + "'\\0';\n";
+		length = 2;
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
+		//res->translation += "\tstrcpy(" + res->label + ", " + n.label + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "float")
 	{
