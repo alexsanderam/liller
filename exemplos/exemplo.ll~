@@ -6,7 +6,7 @@ int main()
 
 	char a = 'a';
 	cout(a);
-	string str = "oi: " + a + "...";
+	string str = "oi: " + 'a' + "...";
 
 	/*switch(i+1)
 	{
