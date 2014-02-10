@@ -18,6 +18,7 @@ ModifierLong "long"
 
 Return "return"
 Cout "cout"
+Coutn "coutn"
 
 True "true"
 False "false"
@@ -51,7 +52,8 @@ Scientific ({Int}|{Float})[e|E][+|-]{Num}
 
 Char \'({Letter}|{Num})\'
 ID {Letter}({Letter}|{Num})*
-String "\""([^\n\"\\]*(\\[.\n])*)*"\""
+String "\""([^\n\"]*(\\[.\n])*)*"\""
+%String "\""([^\n\"\\]*(\\[.\n])*)*"\""
 
 OpPlusPlus "++"
 OpLessLess "--"
@@ -117,7 +119,7 @@ Assign "="
 {Delim}         {}
 {Line}                {yylineno++;}
 
-"main"                {return TK_MAIN;}
+"main"                {yylval.translation = yytext; return TK_MAIN;}
 
 [(){}[\];,]        { return *yytext; }
 
@@ -187,6 +189,7 @@ Assign "="
 
 {Return}         { yylval.translation = yytext; return TK_RETURN; }
 {Cout}                { yylval.translation = yytext; return TK_COUT; }
+{Coutn}                { yylval.translation = yytext; return TK_COUTN; }
 {If}                { yylval.translation = yytext; return TK_IF; }
 {Else}                { yylval.translation = yytext; return TK_ELSE; }
 {For}                { yylval.translation = yytext; return TK_FOR; }
