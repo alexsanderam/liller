@@ -1,5 +1,7 @@
 int z = 150;
 
+int func(int, int);
+
 int main()
 {	
 	int i = 0;

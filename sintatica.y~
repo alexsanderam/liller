@@ -121,6 +121,9 @@ const string voidStr = "";
 /*declaraçãoes (todas referente a atual função)*/
 string declarations = "";
 
+/*headers de todas as funções*/
+string headersFunctions = "";
+
 /*tradução das declarações globais, quando realiza alguma expressão*/
 string globalDeclarationsTranslation = "";
 
@@ -242,7 +245,8 @@ BEGIN                   : START TRANSLATION_UNIT
 
 							$$.translation = "/*Compiler prescot-liller*/\n\n";
 							$$.translation += "#include <stdio.h>\n#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n";
-							$$.translation += "using namespace std;\n\n";
+							$$.translation += "using namespace std;\n";
+							$$.translation += headersFunctions + "\n";
 							$$.translation += globalDeclarations + "\n";
 
 							
@@ -307,11 +311,71 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 							$$.translation = "";
 						}
 						| FUNCTION
-						//| FUNCTION_HEADER ';'
+						| FUNCTION_HEADER ';'
 						;
 
 
 
+FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS_HEADER CLOSE_ARGS
+						{
+							string id;
+							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
+
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
+
+							functions_map* functionMap = stackFunctionMap.front();
+                                                        
+                            if(!isDeclaredFunction($$.idFunction))
+							{
+									id = generateID();
+                                    (*functionMap)[$$.idFunction].label = id;
+                                    (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
+                                    (*functionMap)[$$.idFunction].declared = true;
+                                    (*functionMap)[$$.idFunction].defined = false;
+							}
+
+							$$.translation = "";
+							headersFunctions = "\n\n" + $1.type + " " + id + '(' + $4.translation + ')' + "\n";
+						}
+						| TK_ID OPEN_ARGS ARGS_HEADER CLOSE_ARGS
+						{
+							string id;
+							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
+
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
+
+							functions_map* functionMap = stackFunctionMap.front();
+
+                            if(!isDeclaredFunction($$.idFunction))
+							{
+									id = generateID();
+                                    (*functionMap)[$$.idFunction].label = id;
+                                    (*functionMap)[$$.idFunction].typeOfReturn = "void";
+                                    (*functionMap)[$$.idFunction].declared = true;
+                                    (*functionMap)[$$.idFunction].defined = false;
+							}
+
+							$$.translation = "";
+							headersFunctions = "\n\n void" + id + '(' + $3.translation + ')' + "\n";
+						}
+						;
+
+
+ARGS_HEADER				: ARGS_HEADER ',' TYPE
+						{
+								$$.translation = $1.translation + ", " + $3.type;
+								$$.idFunction = $$.translation;
+						}
+						| TYPE
+						{
+								$$.translation = $1.type;
+								$$.idFunction = $$.type;
+						}
+						;
 
                         
                         
