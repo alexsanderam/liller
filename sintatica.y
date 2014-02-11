@@ -25,6 +25,7 @@ typedef struct
         string typeOfReturn;
         bool declared;
         bool defined;
+
 } function_struct;
 
 typedef struct
@@ -53,6 +54,15 @@ struct args
 
 	/*utilizado para identificar funções*/
 	string idFunction;
+
+	/*utilizado para verificar se tem
+	identificador nos argumentos de uma
+	função*/
+	bool hasIdInArgs;
+
+	/*utilizado no tratamento de erros
+	 ou warnings*/
+	unsigned int line;
 };
 
 typedef struct opStruct
@@ -152,6 +162,10 @@ bool flagBreak = false;
 fora de um switch*/
 bool flagWithinSwitch = false;
 
+/*controle da função main
+verifica se há main, e quantas*/
+unsigned int countMain = 0;
+
 int yylex(void);
 void yyerror(string);
 void yywarning(string);
@@ -180,6 +194,7 @@ void declare(string, string, unsigned int);
 unsigned int getDeclarationLength(YYSTYPE);
 bool setDeclarationLength(YYSTYPE, unsigned int);
 void verifyLabels();
+void verifyMain();
 string getDeclarations();
 void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
@@ -236,18 +251,25 @@ void loadOpearationsMap(void);
 BEGIN                   : START TRANSLATION_UNIT
                         {
 							verifyLabels(); /*verifica se há erros relacionados à rótulos*/
+							verifyMain();
 
 							if(error)
 								exit(1);
 
-							string globalDeclarations = "/*========Variáveis globais========*/\n";
-							globalDeclarations += getDeclarations();
+							string globalDeclarations = getDeclarations();
 
 							$$.translation = "/*Compiler prescot-liller*/\n\n";
 							$$.translation += "#include <stdio.h>\n#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n";
-							$$.translation += "using namespace std;\n";
-							$$.translation += headersFunctions + "\n";
-							$$.translation += globalDeclarations + "\n";
+							$$.translation += "using namespace std;\n\n";
+
+
+							$$.translation += "/*-----Cabeçalhos de funções-------*/\n";
+							$$.translation += headersFunctions;
+							$$.translation += "/*-------------------------------*/\n\n";
+
+							$$.translation += "/*--------Variáveis globais--------*/\n";
+							$$.translation += globalDeclarations;
+							$$.translation += "/*-------------------------------*/\n\n";
 
 							
 							/*Tradução da main*/
@@ -276,12 +298,18 @@ START                   :
 
 MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
                         {
+							$$.translation = "";
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + $4.translation + ')' + "\n";
 
 							headMainTranslation += "{\n" + declarations + "\n";
-							scopeMainTranslation = $6.translation + "}\n";
+							scopeMainTranslation = $6.translation + "}\n\n";
 
 							declarations = "";
+
+							/*controle da função main
+							verifica se há main, e quantas*/
+							countMain++;
+							verifyMain();
                         }
                         | TK_TYPE_INT TK_MAIN '(' ')' SCOPE
                         {
@@ -290,9 +318,14 @@ MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + ')' + "\n";
 
 							headMainTranslation += "{\n" + declarations + "\n";
-							scopeMainTranslation = $5.translation + "}\n";
+							scopeMainTranslation = $5.translation + "}\n\n";
 
 							declarations = "";
+
+							/*controle da função main
+							verifica se há main, e quantas*/
+							countMain++;
+							verifyMain();
                         }
                         ;
                         
@@ -310,20 +343,49 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 							globalDeclarationsTranslation += $1.translation;
 							$$.translation = "";
 						}
+						| MAIN
 						| FUNCTION
 						| FUNCTION_HEADER ';'
-						;
-
-
-
-FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS_HEADER CLOSE_ARGS
 						{
-							string id;
-							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
+							$$.translation = "";
+							headersFunctions = $1.translation + ";\n";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
 							closeCurrentScope();
+						}
+						;
+
+
+FUNCTION				: FUNCTION_HEADER SCOPE
+						{
+							if($1.hasIdInArgs == false)
+							{
+								int line = yylineno;
+								yylineno = $1.line;							
+								yyerror("parameter name omitted");
+								yylineno = line;
+							}
+
+							$$.translation = $1.translation;
+							$$.translation += "\n{\n" + declarations + "\n";
+							$$.translation += $2.translation + "}\n\n";
+
+							declarations = "";
+
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
+						}
+						;
+
+
+                        
+                        
+FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
+						{
+							string id;
+							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
 
 							functions_map* functionMap = stackFunctionMap.front();
                                                         
@@ -333,69 +395,6 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS_HEADER CLOSE_ARGS
                                     (*functionMap)[$$.idFunction].label = id;
                                     (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
                                     (*functionMap)[$$.idFunction].declared = true;
-                                    (*functionMap)[$$.idFunction].defined = false;
-							}
-
-							$$.translation = "";
-							headersFunctions = "\n\n" + $1.type + " " + id + '(' + $4.translation + ')' + ";\n";
-						}
-						| TK_ID OPEN_ARGS ARGS_HEADER CLOSE_ARGS
-						{
-							string id;
-							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
-
-							/*desempilha o mapa que armazena
-							os argumentos da função*/
-							closeCurrentScope();
-
-							functions_map* functionMap = stackFunctionMap.front();
-
-                            if(!isDeclaredFunction($$.idFunction))
-							{
-									id = generateID();
-                                    (*functionMap)[$$.idFunction].label = id;
-                                    (*functionMap)[$$.idFunction].typeOfReturn = "void";
-                                    (*functionMap)[$$.idFunction].declared = true;
-                                    (*functionMap)[$$.idFunction].defined = false;
-							}
-
-							$$.translation = "";
-							headersFunctions = "\n\n void" + id + '(' + $3.translation + ')' + ";\n";
-						}
-						;
-
-
-ARGS_HEADER				: ARGS_HEADER ',' TYPE
-						{
-								$$.translation = $1.translation + ", " + $3.type;
-								$$.idFunction = $$.translation;
-						}
-						| TYPE
-						{
-								$$.translation = $1.type;
-								$$.idFunction = $$.type;
-						}
-						;
-
-                        
-                        
-FUNCTION				: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS SCOPE
-						{
-							string id;
-							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
-
-							/*desempilha o mapa que armazena
-							os argumentos da função*/
-							closeCurrentScope();
-
-							functions_map* functionMap = stackFunctionMap.front();
-                                                        
-                            if(!isDeclaredFunction($$.idFunction))
-							{
-									id = generateID();
-                                    (*functionMap)[$$.idFunction].label = id;
-                                    (*functionMap)[$$.idFunction].typeOfReturn = "void";
-                                    (*functionMap)[$$.idFunction].declared = true;
                                     (*functionMap)[$$.idFunction].defined = true;
 							}
 							else if ((*functionMap)[$$.idFunction].defined == false)
@@ -406,21 +405,15 @@ FUNCTION				: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS SCOPE
 							else
 									yyerror("'" + $$.idFunction + "' previously defined here");
 
-							$$.translation = "\n\n" + $1.type + " " + id + '(' + $4.translation + ')' + "\n";
-							$$.translation += "{\n" + declarations + "\n";
-							$$.translation += $6.translation + "}\n";
-
-							declarations = "";
+							$$.translation = $1.type + " " + id + '(' + $4.translation + ')';
+							$$.hasIdInArgs = $4.hasIdInArgs;
+							$$.line = $4.line;
 						}
-						| TK_ID OPEN_ARGS ARGS CLOSE_ARGS SCOPE
+						| TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
 							$$.idFunction = $1.label + "(" + $3.idFunction + ")";
 
-							/*desempilha o mapa que armazena
-							os argumentos da função*/
-							closeCurrentScope();
-
 							functions_map* functionMap = stackFunctionMap.front();
                                                         
                             if(!isDeclaredFunction($$.idFunction))
@@ -439,13 +432,10 @@ FUNCTION				: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS SCOPE
 							else
 									yyerror("'" + $$.idFunction + "' previously defined here");
 
-		                    $$.translation = "\n\n void" + id + '(' + $3.translation + ')' + "\n";
-							$$.translation += "{\n" + declarations + "\n";
-							$$.translation += $5.translation + "}\n";
-
-							declarations = "";
+		                    $$.translation = "void" + id + '(' + $3.translation + ')';
+							$$.hasIdInArgs = $3.hasIdInArgs;
+							$$.line = $3.line;
 						}
-						| MAIN
 						;
 
 						
@@ -464,49 +454,86 @@ CLOSE_ARGS				: ')'
 
 
 
-ARGS					: ARGS ',' TYPE TK_ID
+ARGS					: TYPE OPTIONAL_ID ',' ARGS
 						{
-							   	identifiers_map* IDMap = stackIDMap.front();
+								if($2.label != "")							   	
+								{
+									identifiers_map* IDMap = stackIDMap.front();
 
-                                (*IDMap)[$4.label].label = generateID();
-                                (*IDMap)[$4.label].type = $3.type;
-                                (*IDMap)[$4.label].modifier = $3.modifier;
+		                            (*IDMap)[$2.label].label = generateID();
+		                            (*IDMap)[$2.label].type = $1.type;
+		                            (*IDMap)[$2.label].modifier = $1.modifier;
 
-								$$.label = (*IDMap)[$4.label].label;
-								$$.type = (*IDMap)[$4.label].type;
-								$$.modifier = (*IDMap)[$4.label].modifier;
+									$$.label = (*IDMap)[$2.label].label;
+									$$.type = (*IDMap)[$2.label].type;
+									$$.modifier = (*IDMap)[$2.label].modifier;
 
-								$$.translation = $1.translation + ", " + $$.type + " " + $$.label;
-								$$.idFunction = $1.idFunction + ", " + $$.type;
+									$$.translation = $$.type + " " + $$.label + ", " + $4.translation;
+									$$.idFunction = $$.type + ", " + $4.idFunction;
+									$$.hasIdInArgs = $4.hasIdInArgs &&  true;
 
-                                if ($$.modifier != "")
-                                        declare($$.label, $$.modifier + " " + $$.type, 1);
-                                else
-                                        declare($$.label, $$.type, 1);
- 
+		                            if ($$.modifier != "")
+		                                    declare($$.label, $$.modifier + " " + $$.type, 1);
+		                            else
+		                                    declare($$.label, $$.type, 1);
+								}
+								else
+								{
+									$$.translation = $$.type + ", " + $4.translation;
+									$$.idFunction = $$.idFunction;
+									$$.hasIdInArgs = $4.hasIdInArgs && false;
+									$$.line = yylineno;
+								}
+									 
 						}
-						| TYPE TK_ID
+						| TYPE OPTIONAL_ID
 						{
-							identifiers_map* IDMap = stackIDMap.front();
+							if($2.label != "")
+							{
+								identifiers_map* IDMap = stackIDMap.front();
 
-                            (*IDMap)[$2.label].label = generateID();
-                            (*IDMap)[$2.label].type = $1.type;
-                            (*IDMap)[$2.label].modifier = $1.modifier;
+		                        (*IDMap)[$2.label].label = generateID();
+		                        (*IDMap)[$2.label].type = $1.type;
+		                        (*IDMap)[$2.label].modifier = $1.modifier;
 
-							$$.label = (*IDMap)[$2.label].label;
-							$$.type = (*IDMap)[$2.label].type;
-							$$.modifier = (*IDMap)[$2.label].modifier;
+								$$.label = (*IDMap)[$2.label].label;
+								$$.type = (*IDMap)[$2.label].type;
+								$$.modifier = (*IDMap)[$2.label].modifier;
 
-							$$.translation = $$.type + " " + $$.label;
-							$$.idFunction = $1.type;
+								$$.translation = $$.type + " " + $$.label;
+								$$.idFunction = $1.type;
+								$$.hasIdInArgs = true;
 
-                            if ($$.modifier != "")
-                                    declare($$.label, $$.modifier + " " + $$.type, 1);
-                            else
-                                    declare($$.label, $$.type, 1);							
+		                        if ($$.modifier != "")
+		                                declare($$.label, $$.modifier + " " + $$.type, 1);
+		                        else
+		                                declare($$.label, $$.type, 1);							
+							}
+							else
+							{
+									$$.translation = $$.type;
+									$$.idFunction = $$.idFunction;
+									$$.hasIdInArgs = false;
+									$$.line = yylineno;
+							}
+						}
+						|
+						{
+									$$.translation = "";
+									$$.idFunction = "void";
+									$$.hasIdInArgs = true;
+									$$.line = yylineno;
 						}
 						;
 
+
+
+OPTIONAL_ID				: TK_ID
+						|
+						{
+							$$.label = "";
+						}
+						;
 
                         
                         
@@ -558,7 +585,7 @@ END_SCOPE                : '}'
 
 
 
-COMMANDS        	: STATEMENT COMMANDS
+COMMANDS        		: STATEMENT COMMANDS
                         {
                                 $$.translation = $1.translation + "\n" + $2.translation;
                         }
@@ -616,12 +643,12 @@ RETURN                  : TK_RETURN E_C
                         
 
 
-IF_C			: TK_IF
-			{
-				/*controle de declaraçãoes*/
-                                flagDeclarationNotAllowed = true;
-			}
-			;
+IF_C					: TK_IF
+						{
+							/*controle de declaraçãoes*/
+							                flagDeclarationNotAllowed = true;
+						}
+						;
 
 IF                      : IF_C '(' E_C ')' STATEMENT %prec IFX
                         {                                
@@ -667,23 +694,23 @@ IF                      : IF_C '(' E_C ')' STATEMENT %prec IFX
                         ;
 
 
-WHILE_C			: TK_WHILE
-			{
-				/*controle de declaraçãoes*/
-                                flagDeclarationNotAllowed = true;
+WHILE_C					: TK_WHILE
+						{
+							/*controle de declaraçãoes*/
+						                    flagDeclarationNotAllowed = true;
 
-				/*controle do continue e do break*/
-				flagContinue = true;
-				flagBreak = true;
+							/*controle do continue e do break*/
+							flagContinue = true;
+							flagBreak = true;
 
-                                string labelBeginWhile = generateLabel();
-                                string labelEndWhile = generateLabel();
+						                    string labelBeginWhile = generateLabel();
+						                    string labelEndWhile = generateLabel();
 
-				/*empilha os labels*/
-				stackBeginLabels.push_front(labelBeginWhile);
-				stackEndLabels.push_front(labelEndWhile);
-			}
-			;
+							/*empilha os labels*/
+							stackBeginLabels.push_front(labelBeginWhile);
+							stackEndLabels.push_front(labelEndWhile);
+						}
+						;
 
 
 WHILE                   : WHILE_C '(' E_C ')' STATEMENT
@@ -704,38 +731,38 @@ WHILE                   : WHILE_C '(' E_C ')' STATEMENT
                                 $$.translation += "\t" + labelEndWhile + ":\n"; /*tradução: labelEndWhile:*/
 
 
-				/*desempilha os labels*/
-				stackBeginLabels.pop_front();
-				stackEndLabels.pop_front();
+								/*desempilha os labels*/
+								stackBeginLabels.pop_front();
+								stackEndLabels.pop_front();
 
-				/*controle do continue e do break*/
-				flagContinue = false;
-				flagBreak = false;
+								/*controle do continue e do break*/
+								flagContinue = false;
+								flagBreak = false;
 
-				/*controle de declaraçãoes*/
-				flagDeclarationNotAllowedAux = false;
+								/*controle de declaraçãoes*/
+								flagDeclarationNotAllowedAux = false;
                                 flagDeclarationNotAllowed = false;
                         }
                         ;
 
 
 DO_WHILE_C		: TK_DO
-			{
-				/*controle de declaraçãoes*/
-                                flagDeclarationNotAllowed = true;
+				{
+					/*controle de declaraçãoes*/
+		                            flagDeclarationNotAllowed = true;
 
-				/*controle do continue e do break*/
-				flagContinue = true;
-				flagBreak = true;
+					/*controle do continue e do break*/
+					flagContinue = true;
+					flagBreak = true;
 
-                                string labelBeginDoWhile = generateLabel();
-                                string labelEndDoWhile = generateLabel();
+		                            string labelBeginDoWhile = generateLabel();
+		                            string labelEndDoWhile = generateLabel();
 
-				/*empilha os labels*/
-				stackBeginLabels.push_front(labelBeginDoWhile);
-				stackEndLabels.push_front(labelEndDoWhile);
-			}
-			;
+					/*empilha os labels*/
+					stackBeginLabels.push_front(labelBeginDoWhile);
+					stackEndLabels.push_front(labelEndDoWhile);
+				}
+				;
 
 
 DO_WHILE                : DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' ';'
@@ -752,17 +779,17 @@ DO_WHILE                : DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' ';'
                                 $$.translation += "\t" + labelEndDoWhile + ":\n\n"; /*tradução: labelEndDoWhileIF:*/
 
 
-				/*desempilha os labels*/
-				stackBeginLabels.pop_front();
-				stackEndLabels.pop_front();
+								/*desempilha os labels*/
+								stackBeginLabels.pop_front();
+								stackEndLabels.pop_front();
 
-				/*controle do continue e do break*/
-				flagContinue = false;
-				flagBreak = false;
+								/*controle do continue e do break*/
+								flagContinue = false;
+								flagBreak = false;
 
 
-				/*controle de declaraçãoes*/
-				flagDeclarationNotAllowedAux = false;
+								/*controle de declaraçãoes*/
+								flagDeclarationNotAllowedAux = false;
                                 flagDeclarationNotAllowed = false;
                         }
                         ;
@@ -776,27 +803,27 @@ OPTIONAL_E              : E_C
 
 
 OPTIONAL_E_OR_DECLARATION	: OPTIONAL_E
-				| DECLARATION
-				;
+							| DECLARATION
+							;
 
 
 
 
 ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
-				{
-					$$.translation = $1.translation;
-					$$.label = $1.label;
-					$$.type = $1.type;
-					$$.modifier = $1.modifier;
-				}
-				| TERMINAL
-				{
-					$$.translation = $1.translation;
-					$$.label = $1.label;
-					$$.type = $1.type;
-					$$.modifier = $1.modifier;
-				}
-				;
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							| TERMINAL
+							{
+								$$.translation = $1.translation;
+								$$.label = $1.label;
+								$$.type = $1.type;
+								$$.modifier = $1.modifier;
+							}
+							;
 
 
 
@@ -823,113 +850,113 @@ FOR_C			: TK_FOR
 			;
 
 
-FOR                     : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
-                        {
-                                YYSTYPE notE;
-                                string labelBeginFor = generateLabel();
-                                string labelIncreaseFor = stackBeginLabels.front();
-                                string labelEndFor = stackEndLabels.front();
+FOR                 : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
+                    {
+                            YYSTYPE notE;
+                            string labelBeginFor = generateLabel();
+                            string labelIncreaseFor = stackBeginLabels.front();
+                            string labelEndFor = stackEndLabels.front();
 
 
-                                $$.translation =  "\n" + $3.translation + "\n"; /*tradução da inicialização do For, que pode ser vazia*/
-                                $$.translation += "\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
-                                if ($5.translation != "") /* caso haja um teste */                                                                
-                                {
-                                        notE = assignNotExpression($5);
-                                        $$.translation += $5.translation; /*tradução da expressão de teste E*/
-                                        $$.translation += notE.translation + "\n"; /*atribui a negação da expressão de teste E*/
-                                        $$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E)*/
-                                        $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
-                                }
+                            $$.translation =  "\n" + $3.translation + "\n"; /*tradução da inicialização do For, que pode ser vazia*/
+                            $$.translation += "\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+                            if ($5.translation != "") /* caso haja um teste */                                                                
+                            {
+                                    notE = assignNotExpression($5);
+                                    $$.translation += $5.translation; /*tradução da expressão de teste E*/
+                                    $$.translation += notE.translation + "\n"; /*atribui a negação da expressão de teste E*/
+                                    $$.translation += "\tif (" + notE.label + ")\n"; /*tradução: if (!E)*/
+                                    $$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+                            }
 
-								$$.translation += $9.translation + "\n"; /*tradução: STATEMENT*/
-                                $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
-                                $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
-                                $$.translation += "\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
-                                $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
-
-
-								/*desempilha os labels*/
-								stackBeginLabels.pop_front();
-								stackEndLabels.pop_front();
-
-								/*controle do continue e do break*/
-								flagContinue = false;
-								flagBreak = false;
-
-								/*desempilha o escopo (para os casos de declaração dentro do for)*/
-								declarations += getDeclarations();
-								closeCurrentScope(); /*desempilha*/
-
-								/*controle de declaraçãoes*/
-								flagDeclarationNotAllowedAux = false;
-								                flagDeclarationNotAllowed = false;
-
-                        }
-                        | FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
-                        {
-                                YYSTYPE expr; /*expressão que controla a parada do for*/
-							  	YYSTYPE value; /*constante 1*/
-								YYSTYPE op; /*operação de incremento*/
-								YYSTYPE ass; /*atribuição*/
-
-                                string labelBeginFor = generateLabel();
-                                string labelIncreaseFor = stackBeginLabels.front();
-                                string labelEndFor = stackEndLabels.front();
+							$$.translation += $9.translation + "\n"; /*tradução: STATEMENT*/
+                            $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
+                            $$.translation += $7.translation + "\n"; /*tradução do incremento, que pode ser vazia*/
+                            $$.translation += "\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
+                            $$.translation += "\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/
 
 
-								/*notifica caso os limitantes não sejam inteiros*/
-								if(($3.type != "int") || ($5.type != "int"))
-									yywarning("counter is not an integer");
+							/*desempilha os labels*/
+							stackBeginLabels.pop_front();
+							stackEndLabels.pop_front();
 
-								/*realiza o teste lógico (negado)*/
-								expr = runBasicOperation($3, $5, ">");
+							/*controle do continue e do break*/
+							flagContinue = false;
+							flagBreak = false;
 
+							/*desempilha o escopo (para os casos de declaração dentro do for)*/
+							declarations += getDeclarations();
+							closeCurrentScope(); /*desempilha*/
 
-								/*realiza o incremento*/
-								value = generateIntValue(1);
-								op = runBasicOperation($3, value, "+");
-								ass.label = $3.label;
-								ass.type = op.type;
-								ass.modifier = op.modifier;
-								ass.translation = op.translation + "\t" + ass.label + " = " + op.label + ";\n";
-				
+							/*controle de declaraçãoes*/
+							flagDeclarationNotAllowedAux = false;
+							                flagDeclarationNotAllowed = false;
 
-								findAndReplace(&(expr.translation), $3.translation, voidStr);
-								findAndReplace(&(ass.translation), $3.translation, voidStr);
+                    }
+                    | FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
+                    {
+                            YYSTYPE expr; /*expressão que controla a parada do for*/
+						  	YYSTYPE value; /*constante 1*/
+							YYSTYPE op; /*operação de incremento*/
+							YYSTYPE ass; /*atribuição*/
 
-
-								$$.translation = $3.translation; /*tradução da atribuição*/
-								$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
-								$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
-								$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
-								$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
-
-
-								$$.translation += $7.translation + "\n"; /*tradução: STATEMENT*/
-								                $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
-								$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
-								$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
-								$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/                                
+                            string labelBeginFor = generateLabel();
+                            string labelIncreaseFor = stackBeginLabels.front();
+                            string labelEndFor = stackEndLabels.front();
 
 
-								/*desempilha os labels*/
-								stackBeginLabels.pop_front();
-								stackEndLabels.pop_front();
+							/*notifica caso os limitantes não sejam inteiros*/
+							if(($3.type != "int") || ($5.type != "int"))
+								yywarning("counter is not an integer");
 
-								/*controle do continue e do break*/
-								flagContinue = false;
-								flagBreak = false;
-
-								/*desempilha o escopo (para os casos de declaração dentro do for)*/
-								                declarations += getDeclarations();
-								closeCurrentScope(); /*desempilha*/
+							/*realiza o teste lógico (negado)*/
+							expr = runBasicOperation($3, $5, ">");
 
 
-								/*controle de declaraçãoes*/
-								flagDeclarationNotAllowedAux = false;
-				                flagDeclarationNotAllowed = false;
-                        }
+							/*realiza o incremento*/
+							value = generateIntValue(1);
+							op = runBasicOperation($3, value, "+");
+							ass.label = $3.label;
+							ass.type = op.type;
+							ass.modifier = op.modifier;
+							ass.translation = op.translation + "\t" + ass.label + " = " + op.label + ";\n";
+			
+
+							findAndReplace(&(expr.translation), $3.translation, voidStr);
+							findAndReplace(&(ass.translation), $3.translation, voidStr);
+
+
+							$$.translation = $3.translation; /*tradução da atribuição*/
+							$$.translation += "\n\t" + labelBeginFor + ":\n"; /*tradução: labelBeginFor:*/
+							$$.translation += expr.translation; /*tradução da expressão que controla a parada do for*/
+							$$.translation += "\tif (" + expr.label + ")\n"; /*tradução: if (!E1)*/
+							$$.translation += "\t\tgoto " + labelEndFor + ";\n\n"; /*tradução: goto labelEndFor*/
+
+
+							$$.translation += $7.translation + "\n"; /*tradução: STATEMENT*/
+							                $$.translation += "\t" + labelIncreaseFor + ":\n"; /*tradução: labelIncreaseFor:*/
+							$$.translation += ass.translation; /*tradução: da atualização do identicador (atribuição)*/
+							$$.translation += "\t\tgoto " + labelBeginFor + ";\n"; /*tradução: goto labelBeginFor*/
+							$$.translation += "\n\t" + labelEndFor + ":\n"; /*tradução: labelEndFor:*/                                
+
+
+							/*desempilha os labels*/
+							stackBeginLabels.pop_front();
+							stackEndLabels.pop_front();
+
+							/*controle do continue e do break*/
+							flagContinue = false;
+							flagBreak = false;
+
+							/*desempilha o escopo (para os casos de declaração dentro do for)*/
+							                declarations += getDeclarations();
+							closeCurrentScope(); /*desempilha*/
+
+
+							/*controle de declaraçãoes*/
+							flagDeclarationNotAllowedAux = false;
+			                flagDeclarationNotAllowed = false;
+                    }
 			;
 
 
@@ -1435,7 +1462,7 @@ OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
 
 
 
-DECLARATION        : DECLARATION ',' TK_ID
+DECLARATION        		: DECLARATION ',' TK_ID
                         {
                                 
                                 identifiers_map* IDMap = stackIDMap.front();
@@ -1517,7 +1544,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                         | TYPE TK_ID TK_ASSIGN E
                         {
 
-				unsigned int length;
+								unsigned int length;
                                 identifiers_map* IDMap = stackIDMap.front();
 
                                 if(!isDeclaredCurrentScope($2.label))
@@ -1530,7 +1557,7 @@ DECLARATION        : DECLARATION ',' TK_ID
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
                                 $$ = assign(voidStr, $2, $4);
-				length = getDeclarationLength($$);
+								length = getDeclarationLength($$);
 				
                                 if ($$.modifier != "")
                                         declare($$.label, $$.modifier + " " + $$.type, length);
@@ -1701,7 +1728,7 @@ TERMINAL        :       TK_INT
                                 $$.type = "int";
                                 $$.modifier = "";
                                	$$.isConstant = true;
-				$$.intValue = $1.intValue;
+								$$.intValue = $1.intValue;
  
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
@@ -1786,21 +1813,21 @@ TERMINAL        :       TK_INT
                                	$$.isConstant = true;
               
 
-                                $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + ";\n";                                
+                                $$.translation = "\t" + $$.label + " = " + $1.translation + $2.translation + "\n";                                
 
                                 declare($$.label, $$.type, 1);
                         }
                         | TK_STRING
                         {                        
 
-			        $$.label = generateID();
+			       				$$.label = generateID();
                                 $$.type = "string";
                                 $$.modifier = "";
                                	$$.isConstant = true;
 
-				$$.translation = "\tstrcpy(" + $$.label + ", " + $1.translation + ");\n";                           
+								$$.translation = "\tstrcpy(" + $$.label + ", " + $1.translation + ");\n";                           
 
-				/*comprimento da string '-2' por conta das aspas*/
+								/*comprimento da string '-2' por conta das aspas*/
                                 declare($$.label, $$.type, $1.translation.length() - 2);
                         }
                         | TK_BOOL
@@ -1842,18 +1869,18 @@ TERMINAL        :       TK_INT
                                         yyerror("identifier: '" + $2.label + "'  was not declared in this scope.");
                                 else
                                 {
-					string modifier;					
+										string modifier;					
 
                                         $$.label = generateID();
                                         $$.type = id->type;
                                         $$.modifier = id->modifier;
                                         $$.translation = "\t" + $$.label + " = " + $1.translation + id->label + ";\n";
 
-					modifier = $$.modifier;
-					if(modifier != "")
-						modifier+= " ";
+										modifier = $$.modifier;
+										if(modifier != "")
+											modifier+= " ";
 			
-					declare($$.label, modifier + $$.type, 1);
+										declare($$.label, modifier + $$.type, 1);
                                 }
 
                                	$$.isConstant = false;
@@ -2335,9 +2362,9 @@ bool isDeclaredFunction(string idFunction)
 		//function_struct f = i->second;
 
         //if (f.defined == false)
-				//return false;
+		//	return false;
 		//else
-	//		return true;
+		//	return true;
            
 }
 
@@ -2346,7 +2373,7 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         YYSTYPE* res; 
         res = new YYSTYPE();
         YYSTYPE* cast;
-	YYSTYPE yID;
+		YYSTYPE yID;
 
         id_struct* identifier = findID(id.label);
 
@@ -2358,22 +2385,22 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
         res->modifier = identifier->modifier;
         res->isConstant = false;
 	
-	/*no caso de operação com strings*/
-	if(identifier->type == "string")
-		return stringAssign(addtranslation, *res, exp);
+		/*no caso de operação com strings*/
+		if(identifier->type == "string")
+			return stringAssign(addtranslation, *res, exp);
 
-        if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
-        {	
-		cast = runCast(exp, *res);
+		    if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
+		    {	
+			cast = runCast(exp, *res);
 
-		if(cast == NULL)
-			yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
+			if(cast == NULL)
+				yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
 
 
-	        res->translation = addtranslation + exp.translation + cast->translation + "\t" + res->label + " = " + cast->label + ";\n";
-        }
-	else
-	        res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
+			    res->translation = addtranslation + exp.translation + cast->translation + "\t" + res->label + " = " + cast->label + ";\n";
+		    }
+		else
+			    res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
 
 
         return *res;
@@ -2387,7 +2414,7 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 	unsigned int length;
 	string modifier;
 
-        res = new YYSTYPE();
+    res = new YYSTYPE();
 
 	res->label = id.label;
 	res->type = id.type;
@@ -2495,6 +2522,14 @@ void verifyLabels()
 }
 
 
+void verifyMain()
+{
+	if(countMain > 1)
+		yyerror("redefinition of ‘main’");
+	else if(countMain == 0)
+		yyerror("undefined reference to `main'");			
+}
+
 void declare(string label, string dIType, unsigned int length)
 {
         string finalType = dIType;
@@ -2502,10 +2537,11 @@ void declare(string label, string dIType, unsigned int length)
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
         if (dIType == "string")
-                finalType = "char*"; //tem que mudar para char ainda
+                finalType = "char*";
 
          (*declarationsMap)[label] = {finalType, length};
 } 
+
 
 string getDeclarations()
 {
@@ -2513,22 +2549,22 @@ string getDeclarations()
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::iterator i;
-	string type;
+		string type;
         
         for(i = declarationsMap.begin(); i != declarationsMap.end(); i++)
         {                        
-		type = i->second.dIType;
-		if(type == "char*")
-			type = "char";
+			type = i->second.dIType;
+			if(type == "char*")
+				type = "char";
 
-                declarations += "\t" + type + " " + i->first;
+		            declarations += "\t" + type + " " + i->first;
 
-                if ((i->second.dIType != "char*") && (i->second.length > 1))
-                        declarations += "[" + intToString(i->second.length) + "]";
-		else if (i->second.dIType == "char*")
-                        declarations += "[" + intToString(i->second.length) + "]";
+		            if ((i->second.dIType != "char*") && (i->second.length > 1))
+		                    declarations += "[" + intToString(i->second.length) + "]";
+					else if (i->second.dIType == "char*")
+		                    declarations += "[" + intToString(i->second.length) + "]";
 
-		declarations += ";\n";
+			declarations += ";\n";
         }
 
         return declarations;

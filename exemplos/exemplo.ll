@@ -38,4 +38,7 @@ int func(int a, int b)
 	return a + b;
 }
 
-
+int func()
+{
+	return 87;
+}

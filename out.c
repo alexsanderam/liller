@@ -7,14 +7,16 @@
 
 using namespace std;
 
-
+/*-----Cabeçalhos de funções-------*/
 int _temp2(int, int);
+/*-------------------------------*/
 
-/*========Variáveis globais========*/
+/*--------Variáveis globais--------*/
 	int _temp0;
 	int _temp1;
 	char _temp19[5];
 	char _temp20[6];
+/*-------------------------------*/
 
 int main()
 {
@@ -78,13 +80,22 @@ int main()
 	return _temp18;
 }
 
-
-int _temp2(int _temp21, int _temp22)
+int _temp23(int _temp22, int _temp21)
 {
-	int _temp23;
+	int _temp24;
 
-	_temp23 = _temp21 + _temp22;
+	_temp24 = _temp22 + _temp21;
 
-	return _temp23;
+	return _temp24;
 }
+
+int _temp25()
+{
+	int _temp26;
+
+	_temp26 = 87;
+
+	return _temp26;
+}
+
 
