@@ -53,7 +53,6 @@ Scientific ({Int}|{Float})[e|E][+|-]{Num}
 Char \'({Letter}|{Num})\'
 ID {Letter}({Letter}|{Num})*
 String "\""([^\n\"]*(\\[.\n])*)*"\""
-%String "\""([^\n\"\\]*(\\[.\n])*)*"\""
 
 OpPlusPlus "++"
 OpLessLess "--"

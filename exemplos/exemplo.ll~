@@ -1,6 +1,45 @@
 int z = 150;
+<<<<<<< HEAD
 
 int func(int, int);
+=======
+>>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
+
+int main()
+{	
+	int i = 0;
+
+	char a = 'a';
+<<<<<<< HEAD
+	coutn(a);
+=======
+	cout(a);
+>>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
+	string str = "oi: " + 'a' + "...";
+
+	/*switch(i+1)
+	{
+		case 1:
+			cout(22222222);
+		case 3:
+			cout(333333);
+		case 2:
+			cout(2);
+		default:
+			cout("desconhecido");
+			
+	}*/
+
+
+
+<<<<<<< HEAD
+	cout("teste: " + str + "\n\n");
+=======
+	cout("teste: " + str);
+>>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
+
+	return 0;
+}
 
 string p = "chora";
 
