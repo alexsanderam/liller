@@ -23,6 +23,7 @@ typedef struct
 {
         string label;
         string typeOfReturn;
+        string modifierOfReturn;
         bool declared;
         bool defined;
 
@@ -54,6 +55,9 @@ struct args
 
 	/*utilizado para identificar funções*/
 	string idFunction;
+
+	/*utilizado para assinaturas das funções*/
+	string typesArgsFunction;
 
 	/*utilizado para verificar se tem
 	identificador nos argumentos de uma
@@ -134,6 +138,9 @@ string declarations = "";
 /*headers de todas as funções*/
 string headersFunctions = "";
 
+/*pilha de identificadores da função corrente*/
+list<string> idOfCurrentFunction = "";
+
 /*tradução das declarações globais, quando realiza alguma expressão*/
 string globalDeclarationsTranslation = "";
 
@@ -196,6 +203,7 @@ bool setDeclarationLength(YYSTYPE, unsigned int);
 void verifyLabels();
 void verifyMain();
 string getDeclarations();
+string getFunctionArgs();
 void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
 string verifyStrongType(string, string);
@@ -296,7 +304,7 @@ START                   :
                         ;
 
 
-MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
+MAIN                    : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE
                         {
 							$$.translation = "";
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + $4.translation + ')' + "\n";
@@ -306,12 +314,16 @@ MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
 
 							declarations = "";
 
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
+
 							/*controle da função main
 							verifica se há main, e quantas*/
 							countMain++;
 							verifyMain();
                         }
-                        | TK_TYPE_INT TK_MAIN '(' ')' SCOPE
+                        | TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS SCOPE
                         {
 
 							$$.translation = "";
@@ -321,6 +333,10 @@ MAIN                    : TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
 							scopeMainTranslation = $5.translation + "}\n\n";
 
 							declarations = "";
+
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
 
 							/*controle da função main
 							verifica se há main, e quantas*/
@@ -346,9 +362,10 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 						| MAIN
 						| FUNCTION
 						| FUNCTION_HEADER ';'
-						{
+						{	
 							$$.translation = "";
-							headersFunctions = $1.translation + ";\n";
+							headersFunctions = $1.translation;
+							headersFunctions += "(" + $1.typesArgsFunction + ") ;\n";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -359,6 +376,8 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 
 FUNCTION				: FUNCTION_HEADER SCOPE
 						{
+							functions_map* functionMap;
+
 							if($1.hasIdInArgs == false)
 							{
 								int line = yylineno;
@@ -368,6 +387,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							}
 
 							$$.translation = $1.translation;
+							$$.translation += "(" + getFunctionArgs() + ")";
 							$$.translation += "\n{\n" + declarations + "\n";
 							$$.translation += $2.translation + "}\n\n";
 
@@ -376,6 +396,14 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
 							closeCurrentScope();
+
+							/*muda o estado da função para definida*/
+							functionMap = stackFunctionMap.front();
+							if((*functionMap)[$1.idFunction].defined == false)
+	                            (*functionMap)[$1.idFunction].defined = true;
+							else
+								yyerror("'" + $$.idFunction + "' previously defined here");
+
 						}
 						;
 
@@ -385,54 +413,62 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
-							$$.idFunction = $2.label + "(" + $4.idFunction + ")";
+							$$.idFunction = $2.label + "(" + $4.typesArgsFunction + ")";
+							idOfCurrentFunction.push_front($$.idFunction);
 
-							functions_map* functionMap = stackFunctionMap.front();
+							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
                                                         
-                            if(!isDeclaredFunction($$.idFunction))
+                            if(isDeclaredFunction($$.idFunction) == false)
 							{
 									id = generateID();
                                     (*functionMap)[$$.idFunction].label = id;
                                     (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
+                                    (*functionMap)[$$.idFunction].modifierOfReturn = $1.modifier;
                                     (*functionMap)[$$.idFunction].declared = true;
-                                    (*functionMap)[$$.idFunction].defined = true;
+                                    (*functionMap)[$$.idFunction].defined = false;
 							}
-							else if ((*functionMap)[$$.idFunction].defined == false)
+							else// if ((*functionMap)[$$.idFunction].defined == false)
 							{
 									id = (*functionMap)[$$.idFunction].label;
-									(*functionMap)[$$.idFunction].defined = true;
+									//(*functionMap)[$$.idFunction].defined = true;
 							}
-							else
-									yyerror("'" + $$.idFunction + "' previously defined here");
+							//else
+									//yyerror("'" + $$.idFunction + "' previously defined here");
 
-							$$.translation = $1.type + " " + id + '(' + $4.translation + ')';
+							$$.label = id;
+							$$.typesArgsFunction = $4.typesArgsFunction;
+							$$.translation = $1.type + " " + id;// + '(' + $4.translation + ')';
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}
 						| TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
-							$$.idFunction = $1.label + "(" + $3.idFunction + ")";
+							$$.idFunction = $1.label + "(" + $3.typesArgsFunction + ")";
+							idOfCurrentFunction.push_front($$.idFunction);
 
-							functions_map* functionMap = stackFunctionMap.front();
+							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
                                                         
                             if(!isDeclaredFunction($$.idFunction))
 							{
 									id = generateID();
                                     (*functionMap)[$$.idFunction].label = id;
                                     (*functionMap)[$$.idFunction].typeOfReturn = "void";
+                                    (*functionMap)[$$.idFunction].modifierOfReturn = "";
                                     (*functionMap)[$$.idFunction].declared = true;
-                                    (*functionMap)[$$.idFunction].defined = true;
+                                    (*functionMap)[$$.idFunction].defined = false;
 							}
-							else if ((*functionMap)[$$.idFunction].defined == false)
+							else// if ((*functionMap)[$$.idFunction].defined == false)
 							{
 									id = (*functionMap)[$$.idFunction].label;
-									(*functionMap)[$$.idFunction].defined = true;
+									//(*functionMap)[$$.idFunction].defined = true;
 							}
-							else
-									yyerror("'" + $$.idFunction + "' previously defined here");
+							//else
+									//yyerror("'" + $$.idFunction + "' previously defined here");
 
-		                    $$.translation = "void" + id + '(' + $3.translation + ')';
+							$$.label = id;
+							$$.typesArgsFunction = $3.typesArgsFunction;
+		                    $$.translation = "void" + id;// + '(' + $3.translation + ')';
 							$$.hasIdInArgs = $3.hasIdInArgs;
 							$$.line = $3.line;
 						}
@@ -469,7 +505,7 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 									$$.modifier = (*IDMap)[$2.label].modifier;
 
 									$$.translation = $$.type + " " + $$.label + ", " + $4.translation;
-									$$.idFunction = $$.type + ", " + $4.idFunction;
+									$$.typesArgsFunction = $$.type + ", " + $4.typesArgsFunction;
 									$$.hasIdInArgs = $4.hasIdInArgs &&  true;
 
 		                            if ($$.modifier != "")
@@ -480,7 +516,7 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 								else
 								{
 									$$.translation = $$.type + ", " + $4.translation;
-									$$.idFunction = $$.idFunction;
+									$$.typesArgsFunction = $$.type + ", " + $4.typesArgsFunction;
 									$$.hasIdInArgs = $4.hasIdInArgs && false;
 									$$.line = yylineno;
 								}
@@ -501,7 +537,7 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 								$$.modifier = (*IDMap)[$2.label].modifier;
 
 								$$.translation = $$.type + " " + $$.label;
-								$$.idFunction = $1.type;
+								$$.typesArgsFunction = $1.type;
 								$$.hasIdInArgs = true;
 
 		                        if ($$.modifier != "")
@@ -512,17 +548,17 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 							else
 							{
 									$$.translation = $$.type;
-									$$.idFunction = $$.idFunction;
+									$$.typesArgsFunction = $$.translation;
 									$$.hasIdInArgs = false;
 									$$.line = yylineno;
 							}
 						}
 						|
 						{
-									$$.translation = "";
-									$$.idFunction = "void";
-									$$.hasIdInArgs = true;
-									$$.line = yylineno;
+							$$.translation = "";
+							$$.typesArgsFunction = "void";
+							$$.hasIdInArgs = true;
+							$$.line = yylineno;
 						}
 						;
 
@@ -635,7 +671,37 @@ STATEMENT               : E_C ';'
 
 RETURN                  : TK_RETURN E_C 
                         {
-                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
+								functions_map* functionMap;
+								functions_map::iterator i;
+
+								YYSTYPE cast;
+								YYSTYPE func;
+								function_struct f;
+
+								functionMap = *next(stackFunctionMap.begin(), 2);
+								i = functionMap->find(idOfCurrentFunction);
+
+								if(i != functionMap->end())
+								{
+									f = i->second;
+
+									if(f.typeOfReturn != $2.type)
+									{
+										func.type = f.typeOfReturn;										
+										func.modifier = f.modifierOfReturn;	
+
+										cast = *runCast($2, func);
+
+										if(cast.label == "")
+							            	yyerror("cast from " + $2.type + " to " + func.modifier + " " + func.type + " not allowed");
+										else
+											$$.translation = $2.translation + cast.translation + "\n\t" + $1.translation + " " + cast.label + ";";
+									}
+									else
+		                                	$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+								}
+								else
+	                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";		
                         }
                         ;
 
@@ -2351,7 +2417,7 @@ bool isDeclaredCurrentScope(string label)
 
 bool isDeclaredFunction(string idFunction)
 {
-        functions_map* functionMap = stackFunctionMap.front();
+        functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
 		functions_map::iterator i;
 		i = functionMap->find(idFunction);
 
@@ -2568,6 +2634,35 @@ string getDeclarations()
         }
 
         return declarations;
+}
+
+
+string getFunctionArgs()
+{
+		string args = "";
+
+        declarations_map declarationsMap = *stackDeclarationsMap.front();
+        declarations_map::reverse_iterator i;
+		string type;
+        
+        for(i = declarationsMap.rbegin(); i != declarationsMap.rend(); i++)
+        {                        
+			type = i->second.dIType;
+			if(type == "char*")
+				type = "char";
+
+		            args += type + " " + i->first;
+
+		            if ((i->second.dIType != "char*") && (i->second.length > 1))
+		                    args += "[" + intToString(i->second.length) + "]";
+					else if (i->second.dIType == "char*")
+		                    args += "[" + intToString(i->second.length) + "]";
+
+			if(next(i , 1) != declarationsMap.rend())
+				args += ", ";
+        }
+
+        return args;
 }
 
 unsigned int getDeclarationLength(YYSTYPE id)

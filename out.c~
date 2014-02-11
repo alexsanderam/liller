@@ -1,3 +1,6 @@
+/*0 3*/
+/*0 3*/
+/*0 3*/
 /*Compiler prescot-liller*/
 
 #include <stdio.h>
@@ -7,9 +10,8 @@
 
 using namespace std;
 
-<<<<<<< HEAD
 /*-----Cabeçalhos de funções-------*/
-int _temp2(int, int);
+int _temp2(int, int) ;
 /*-------------------------------*/
 
 /*--------Variáveis globais--------*/
@@ -81,76 +83,25 @@ int main()
 	return _temp18;
 }
 
-int _temp23(int _temp22, int _temp21)
+int _temp23(int _temp22, char _temp21[1])
 {
-	int _temp24;
+	char _temp24[100];
+	char _temp25[100];
 
-	_temp24 = _temp22 + _temp21;
+	snprintf(_temp24, 100, "%d", _temp22);
+	strcpy(_temp25, _temp24);
+	strcat(_temp25, _temp21);
 
-	return _temp24;
+	return _temp25;
 }
 
-int _temp25()
+int _temp26()
 {
-	int _temp26;
+	int _temp27;
 
-	_temp26 = 87;
+	_temp27 = 87;
 
-	return _temp26;
-=======
-/*============Variáveis globais==============*/
-	int _temp0;
-	int _temp1;
-
-int main()
-{
-	char _temp10[9];
-	char _temp11[10];
-	char _temp12[7];
-	char _temp13[17];
-	int _temp14;
-	int _temp2;
-	int _temp3;
-	char _temp4;
-	char _temp5;
-	char _temp6[4];
-	char _temp7[2];
-	char _temp8[6];
-	char _temp9[3];
-
-	_temp0 = 150;
-	_temp1 = _temp0;
-
-	_temp2 = 0;
-	_temp3 = _temp2;
-
-	_temp4 = 'a';
-	_temp5 = _temp4;
-
-
-	cout << _temp5 << endl;
-
-	strcpy(_temp6, "oi: ");
-	snprintf(_temp7, 2, "%c", _temp5);
-	_temp7[1] = '\0';
-	strcpy(_temp8, _temp6);
-	strcat(_temp8, _temp7);
-	strcpy(_temp9, "...");
-	strcpy(_temp10, _temp8);
-	strcat(_temp10, _temp9);
-	strcpy(_temp11, _temp10);
-	_temp11[9] = '\0';
-
-	strcpy(_temp12, "teste: ");
-	strcpy(_temp13, _temp12);
-	strcat(_temp13, _temp11);
-
-	cout << _temp13 << endl;
-
-	_temp14 = 0;
-
-	return _temp14;
->>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
+	return _temp27;
 }
 
 

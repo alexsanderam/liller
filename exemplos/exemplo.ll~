@@ -1,20 +1,13 @@
 int z = 150;
-<<<<<<< HEAD
 
 int func(int, int);
-=======
->>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
 
 int main()
 {	
 	int i = 0;
 
 	char a = 'a';
-<<<<<<< HEAD
 	coutn(a);
-=======
-	cout(a);
->>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
 	string str = "oi: " + 'a' + "...";
 
 	/*switch(i+1)
@@ -32,11 +25,7 @@ int main()
 
 
 
-<<<<<<< HEAD
 	cout("teste: " + str + "\n\n");
-=======
-	cout("teste: " + str);
->>>>>>> 8775f61c53d4a1d972f0ff5f7f1475baab01d278
 
 	return 0;
 }
@@ -44,8 +33,21 @@ int main()
 string p = "chora";
 
 
+string func(int a, string b)
+{
+
+	return a + b;
+}
+
+/*string func(int a, string b)
+{
+
+	return a + b;
+}*/
+
 int func(int a, int b)
 {
+
 	return a + b;
 }
 

@@ -33,8 +33,21 @@ int main()
 string p = "chora";
 
 
+int func(int a, string b)
+{
+
+	return a + b;
+}
+
+/*string func(int a, string b)
+{
+
+	return a + b;
+}*/
+
 int func(int a, int b)
 {
+
 	return a + b;
 }
 

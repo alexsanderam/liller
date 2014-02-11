@@ -18,8 +18,8 @@ Gramática
 
     2 START: /* vazio */
 
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
-    4     | TK_TYPE_INT TK_MAIN '(' ')' SCOPE
+    3 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE
+    4     | TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS SCOPE
 
     5 TRANSLATION_UNIT: EXTERNAL_DECLARATION
     6                 | TRANSLATION_UNIT EXTERNAL_DECLARATION
@@ -205,8 +205,8 @@ Gramática
 Terminais, com as regras onde eles aparecem
 
 $end (0) 0
-'(' (40) 3 4 14 21 22 45 46 48 50 58 59 67 69 72
-')' (41) 3 4 15 21 22 45 46 48 50 58 59 67 69 72
+'(' (40) 14 21 22 45 46 48 50 58 59 67 69 72
+')' (41) 15 21 22 45 46 48 50 58 59 67 69 72
 ',' (44) 16 100 101
 ';' (59) 7 10 28 29 30 31 38 39 40 42 50 58
 '{' (123) 24
@@ -297,9 +297,9 @@ FUNCTION (79)
 FUNCTION_HEADER (80)
     à esquerda: 12 13, à direita: 10 11
 OPEN_ARGS (81)
-    à esquerda: 14, à direita: 12 13
+    à esquerda: 14, à direita: 3 4 12 13
 CLOSE_ARGS (82)
-    à esquerda: 15, à direita: 12 13
+    à esquerda: 15, à direita: 3 4 12 13
 ARGS (83)
     à esquerda: 16 17 18, à direita: 12 13 16
 OPTIONAL_ID (84)
@@ -455,8 +455,8 @@ estado 6
 
 estado 7
 
-    3 MAIN: TK_TYPE_INT . TK_MAIN '(' TK_TYPE_VOID ')' SCOPE
-    4     | TK_TYPE_INT . TK_MAIN '(' ')' SCOPE
+    3 MAIN: TK_TYPE_INT . TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE
+    4     | TK_TYPE_INT . TK_MAIN OPEN_ARGS CLOSE_ARGS SCOPE
   106 TYPE: TK_TYPE_INT .
 
     TK_MAIN  deslocar, e ir ao estado 25
@@ -657,10 +657,12 @@ estado 24
 
 estado 25
 
-    3 MAIN: TK_TYPE_INT TK_MAIN . '(' TK_TYPE_VOID ')' SCOPE
-    4     | TK_TYPE_INT TK_MAIN . '(' ')' SCOPE
+    3 MAIN: TK_TYPE_INT TK_MAIN . OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE
+    4     | TK_TYPE_INT TK_MAIN . OPEN_ARGS CLOSE_ARGS SCOPE
 
-    '('  deslocar, e ir ao estado 49
+    '('  deslocar, e ir ao estado 23
+
+    OPEN_ARGS  ir ao estado 49
 
 
 estado 26
@@ -821,8 +823,8 @@ estado 42
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     $padrão  reduzir usando a regra 27 (COMMANDS)
@@ -918,11 +920,13 @@ estado 48
 
 estado 49
 
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' . TK_TYPE_VOID ')' SCOPE
-    4     | TK_TYPE_INT TK_MAIN '(' . ')' SCOPE
+    3 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS . TK_TYPE_VOID CLOSE_ARGS SCOPE
+    4     | TK_TYPE_INT TK_MAIN OPEN_ARGS . CLOSE_ARGS SCOPE
 
     TK_TYPE_VOID  deslocar, e ir ao estado 120
-    ')'           deslocar, e ir ao estado 121
+    ')'           deslocar, e ir ao estado 116
+
+    CLOSE_ARGS  ir ao estado 121
 
 
 estado 50
@@ -1068,7 +1072,7 @@ estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 129
     INCREASE       ir ao estado 105
@@ -1095,7 +1099,7 @@ estado 67
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 130
     INCREASE       ir ao estado 105
@@ -1122,7 +1126,7 @@ estado 68
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 131
     E              ir ao estado 104
@@ -1178,7 +1182,7 @@ estado 73
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 134
     E              ir ao estado 104
@@ -1248,6 +1252,13 @@ estado 81
 
 estado 82
 
+   42 STATEMENT: ';' .
+
+    $padrão  reduzir usando a regra 42 (STATEMENT)
+
+
+estado 83
+
    69 E: '(' . E ')'
    72  | '(' . TYPE ')' TERMINAL
 
@@ -1274,7 +1285,7 @@ estado 82
     TK_OP_LOGIC_NOT       deslocar, e ir ao estado 66
     TK_OP_BIN_NOT         deslocar, e ir ao estado 67
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
 
     E              ir ao estado 138
     INCREASE       ir ao estado 105
@@ -1284,13 +1295,6 @@ estado 82
     TYPE           ir ao estado 139
     TERMINAL       ir ao estado 111
     SIGNAL         ir ao estado 112
-
-
-estado 83
-
-   42 STATEMENT: ';' .
-
-    $padrão  reduzir usando a regra 42 (STATEMENT)
 
 
 estado 84
@@ -1356,8 +1360,8 @@ estado 87
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     $padrão  reduzir usando a regra 27 (COMMANDS)
@@ -1470,8 +1474,8 @@ estado 93
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -1567,8 +1571,8 @@ estado 97
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -1782,7 +1786,7 @@ estado 114
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 181
     INCREASE       ir ao estado 105
@@ -1848,14 +1852,16 @@ estado 119
 
 estado 120
 
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID . ')' SCOPE
+    3 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID . CLOSE_ARGS SCOPE
 
-    ')'  deslocar, e ir ao estado 184
+    ')'  deslocar, e ir ao estado 116
+
+    CLOSE_ARGS  ir ao estado 184
 
 
 estado 121
 
-    4 MAIN: TK_TYPE_INT TK_MAIN '(' ')' . SCOPE
+    4 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS . SCOPE
 
     '{'  deslocar, e ir ao estado 40
 
@@ -1893,7 +1899,7 @@ estado 124
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 186
     INCREASE       ir ao estado 105
@@ -1927,7 +1933,7 @@ estado 126
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 187
     INCREASE       ir ao estado 105
@@ -2032,7 +2038,7 @@ estado 132
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 188
     E              ir ao estado 104
@@ -2060,7 +2066,7 @@ estado 133
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 189
     E              ir ao estado 104
@@ -2202,7 +2208,7 @@ estado 145
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 193
     E              ir ao estado 104
@@ -2230,7 +2236,7 @@ estado 146
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 194
     E              ir ao estado 104
@@ -2277,7 +2283,7 @@ estado 148
     TK_OP_LOGIC_NOT       deslocar, e ir ao estado 66
     TK_OP_BIN_NOT         deslocar, e ir ao estado 67
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
 
     $padrão  reduzir usando a regra 52 (OPTIONAL_E)
 
@@ -2340,7 +2346,7 @@ estado 153
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 203
     E              ir ao estado 104
@@ -2375,7 +2381,7 @@ estado 155
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 204
     INCREASE       ir ao estado 105
@@ -2402,7 +2408,7 @@ estado 156
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 205
     INCREASE       ir ao estado 105
@@ -2429,7 +2435,7 @@ estado 157
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 206
     INCREASE       ir ao estado 105
@@ -2456,7 +2462,7 @@ estado 158
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 207
     INCREASE       ir ao estado 105
@@ -2483,7 +2489,7 @@ estado 159
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 208
     INCREASE       ir ao estado 105
@@ -2510,7 +2516,7 @@ estado 160
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 209
     INCREASE       ir ao estado 105
@@ -2537,7 +2543,7 @@ estado 161
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 210
     INCREASE       ir ao estado 105
@@ -2564,7 +2570,7 @@ estado 162
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 211
     INCREASE       ir ao estado 105
@@ -2591,7 +2597,7 @@ estado 163
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 212
     INCREASE       ir ao estado 105
@@ -2618,7 +2624,7 @@ estado 164
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 213
     INCREASE       ir ao estado 105
@@ -2645,7 +2651,7 @@ estado 165
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 214
     INCREASE       ir ao estado 105
@@ -2672,7 +2678,7 @@ estado 166
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 215
     INCREASE       ir ao estado 105
@@ -2699,7 +2705,7 @@ estado 167
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 216
     INCREASE       ir ao estado 105
@@ -2726,7 +2732,7 @@ estado 168
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 217
     INCREASE       ir ao estado 105
@@ -2753,7 +2759,7 @@ estado 169
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 218
     INCREASE       ir ao estado 105
@@ -2780,7 +2786,7 @@ estado 170
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 219
     INCREASE       ir ao estado 105
@@ -2807,7 +2813,7 @@ estado 171
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 220
     INCREASE       ir ao estado 105
@@ -2834,7 +2840,7 @@ estado 172
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 221
     INCREASE       ir ao estado 105
@@ -2913,7 +2919,7 @@ estado 180
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E              ir ao estado 222
     INCREASE       ir ao estado 105
@@ -3001,7 +3007,7 @@ estado 183
 
 estado 184
 
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' . SCOPE
+    3 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS . SCOPE
 
     '{'  deslocar, e ir ao estado 40
 
@@ -3011,7 +3017,7 @@ estado 184
 
 estado 185
 
-    4 MAIN: TK_TYPE_INT TK_MAIN '(' ')' SCOPE .
+    4 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS SCOPE .
 
     $padrão  reduzir usando a regra 4 (MAIN)
 
@@ -3898,7 +3904,7 @@ estado 224
 
 estado 225
 
-    3 MAIN: TK_TYPE_INT TK_MAIN '(' TK_TYPE_VOID ')' SCOPE .
+    3 MAIN: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE .
 
     $padrão  reduzir usando a regra 3 (MAIN)
 
@@ -3972,8 +3978,8 @@ estado 230
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -4047,8 +4053,8 @@ estado 231
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -4098,7 +4104,7 @@ estado 232
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     E_C            ir ao estado 238
     E              ir ao estado 104
@@ -4126,7 +4132,7 @@ estado 233
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     $padrão  reduzir usando a regra 52 (OPTIONAL_E)
 
@@ -4199,8 +4205,8 @@ estado 235
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -4320,8 +4326,8 @@ estado 242
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -4378,7 +4384,7 @@ estado 244
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 66
     TK_OP_BIN_NOT    deslocar, e ir ao estado 67
     TK_OP_INCREASE   deslocar, e ir ao estado 81
-    '('              deslocar, e ir ao estado 82
+    '('              deslocar, e ir ao estado 83
 
     $padrão  reduzir usando a regra 52 (OPTIONAL_E)
 
@@ -4433,8 +4439,8 @@ estado 245
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
@@ -4536,8 +4542,8 @@ estado 250
     TK_CONTINUE           deslocar, e ir ao estado 79
     TK_GOTO               deslocar, e ir ao estado 80
     TK_OP_INCREASE        deslocar, e ir ao estado 81
-    '('                   deslocar, e ir ao estado 82
-    ';'                   deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 82
+    '('                   deslocar, e ir ao estado 83
     '{'                   deslocar, e ir ao estado 40
 
     COUT           ir ao estado 84
