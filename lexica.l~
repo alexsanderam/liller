@@ -18,6 +18,7 @@ ModifierLong "long"
 
 Return "return"
 Cout "cout"
+Cin "cin"
 Coutn "coutn"
 
 True "true"

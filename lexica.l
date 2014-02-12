@@ -18,6 +18,7 @@ ModifierLong "long"
 
 Return "return"
 Cout "cout"
+Cin "cin"
 Coutn "coutn"
 
 True "true"
@@ -188,6 +189,7 @@ Assign "="
 
 {Return}         { yylval.translation = yytext; return TK_RETURN; }
 {Cout}                { yylval.translation = yytext; return TK_COUT; }
+{Cin}                { yylval.translation = yytext; return TK_CIN; }
 {Coutn}                { yylval.translation = yytext; return TK_COUTN; }
 {If}                { yylval.translation = yytext; return TK_IF; }
 {Else}                { yylval.translation = yytext; return TK_ELSE; }

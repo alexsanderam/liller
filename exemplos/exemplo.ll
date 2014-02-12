@@ -2,6 +2,7 @@ int z = 150;
 
 int func(int, int);
 int func(int, float);
+string func(int a, string b);
 void func();
 
 
@@ -25,11 +26,17 @@ int main()
 			cout("desconhecido");
 			
 	}*/
+	
+	if(i == 0)
+		func();
+	else if (i == 3)
+		func();
+	else
+		func();
 
 
 	func(1, 1);
 	int z = func(1, 2);
-	func();
 
 	cout("teste: " + str + "\n\n");
 
@@ -41,6 +48,7 @@ string p = "chora";
 
 string func(int a, string b)
 {
+	int k;
 	coutn(p);
 
 	return a + b;
@@ -60,5 +68,7 @@ int func(int a, int b)
 
 void func()
 {
-
+	int k;
+	cin(k);
+	cout(k);
 }

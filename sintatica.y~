@@ -232,6 +232,7 @@ void loadOpearationsMap(void);
 %token TK_ASSIGN
 %token TK_RETURN
 %token TK_COUT TK_COUTN
+%token TK_CIN
 %token TK_IF TK_ELSE
 %token TK_SWITCH TK_CASE TK_DEFAULT
 %token TK_FOR TK_EACH TK_WHILE TK_DO
@@ -462,7 +463,7 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							$$.label = id;
 							$$.typesArgsFunction = $4.typesArgsFunction;
-							$$.translation = $1.type + " " + id;
+							$$.translation = normalizedType($1.type) + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}
@@ -620,7 +621,7 @@ PARAMETERS				: PARAMETERS ',' E
 
 
 CALL_FUNCTION			: COUT
-						//| CIN
+						| CIN
 						| TK_ID '(' OPTIONAL_PARAMETERS ')'
 						{
 							function_struct* f;
@@ -677,6 +678,13 @@ COUT                    : TK_COUT '(' E_C ')'
                         | TK_COUTN '(' E_C ')'
                         {
 	                           $$.translation = $3.translation + "\n\tcout << " + $3.label + " << endl;\n";
+                        }
+                        ;
+
+
+CIN                    : TK_CIN '(' E_C ')'
+                        {
+                                $$.translation = $3.translation + "\n\tcin >> " + $3.label + ";\n";
                         }
                         ;
 
@@ -2163,7 +2171,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
         res->label = generateID();
         res->translation = operand1.translation + operand2.translation;
 
-	/*verifica-se a operação é permitida*/
+		/*verifica-se a operação é permitida*/
         resultOperationType = verifyResultOperation(operand1.type, operand2.type, operation);
 
         /*Neste caso, não se considera o modificador. A variável auxiliar temporária, armazenará o tipo
@@ -2388,14 +2396,12 @@ YYSTYPE toString(YYSTYPE n)
 	if(n.type == "int")
 	{
 		length = 100;
-		//res->translation += "\titoa(" + n.label + ", " + res->label + ", " + "10" + ");\n";
 		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%d\", " + n.label + ");\n";
 	}
 	else if(n.type == "char")
 	{
 		length = 2;
 		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
-		//res->translation += "\tstrcpy(" + res->label + ", " + n.label + ");\n";
 		res->translation += "\t" + res->label + "[" + intToString(1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "float")

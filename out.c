@@ -10,128 +10,177 @@ using namespace std;
 /*-----Cabeçalhos de funções-------*/
 int _temp2(int, int);
 int _temp3(int, float);
-void _temp4(void);
+string _temp6(int, string);
+void _temp7(void);
 /*-------------------------------*/
 
 /*--------Variáveis globais--------*/
 	int _temp0;
 	int _temp1;
-	char _temp28[5];
-	char _temp29[6];
+	char _temp37[5];
+	char _temp38[6];
 /*-------------------------------*/
 
 int main()
 {
 	char _temp10;
-	char _temp11[2];
-	char _temp12[6];
-	char _temp13[3];
-	char _temp14[9];
-	char _temp15[10];
-	int _temp16;
-	int _temp17;
-	int _temp18;
+	char _temp11;
+	char _temp12[4];
+	char _temp13;
+	char _temp14[2];
+	char _temp15[6];
+	char _temp16[3];
+	char _temp17[9];
+	char _temp18[10];
 	int _temp19;
 	int _temp20;
 	int _temp21;
 	int _temp22;
-	char _temp23[7];
-	char _temp24[17];
-	char _temp25[4];
-	char _temp26[21];
+	int _temp23;
+	int _temp24;
+	int _temp25;
+	int _temp26;
 	int _temp27;
-	int _temp5;
-	int _temp6;
-	char _temp7;
-	char _temp8;
-	char _temp9[4];
+	int _temp28;
+	int _temp29;
+	int _temp30;
+	int _temp31;
+	char _temp32[7];
+	char _temp33[17];
+	char _temp34[4];
+	char _temp35[21];
+	int _temp36;
+	int _temp8;
+	int _temp9;
 
 	/*Atribuição de variáveis globais*/
 	_temp0 = 150;
 	_temp1 = _temp0;
-	strcpy(_temp28, "chora");
-	strcpy(_temp29, _temp28);
-	_temp29[5] = '\0';
+	strcpy(_temp37, "chora");
+	strcpy(_temp38, _temp37);
+	_temp38[5] = '\0';
 	/*-------------------------------*/
 
-	_temp5 = 0;
-	_temp6 = _temp5;
+	_temp8 = 0;
+	_temp9 = _temp8;
 
-	_temp7 = 'a';
-	_temp8 = _temp7;
-
-
-	cout << _temp8 << endl;
-
-	strcpy(_temp9, "oi: ");
 	_temp10 = 'a';
-	snprintf(_temp11, 2, "%c", _temp10);
-	_temp11[1] = '\0';
-	strcpy(_temp12, _temp9);
-	strcat(_temp12, _temp11);
-	strcpy(_temp13, "...");
-	strcpy(_temp14, _temp12);
-	strcat(_temp14, _temp13);
-	strcpy(_temp15, _temp14);
-	_temp15[9] = '\0';
+	_temp11 = _temp10;
+
+
+	cout << _temp11 << endl;
+
+	strcpy(_temp12, "oi: ");
+	_temp13 = 'a';
+	snprintf(_temp14, 2, "%c", _temp13);
+	_temp14[1] = '\0';
+	strcpy(_temp15, _temp12);
+	strcat(_temp15, _temp14);
+	strcpy(_temp16, "...");
+	strcpy(_temp17, _temp15);
+	strcat(_temp17, _temp16);
+	strcpy(_temp18, _temp17);
+	_temp18[9] = '\0';
+
+	_temp19 = 0;
+	_temp20 = _temp9 == _temp19;
+	_temp24 = !_temp20;
+
+	if(_temp24)
+		goto _tempLabel2;
 
 	/*----chamada de função----*/
-	_temp16 = 1;
-	_temp17 = 1;
-	_temp18 = _temp2(_temp16, _temp17);
+	_temp7();
+	/*-------------------------*/
+
+		goto _tempLabel3;
+
+	_tempLabel2:
+	_temp21 = 3;
+	_temp22 = _temp9 == _temp21;
+	_temp23 = !_temp22;
+
+	if(_temp23)
+		goto _tempLabel0;
+
+	/*----chamada de função----*/
+	_temp7();
+	/*-------------------------*/
+
+		goto _tempLabel1;
+
+	_tempLabel0:
+	/*----chamada de função----*/
+	_temp7();
+	/*-------------------------*/
+
+	_tempLabel1:
+
+	_tempLabel3:
+
+	/*----chamada de função----*/
+	_temp25 = 1;
+	_temp26 = 1;
+	_temp27 = _temp2(_temp25, _temp26);
 	/*-------------------------*/
 
 	/*----chamada de função----*/
-	_temp19 = 1;
-	_temp20 = 2;
-	_temp21 = _temp2(_temp19, _temp20);
+	_temp28 = 1;
+	_temp29 = 2;
+	_temp30 = _temp2(_temp28, _temp29);
 	/*-------------------------*/
-	_temp22 = _temp21;
+	_temp31 = _temp30;
 
-	/*----chamada de função----*/
-	_temp4();
-	/*-------------------------*/
+	strcpy(_temp32, "teste: ");
+	strcpy(_temp33, _temp32);
+	strcat(_temp33, _temp18);
+	strcpy(_temp34, "\n\n");
+	strcpy(_temp35, _temp33);
+	strcat(_temp35, _temp34);
 
-	strcpy(_temp23, "teste: ");
-	strcpy(_temp24, _temp23);
-	strcat(_temp24, _temp15);
-	strcpy(_temp25, "\n\n");
-	strcpy(_temp26, _temp24);
-	strcat(_temp26, _temp25);
+	cout << _temp35;
 
-	cout << _temp26;
+	_temp36 = 0;
 
-	_temp27 = 0;
-
-	return _temp27;
+	return _temp36;
 }
 
-string _temp32(int _temp31, char _temp30[1])
+string _temp6(int _temp40, char _temp39[1])
 {
-	char _temp33[100];
-	char _temp34[100];
+	int _temp41;
+	char _temp42[100];
+	char _temp43[100];
 
 
-	cout << _temp29 << endl;
 
-	snprintf(_temp33, 100, "%d", _temp31);
-	strcpy(_temp34, _temp33);
-	strcat(_temp34, _temp30);
+	cout << _temp38 << endl;
 
-	return _temp34;
+	snprintf(_temp42, 100, "%d", _temp40);
+	strcpy(_temp43, _temp42);
+	strcat(_temp43, _temp39);
+
+	return _temp43;
 }
 
-int _temp2(int _temp36, int _temp35)
+int _temp2(int _temp45, int _temp44)
 {
-	int _temp37;
+	int _temp46;
 
-	_temp37 = _temp36 + _temp35;
+	_temp46 = _temp45 + _temp44;
 
-	return _temp37;
+	return _temp46;
 }
 
-void _temp4()
+void _temp7()
 {
+	int _temp47;
+
+
+
+	cin >> _temp47;
+
+
+	cout << _temp47;
 
 }
 
