@@ -2,6 +2,7 @@ int z = 150;
 
 int func(int, int);
 
+
 int main()
 {	
 	int i = 0;
@@ -33,7 +34,7 @@ int main()
 string p = "chora";
 
 
-int func(int a, string b)
+string func(int a, string b)
 {
 
 	return a + b;

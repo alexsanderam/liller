@@ -126,6 +126,9 @@ list<string> stackEndLabels;
 /*pilha de rótulos para o comando case*/
 list<case_label_map*>  stackCaseLabel;
 
+/*pilha de identificadores de funções correntes*/
+list<string>idOfCurrentFunction;
+
 /*mapa de operações permititdas*/
 map<operation_struct, string> operationsMap;
 
@@ -137,9 +140,6 @@ string declarations = "";
 
 /*headers de todas as funções*/
 string headersFunctions = "";
-
-/*pilha de identificadores da função corrente*/
-list<string> idOfCurrentFunction = "";
 
 /*tradução das declarações globais, quando realiza alguma expressão*/
 string globalDeclarationsTranslation = "";
@@ -304,39 +304,28 @@ START                   :
                         ;
 
 
-MAIN                    : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS SCOPE
+MAIN_HEADER             : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS
                         {
 							$$.translation = "";
+							$$.idFunction = $2.translation + " (void)";
+
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + $4.translation + ')' + "\n";
 
-							headMainTranslation += "{\n" + declarations + "\n";
-							scopeMainTranslation = $6.translation + "}\n\n";
-
-							declarations = "";
-
-							/*desempilha o mapa que armazena
-							os argumentos da função*/
-							closeCurrentScope();
+							idOfCurrentFunction.push_front($$.idFunction);
 
 							/*controle da função main
 							verifica se há main, e quantas*/
 							countMain++;
 							verifyMain();
                         }
-                        | TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS SCOPE
+                        | TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS
                         {
-
 							$$.translation = "";
+							$$.idFunction = $2.translation + " (void)";
+
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + ')' + "\n";
 
-							headMainTranslation += "{\n" + declarations + "\n";
-							scopeMainTranslation = $5.translation + "}\n\n";
-
-							declarations = "";
-
-							/*desempilha o mapa que armazena
-							os argumentos da função*/
-							closeCurrentScope();
+							idOfCurrentFunction.push_front($$.idFunction);
 
 							/*controle da função main
 							verifica se há main, e quantas*/
@@ -359,7 +348,6 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 							globalDeclarationsTranslation += $1.translation;
 							$$.translation = "";
 						}
-						| MAIN
 						| FUNCTION
 						| FUNCTION_HEADER ';'
 						{	
@@ -370,6 +358,9 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
 							closeCurrentScope();
+
+							/*desempilha o identificador da função corrente*/
+							idOfCurrentFunction.pop_front();
 						}
 						;
 
@@ -397,6 +388,9 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							os argumentos da função*/
 							closeCurrentScope();
 
+							/*desempilha o identificador da função corrente*/
+							idOfCurrentFunction.pop_front();
+
 							/*muda o estado da função para definida*/
 							functionMap = stackFunctionMap.front();
 							if((*functionMap)[$1.idFunction].defined == false)
@@ -404,6 +398,21 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							else
 								yyerror("'" + $$.idFunction + "' previously defined here");
 
+						}
+						| MAIN_HEADER SCOPE
+						{
+							headMainTranslation += "{\n" + declarations + "\n";
+							scopeMainTranslation = $2.translation;
+							scopeMainTranslation += "}\n\n";
+
+							declarations = "";
+
+							/*desempilha o mapa que armazena
+							os argumentos da função*/
+							closeCurrentScope();
+
+							/*desempilha o identificador da função corrente*/
+							idOfCurrentFunction.pop_front();
 						}
 						;
 
@@ -674,12 +683,12 @@ RETURN                  : TK_RETURN E_C
 								functions_map* functionMap;
 								functions_map::iterator i;
 
-								YYSTYPE cast;
+								YYSTYPE* cast;
 								YYSTYPE func;
 								function_struct f;
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
-								i = functionMap->find(idOfCurrentFunction);
+								i = functionMap->find(idOfCurrentFunction.front());
 
 								if(i != functionMap->end())
 								{
@@ -690,12 +699,12 @@ RETURN                  : TK_RETURN E_C
 										func.type = f.typeOfReturn;										
 										func.modifier = f.modifierOfReturn;	
 
-										cast = *runCast($2, func);
+										cast = runCast($2, func);
 
-										if(cast.label == "")
+										if(cast == NULL)
 							            	yyerror("cast from " + $2.type + " to " + func.modifier + " " + func.type + " not allowed");
 										else
-											$$.translation = $2.translation + cast.translation + "\n\t" + $1.translation + " " + cast.label + ";";
+											$$.translation = $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
 									}
 									else
 		                                	$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
@@ -2038,7 +2047,7 @@ void relationalControl(YYSTYPE* expr, YYSTYPE operation)
 
         expr->relationalCounter = expr->relationalCounter + 1;
 
-	cout << "//" << expr->relationalCounter << endl;
+	//cout << "//" << expr->relationalCounter << endl;
 }
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
@@ -2328,20 +2337,20 @@ YYSTYPE* runCast(YYSTYPE from, YYSTYPE to)
         res = new YYSTYPE();
 
         if(!verifyCast(from.type, to.type))
-		return NULL;
+			return NULL;
 
 	
-	modifier = to.modifier;
+		modifier = to.modifier;
         modifier += (modifier != "" ? " " : "");
 
-	res->label = generateID();
-	res->type = to.type;
-	res->modifier = to.modifier;
-	res->isConstant = from.isConstant && to.isConstant;
+		res->label = generateID();
+		res->type = to.type;
+		res->modifier = to.modifier;
+		res->isConstant = from.isConstant && to.isConstant;
 
-	res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
+		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
 
-	declare(res->label, modifier + res->type, 1); 
+		declare(res->label, modifier + res->type, 1); 
 
 	return res;        
 }
