@@ -25,7 +25,7 @@ int main()
 	}*/
 
 
-	func(1, "huah");
+	func(1, 1);
 
 	cout("teste: " + str + "\n\n");
 

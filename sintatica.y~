@@ -586,7 +586,7 @@ PARAMETERS				: PARAMETERS ',' E
 						{
 							$$.translation = $1.translation + $3.translation;
 							$$.label = $1.label + ", " + $3.label;
-							$$.translation += "\t" + $$.label;
+							//$$.translation += "\t" + $$.label;
 							$$.typesArgsFunction = $1.typesArgsFunction + ", " + $3.type;
 
 						}
@@ -594,6 +594,7 @@ PARAMETERS				: PARAMETERS ',' E
 						{
 							$$.typesArgsFunction = $1.type;
 							$$.label = $1.label;
+							$$.translation = $1.translation;
 						}
 						; 
 
@@ -605,15 +606,19 @@ CALL_FUNCTION			: COUT
 							function_struct* f;
 							string idFunction = $1.label + '(' + $3.typesArgsFunction + ')';
 
+							cout << "/*" + idFunction + "*/" << endl;
+
 							f = findFunction(idFunction);
 
-							if((f != NULL) && (f->defined == true))
+							if((f != NULL))// && (f->defined == true))
 							{
-								$$.translation = $3.translation;
-								$$.translation +=  "\t" + f->label + "(" +  $3.label + ");"; 
+								$$.translation = "\t/*----chamada de função----*/\n";
+								$$.translation += $3.translation;
+								$$.translation +=  "\t" + f->label + "(" +  $3.label + ");\n"; 
+								$$.translation += "\t/*-------------------------*/\n";
 							}
-							else if ((f != NULL) && (f->defined == false))
-								yyerror("não definida");
+							//else if ((f != NULL) && (f->defined == false))
+								//yyerror("undefined reference to '" + $1.label + "'");
 							else
 								yyerror("não existente");
 						}
