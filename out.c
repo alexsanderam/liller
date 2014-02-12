@@ -15,22 +15,22 @@ using namespace std;
 
 int main()
 {
-	char _temp0[1];
+	int _temp0[20];
 	int _temp1;
+	int _temp2;
+	int _temp3;
 
 	/*Atribuição de variáveis globais*/
 	/*-------------------------------*/
 
 
 
-	cin >> _temp0;
+	_temp2 = 5;
+	_temp0[16] = _temp2;
 
+	_temp3 = 0;
 
-	cout << _temp0;
-
-	_temp1 = 0;
-
-	return _temp1;
+	return _temp3;
 }
 
 
