@@ -1,6 +1,3 @@
-/*0 3*/
-/*0 3*/
-/*0 3*/
 /*Compiler prescot-liller*/
 
 #include <stdio.h>
@@ -83,7 +80,7 @@ int main()
 	return _temp18;
 }
 
-int _temp23(int _temp22, char _temp21[1])
+string _temp23(int _temp22, char _temp21[1])
 {
 	char _temp24[100];
 	char _temp25[100];
@@ -95,13 +92,22 @@ int _temp23(int _temp22, char _temp21[1])
 	return _temp25;
 }
 
-int _temp26()
+int _temp2(int _temp27, int _temp26)
 {
-	int _temp27;
+	int _temp28;
 
-	_temp27 = 87;
+	_temp28 = _temp27 + _temp26;
 
-	return _temp27;
+	return _temp28;
+}
+
+int _temp29()
+{
+	int _temp30;
+
+	_temp30 = 87;
+
+	return _temp30;
 }
 
 

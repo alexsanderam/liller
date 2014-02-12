@@ -25,6 +25,7 @@ int main()
 	}*/
 
 
+	func(1, "huah");
 
 	cout("teste: " + str + "\n\n");
 
@@ -36,6 +37,7 @@ string p = "chora";
 
 string func(int a, string b)
 {
+	coutn(p);
 
 	return a + b;
 }

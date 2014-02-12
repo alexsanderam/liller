@@ -194,10 +194,12 @@ string generateID();
 string generateLabel();
 void relationalControl(YYSTYPE*, YYSTYPE);
 id_struct* findID(string);
+function_struct* findFunction(string);
 label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string);
-bool isDeclaredFunction(string);
+bool isDeclaredFunctionInCurrentScope(string);
 void declare(string, string, unsigned int);
+string normalizedType(string);
 unsigned int getDeclarationLength(YYSTYPE);
 bool setDeclarationLength(YYSTYPE, unsigned int);
 void verifyLabels();
@@ -427,7 +429,7 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
                                                         
-                            if(isDeclaredFunction($$.idFunction) == false)
+                            if(isDeclaredFunctionInCurrentScope($$.idFunction) == false)
 							{
 									id = generateID();
                                     (*functionMap)[$$.idFunction].label = id;
@@ -458,7 +460,7 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
                                                         
-                            if(!isDeclaredFunction($$.idFunction))
+                            if(!isDeclaredFunctionInCurrentScope($$.idFunction))
 							{
 									id = generateID();
                                     (*functionMap)[$$.idFunction].label = id;
@@ -580,7 +582,43 @@ OPTIONAL_ID				: TK_ID
 						}
 						;
 
-                        
+PARAMETERS				: PARAMETERS ',' E
+						{
+							$$.translation = $1.translation + $3.translation;
+							$$.label = $1.label + ", " + $3.label;
+							$$.translation += "\t" + $$.label;
+							$$.typesArgsFunction = $1.typesArgsFunction + ", " + $3.type;
+
+						}
+						| E
+						{
+							$$.typesArgsFunction = $1.type;
+							$$.label = $1.label;
+						}
+						; 
+
+
+CALL_FUNCTION			: COUT
+						//| CIN
+						| TK_ID '(' PARAMETERS ')'
+						{
+							function_struct* f;
+							string idFunction = $1.label + '(' + $3.typesArgsFunction + ')';
+
+							f = findFunction(idFunction);
+
+							if((f != NULL) && (f->defined == true))
+							{
+								$$.translation = $3.translation;
+								$$.translation +=  "\t" + f->label + "(" +  $3.label + ");"; 
+							}
+							else if ((f != NULL) && (f->defined == false))
+								yyerror("não definida");
+							else
+								yyerror("não existente");
+						}
+						;
+		                        
                         
 COUT                    : TK_COUT '(' E_C ')'
                         {
@@ -644,7 +682,6 @@ COMMANDS        		: STATEMENT COMMANDS
 
 STATEMENT               : E_C ';'
                         | RETURN ';'
-                        | COUT ';'
                         | DECLARATION ';'
                         {
                                 /*controle de declarações, quando tais não são permititdas (exemplo: if, for, ...)*/
@@ -1225,21 +1262,21 @@ SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
 
 
 
-E_C			: E
-			{
-				/*controle para alertar a recursão de operações relacionais*/
-                                $$.relationalCounter = 0;
+E_C						: E
+						{
+							/*controle para alertar a recursão de operações relacionais*/
+						                    $$.relationalCounter = 0;
 
-                                /*controle da tradução do incremento/decremento*/
-                                if(flagIncreaseTranslation)
-                                {
-                                        $$.translation += auxIncreaseTranslation;
-                                        flagIncreaseTranslation = false;
-                                        auxIncreaseTranslation = "";
-                                }
+						                    /*controle da tradução do incremento/decremento*/
+						                    if(flagIncreaseTranslation)
+						                    {
+						                            $$.translation += auxIncreaseTranslation;
+						                            flagIncreaseTranslation = false;
+						                            auxIncreaseTranslation = "";
+						                    }
 
-			}
-			;
+						}
+						;
 
 
 
@@ -1251,6 +1288,7 @@ E                       : '(' E ')'
                                 $$.modifier = $2.modifier;                
                                 $$.isConstant = $2.isConstant; 
                         }
+						| CALL_FUNCTION
                         | TERMINAL
                         | ATTRIBUITION
                         | '(' TYPE ')' TERMINAL /*cast*/
@@ -2405,6 +2443,24 @@ id_struct* findID(string label)
 }
 
 
+function_struct* findFunction(string label)
+{
+        list<functions_map*>::iterator i;
+        
+        for(i = stackFunctionMap.begin(); i != stackFunctionMap.end(); i++)
+        {
+                functions_map* functionMap = *i;
+
+                if(functionMap->find(label) != functionMap->end())
+                {
+                        return &(*functionMap)[label];
+                }
+        }
+
+        return NULL;
+}
+
+
 label_struct* findLabel(string label)
 {       
         if(labelMap.find(label) != labelMap.end())
@@ -2424,7 +2480,7 @@ bool isDeclaredCurrentScope(string label)
                 return true;        
 }
 
-bool isDeclaredFunction(string idFunction)
+bool isDeclaredFunctionInCurrentScope(string idFunction)
 {
         functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
 		functions_map::iterator i;
@@ -2611,11 +2667,19 @@ void declare(string label, string dIType, unsigned int length)
         
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
-        if (dIType == "string")
-                finalType = "char*";
+        finalType = normalizedType(dIType);
 
-         (*declarationsMap)[label] = {finalType, length};
+        (*declarationsMap)[label] = {finalType, length};
 } 
+
+
+string normalizedType(string type)
+{
+       if (type == "string")
+       		return "char*";
+	
+		return type;
+}
 
 
 string getDeclarations()
