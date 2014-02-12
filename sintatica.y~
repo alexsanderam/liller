@@ -21,11 +21,16 @@ typedef struct idStruct
 
 typedef struct
 {
+		string idFunction;
         string label;
         string typeOfReturn;
         string modifierOfReturn;
         bool declared;
         bool defined;
+        bool called;
+
+		unsigned int first_call_line;
+		unsigned int definition_line;
 
 } function_struct;
 
@@ -204,6 +209,7 @@ unsigned int getDeclarationLength(YYSTYPE);
 bool setDeclarationLength(YYSTYPE, unsigned int);
 void verifyLabels();
 void verifyMain();
+void verifyCallsFunctions();
 string getDeclarations();
 string getFunctionArgs();
 void findAndReplace(string*, const string, const string);
@@ -316,7 +322,7 @@ MAIN_HEADER             : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS
 							idOfCurrentFunction.push_front($$.idFunction);
 
 							/*controle da função main
-							verifica se há main, e quantas*/
+							verifica se há main, e quantos*/
 							countMain++;
 							verifyMain();
                         }
@@ -330,7 +336,7 @@ MAIN_HEADER             : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS
 							idOfCurrentFunction.push_front($$.idFunction);
 
 							/*controle da função main
-							verifica se há main, e quantas*/
+							verifica se há main, e quantos*/
 							countMain++;
 							verifyMain();
                         }
@@ -400,6 +406,9 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							else
 								yyerror("'" + $$.idFunction + "' previously defined here");
 
+							/*verifica se alguma função que foi
+							chamada não foi definida*/
+							verifyCallsFunctions();
 						}
 						| MAIN_HEADER SCOPE
 						{
@@ -415,6 +424,10 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 
 							/*desempilha o identificador da função corrente*/
 							idOfCurrentFunction.pop_front();
+
+							/*verifica se alguma função que foi
+							chamada não foi definida*/
+							verifyCallsFunctions();
 						}
 						;
 
@@ -432,23 +445,20 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
                             if(isDeclaredFunctionInCurrentScope($$.idFunction) == false)
 							{
 									id = generateID();
+                                    (*functionMap)[$$.idFunction].idFunction = $$.idFunction;
                                     (*functionMap)[$$.idFunction].label = id;
                                     (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
                                     (*functionMap)[$$.idFunction].modifierOfReturn = $1.modifier;
                                     (*functionMap)[$$.idFunction].declared = true;
                                     (*functionMap)[$$.idFunction].defined = false;
+                                    (*functionMap)[$$.idFunction].called = false;
 							}
-							else// if ((*functionMap)[$$.idFunction].defined == false)
-							{
+							else
 									id = (*functionMap)[$$.idFunction].label;
-									//(*functionMap)[$$.idFunction].defined = true;
-							}
-							//else
-									//yyerror("'" + $$.idFunction + "' previously defined here");
 
 							$$.label = id;
 							$$.typesArgsFunction = $4.typesArgsFunction;
-							$$.translation = $1.type + " " + id;// + '(' + $4.translation + ')';
+							$$.translation = $1.type + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}
@@ -463,23 +473,20 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
                             if(!isDeclaredFunctionInCurrentScope($$.idFunction))
 							{
 									id = generateID();
+                                    (*functionMap)[$$.idFunction].idFunction = $$.idFunction;
                                     (*functionMap)[$$.idFunction].label = id;
                                     (*functionMap)[$$.idFunction].typeOfReturn = "void";
                                     (*functionMap)[$$.idFunction].modifierOfReturn = "";
                                     (*functionMap)[$$.idFunction].declared = true;
                                     (*functionMap)[$$.idFunction].defined = false;
+                                    (*functionMap)[$$.idFunction].called = false;
 							}
-							else// if ((*functionMap)[$$.idFunction].defined == false)
-							{
+							else
 									id = (*functionMap)[$$.idFunction].label;
-									//(*functionMap)[$$.idFunction].defined = true;
-							}
-							//else
-									//yyerror("'" + $$.idFunction + "' previously defined here");
 
 							$$.label = id;
 							$$.typesArgsFunction = $3.typesArgsFunction;
-		                    $$.translation = "void" + id;// + '(' + $3.translation + ')';
+		                    $$.translation = "void" + id;
 							$$.hasIdInArgs = $3.hasIdInArgs;
 							$$.line = $3.line;
 						}
@@ -586,7 +593,6 @@ PARAMETERS				: PARAMETERS ',' E
 						{
 							$$.translation = $1.translation + $3.translation;
 							$$.label = $1.label + ", " + $3.label;
-							//$$.translation += "\t" + $$.label;
 							$$.typesArgsFunction = $1.typesArgsFunction + ", " + $3.type;
 
 						}
@@ -616,6 +622,9 @@ CALL_FUNCTION			: COUT
 								$$.translation += $3.translation;
 								$$.translation +=  "\t" + f->label + "(" +  $3.label + ");\n"; 
 								$$.translation += "\t/*-------------------------*/\n";
+
+								f->called = true;
+								f->first_call_line = yylineno;
 							}
 							//else if ((f != NULL) && (f->defined == false))
 								//yyerror("undefined reference to '" + $1.label + "'");
@@ -2089,8 +2098,6 @@ void relationalControl(YYSTYPE* expr, YYSTYPE operation)
                 lastOp = operation.translation;
 
         expr->relationalCounter = expr->relationalCounter + 1;
-
-	//cout << "//" << expr->relationalCounter << endl;
 }
 
 YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
@@ -2493,15 +2500,7 @@ bool isDeclaredFunctionInCurrentScope(string idFunction)
 
         if(i == functionMap->end())
                 return false;
-		return true;
-
-		//function_struct f = i->second;
-
-        //if (f.defined == false)
-		//	return false;
-		//else
-		//	return true;
-           
+		return true;           
 }
 
 YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
@@ -2664,6 +2663,29 @@ void verifyMain()
 		yyerror("redefinition of ‘main’");
 	else if(countMain == 0)
 		yyerror("undefined reference to `main'");			
+}
+
+void verifyCallsFunctions()
+{
+    functions_map* functionMap = stackFunctionMap.front();
+	functions_map::iterator i;
+	function_struct* f;
+	unsigned int line;
+
+	for(i = functionMap->begin(); i != functionMap->end(); i++)
+	{
+		f = &i->second;
+
+		if((f->called == true) && (f->defined == false))
+		{
+			line = yylineno;
+			yylineno = f->first_call_line;
+			yyerror("undefined reference to '" + f->idFunction + "'");
+			yylineno = line;
+
+			f->called = false; //apenas para não exibir o mesmo erro novamente
+		}
+	}     
 }
 
 void declare(string label, string dIType, unsigned int length)
