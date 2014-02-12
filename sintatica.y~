@@ -261,7 +261,7 @@ void loadOpearationsMap(void);
 %left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
 %nonassoc IFX
-%nonassoc ELSE
+%nonassoc TK_ELSE
 %%
 
 
@@ -463,7 +463,7 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							$$.label = id;
 							$$.typesArgsFunction = $4.typesArgsFunction;
-							$$.translation = normalizedType($1.type) + " " + id;
+							$$.translation = $1.type + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}

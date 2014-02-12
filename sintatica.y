@@ -261,7 +261,7 @@ void loadOpearationsMap(void);
 %left TK_OP_LOGIC_NOT
 %left TK_OP_BIN_NOT
 %nonassoc IFX
-%nonassoc ELSE
+%nonassoc TK_ELSE
 %%
 
 

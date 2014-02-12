@@ -4,10 +4,6 @@ Terminais não utilizados na gramática
    TK_ERROR
    TK_EACH
    TK_OP_LESS_LESS
-   ELSE
-
-
-Estado 247 conflitos: 1 de deslocamento/redução
 
 
 Gramática
@@ -288,117 +284,116 @@ TK_OP_ASSIGN (318) 107
 TK_DOT_DOT (319) 66
 TK_GO_LABEL (320) 67 68 69
 IFX (321)
-ELSE (322)
 
 
 Não-terminais com as regras onde eles aparecem
 
-$accept (74)
+$accept (73)
     à esquerda: 0
-BEGIN (75)
+BEGIN (74)
     à esquerda: 1, à direita: 0
-START (76)
+START (75)
     à esquerda: 2, à direita: 1
-MAIN_HEADER (77)
+MAIN_HEADER (76)
     à esquerda: 3 4, à direita: 11
-TRANSLATION_UNIT (78)
+TRANSLATION_UNIT (77)
     à esquerda: 5 6, à direita: 1 6
-EXTERNAL_DECLARATION (79)
+EXTERNAL_DECLARATION (78)
     à esquerda: 7 8 9, à direita: 5 6
-FUNCTION (80)
+FUNCTION (79)
     à esquerda: 10 11, à direita: 8
-FUNCTION_HEADER (81)
+FUNCTION_HEADER (80)
     à esquerda: 12 13, à direita: 9 10
-OPEN_ARGS (82)
+OPEN_ARGS (81)
     à esquerda: 14, à direita: 3 4 12 13
-CLOSE_ARGS (83)
+CLOSE_ARGS (82)
     à esquerda: 15, à direita: 3 4 12 13
-ARGS (84)
+ARGS (83)
     à esquerda: 16 17 18, à direita: 12 13 16
-OPTIONAL_ID (85)
+OPTIONAL_ID (84)
     à esquerda: 19 20, à direita: 16 17
-OPTIONAL_PARAMETERS (86)
+OPTIONAL_PARAMETERS (85)
     à esquerda: 21 22, à direita: 27
-PARAMETERS (87)
+PARAMETERS (86)
     à esquerda: 23 24, à direita: 21 23
-CALL_FUNCTION (88)
+CALL_FUNCTION (87)
     à esquerda: 25 26 27, à direita: 77
-COUT (89)
+COUT (88)
     à esquerda: 28 29, à direita: 25
-CIN (90)
+CIN (89)
     à esquerda: 30, à direita: 26
-SCOPE (91)
+SCOPE (90)
     à esquerda: 31, à direita: 10 11 39
-BEGIN_SCOPE (92)
+BEGIN_SCOPE (91)
     à esquerda: 32, à direita: 31
-END_SCOPE (93)
+END_SCOPE (92)
     à esquerda: 33, à direita: 31
-COMMANDS (94)
+COMMANDS (93)
     à esquerda: 34 35, à direita: 31 34
-STATEMENT (95)
+STATEMENT (94)
     à esquerda: 36 37 38 39 40 41 42 43 44 45 46 47 48 49, à direita:
     34 44 52 53 55 57 65 66 74
-RETURN (96)
+RETURN (95)
     à esquerda: 50, à direita: 37
-IF_C (97)
+IF_C (96)
     à esquerda: 51, à direita: 52 53
-IF (98)
+IF (97)
     à esquerda: 52 53, à direita: 40
-WHILE_C (99)
+WHILE_C (98)
     à esquerda: 54, à direita: 55
-WHILE (100)
+WHILE (99)
     à esquerda: 55, à direita: 41
-DO_WHILE_C (101)
+DO_WHILE_C (100)
     à esquerda: 56, à direita: 57
-DO_WHILE (102)
+DO_WHILE (101)
     à esquerda: 57, à direita: 42
-OPTIONAL_E (103)
+OPTIONAL_E (102)
     à esquerda: 58 59, à direita: 60 65
-OPTIONAL_E_OR_DECLARATION (104)
+OPTIONAL_E_OR_DECLARATION (103)
     à esquerda: 60 61, à direita: 65
-ATTRIBUITION_OR_TERMINAL (105)
+ATTRIBUITION_OR_TERMINAL (104)
     à esquerda: 62 63, à direita: 66
-FOR_C (106)
+FOR_C (105)
     à esquerda: 64, à direita: 65 66
-FOR (107)
+FOR (106)
     à esquerda: 65 66, à direita: 43
-LABEL (108)
+LABEL (107)
     à esquerda: 67 68 69, à direita: 44
-GOTO (109)
+GOTO (108)
     à esquerda: 70, à direita: 45
-CONTINUE (110)
+CONTINUE (109)
     à esquerda: 71, à direita: 46
-BREAK (111)
+BREAK (110)
     à esquerda: 72, à direita: 47
-SWITCH_C (112)
+SWITCH_C (111)
     à esquerda: 73, à direita: 74
-SWITCH (113)
+SWITCH (112)
     à esquerda: 74, à direita: 48
-E_C (114)
+E_C (113)
     à esquerda: 75, à direita: 28 29 30 36 50 52 53 55 57 58 68 74
-E (115)
+E (114)
     à esquerda: 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92
     93 94 95 96 97 98 99 100 101 102, à direita: 23 24 75 76 81 82
     83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 105 107
     109 111
-INCREASE (116)
+INCREASE (115)
     à esquerda: 103, à direita: 101
-PREV_INCREASE (117)
+PREV_INCREASE (116)
     à esquerda: 104, à direita: 102
-ATTRIBUITION (118)
+ATTRIBUITION (117)
     à esquerda: 105 106, à direita: 62 79
-OP_ASSIGN (119)
+OP_ASSIGN (118)
     à esquerda: 107, à direita: 106
-DECLARATION (120)
+DECLARATION (119)
     à esquerda: 108 109 110 111, à direita: 7 38 61 108 109
-TYPE (121)
+TYPE (120)
     à esquerda: 112 113 114 115 116 117 118 119 120 121 122 123 124
     125 126 127 128 129 130 131 132 133 134 135 136, à direita: 12
     16 17 80 110 111
-TERMINAL (122)
+TERMINAL (121)
     à esquerda: 137 138 139 140 141 142 143 144 145 146 147 148, à direita:
     63 66 78 80
-SIGNAL (123)
+SIGNAL (122)
     à esquerda: 149 150, à direita: 141 142 143 144 148
 
 
@@ -4738,7 +4733,6 @@ estado 247
 
     TK_ELSE  deslocar, e ir ao estado 253
 
-    TK_ELSE   [reduzir usando a regra 52 (IF)]
     $padrão  reduzir usando a regra 52 (IF)
 
 
