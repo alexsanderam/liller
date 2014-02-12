@@ -1,6 +1,8 @@
 int z = 150;
 
 int func(int, int);
+int func(int, float);
+void func();
 
 
 int main()
@@ -26,6 +28,8 @@ int main()
 
 
 	func(1, 1);
+	int z = func(1, 2);
+	func();
 
 	cout("teste: " + str + "\n\n");
 
@@ -39,7 +43,7 @@ string func(int a, string b)
 {
 	coutn(p);
 
-	return a + b;
+	//return a + b;
 }
 
 /*string func(int a, string b)
@@ -54,7 +58,7 @@ int func(int a, int b)
 	return a + b;
 }
 
-int func()
+void func()
 {
-	return 87;
+
 }

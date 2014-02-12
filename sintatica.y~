@@ -28,9 +28,9 @@ typedef struct
         bool declared;
         bool defined;
         bool called;
+		bool hasReturn;
 
-		unsigned int first_call_line;
-		unsigned int definition_line;
+		unsigned int last_call_line;
 
 } function_struct;
 
@@ -267,7 +267,9 @@ void loadOpearationsMap(void);
 BEGIN                   : START TRANSLATION_UNIT
                         {
 							verifyLabels(); /*verifica se há erros relacionados à rótulos*/
-							verifyMain();
+							verifyMain(); /*verifica se há inconsistência com relação a main*/
+							/*verifica se alguma função que foi chamada não foi definida*/
+							verifyCallsFunctions();
 
 							if(error)
 								exit(1);
@@ -360,8 +362,8 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 						| FUNCTION_HEADER ';'
 						{	
 							$$.translation = "";
-							headersFunctions = $1.translation;
-							headersFunctions += "(" + $1.typesArgsFunction + ") ;\n";
+							headersFunctions += $1.translation;
+							headersFunctions += "(" + $1.typesArgsFunction + ");\n";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -376,10 +378,11 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 FUNCTION				: FUNCTION_HEADER SCOPE
 						{
 							functions_map* functionMap;
+							int line;
 
 							if($1.hasIdInArgs == false)
 							{
-								int line = yylineno;
+								line = yylineno;
 								yylineno = $1.line;							
 								yyerror("parameter name omitted");
 								yylineno = line;
@@ -404,11 +407,16 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							if((*functionMap)[$1.idFunction].defined == false)
 	                            (*functionMap)[$1.idFunction].defined = true;
 							else
+							{
+								line = yylineno;
+								yylineno = $1.line;
 								yyerror("'" + $$.idFunction + "' previously defined here");
+								yylineno = line;
+							}
 
-							/*verifica se alguma função que foi
-							chamada não foi definida*/
-							verifyCallsFunctions();
+							/*verifica se precisa a função tem retorno quando essa necessita*/
+							if(((*functionMap)[$1.idFunction].typeOfReturn != "void") && ((*functionMap)[$1.idFunction].hasReturn == false))
+								yywarning("control reaches end of non-void function [-Wreturn-type]");
 						}
 						| MAIN_HEADER SCOPE
 						{
@@ -424,10 +432,6 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 
 							/*desempilha o identificador da função corrente*/
 							idOfCurrentFunction.pop_front();
-
-							/*verifica se alguma função que foi
-							chamada não foi definida*/
-							verifyCallsFunctions();
 						}
 						;
 
@@ -589,6 +593,16 @@ OPTIONAL_ID				: TK_ID
 						}
 						;
 
+
+OPTIONAL_PARAMETERS		: PARAMETERS
+						|
+						{
+							$$.typesArgsFunction = "void";
+							$$.label = "";
+							$$.translation = "";
+						}
+						;
+
 PARAMETERS				: PARAMETERS ',' E
 						{
 							$$.translation = $1.translation + $3.translation;
@@ -607,29 +621,51 @@ PARAMETERS				: PARAMETERS ',' E
 
 CALL_FUNCTION			: COUT
 						//| CIN
-						| TK_ID '(' PARAMETERS ')'
+						| TK_ID '(' OPTIONAL_PARAMETERS ')'
 						{
 							function_struct* f;
-							string idFunction = $1.label + '(' + $3.typesArgsFunction + ')';
-
-							cout << "/*" + idFunction + "*/" << endl;
+							YYSTYPE* ass;
+							string idFunction;
+						
+							idFunction = $1.label + '(' + $3.typesArgsFunction + ')';
 
 							f = findFunction(idFunction);
 
-							if((f != NULL))// && (f->defined == true))
+							if(f != NULL)
 							{
+								$$.type = f->typeOfReturn;
+								$$.modifier = f->modifierOfReturn;
+
 								$$.translation = "\t/*----chamada de função----*/\n";
 								$$.translation += $3.translation;
-								$$.translation +=  "\t" + f->label + "(" +  $3.label + ");\n"; 
+
+								if($$.type != "void")
+								{
+									$$.label = generateID();
+
+									ass = new YYSTYPE();
+									ass->label = $$.label;
+									ass->type = $$.type;
+									ass->modifier = $$.modifier;
+									declare(ass->label, ass->modifier + (ass->modifier == "" ? "" : " ") + ass->type, 1);
+
+									$$.translation += "\t" + ass->label + " = " + f->label + "(" +  $3.label + ");\n";
+								}
+								else
+								{
+									$$.label = f->label;
+									$$.translation += "\t" + f->label + "(" +  $3.label + ");\n";
+								}
+
 								$$.translation += "\t/*-------------------------*/\n";
 
 								f->called = true;
-								f->first_call_line = yylineno;
+								f->last_call_line = yylineno;
 							}
-							//else if ((f != NULL) && (f->defined == false))
-								//yyerror("undefined reference to '" + $1.label + "'");
 							else
-								yyerror("não existente");
+							{
+								yyerror("implicit declaration of function ‘" + idFunction + "’");
+							}
 						}
 						;
 		                        
@@ -736,19 +772,20 @@ RETURN                  : TK_RETURN E_C
 
 								YYSTYPE* cast;
 								YYSTYPE func;
-								function_struct f;
+								function_struct* f;
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
 								i = functionMap->find(idOfCurrentFunction.front());
 
 								if(i != functionMap->end())
 								{
-									f = i->second;
+									f = &i->second;
+									f->hasReturn = true;
 
-									if(f.typeOfReturn != $2.type)
+									if(f->typeOfReturn != $2.type)
 									{
-										func.type = f.typeOfReturn;										
-										func.modifier = f.modifierOfReturn;	
+										func.type = f->typeOfReturn;										
+										func.modifier = f->modifierOfReturn;	
 
 										cast = runCast($2, func);
 
@@ -1086,7 +1123,7 @@ FOR                 : FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPT
 			;
 
 
-LABEL			: TK_ID TK_GO_LABEL
+LABEL		: TK_ID TK_GO_LABEL
 			{
 				label_struct* l;
 
@@ -2535,7 +2572,7 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 			    res->translation = addtranslation + exp.translation + cast->translation + "\t" + res->label + " = " + cast->label + ";\n";
 		    }
 		else
-			    res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
+			res->translation = addtranslation + exp.translation + "\t" + res->label + " = " + exp.label + ";\n";
 
 
         return *res;
@@ -2679,7 +2716,7 @@ void verifyCallsFunctions()
 		if((f->called == true) && (f->defined == false))
 		{
 			line = yylineno;
-			yylineno = f->first_call_line;
+			yylineno = f->last_call_line;
 			yyerror("undefined reference to '" + f->idFunction + "'");
 			yylineno = line;
 
