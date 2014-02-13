@@ -1,16 +1,15 @@
-int main()
-{	
-	int a[2][2][5];
-	//string a;
-	//cin(a);
-	//cout(a);
-	int b;
+int main(void)
+{
+	int d;
+	int size;
+	
+	cout("\nEnter the value to d: ");
+	cin(d);
 
-	a[1][1][1];
+	cout("\nEnter the size of matrix: ");
+	cin(size);
 
-	b;
+	float matrix[size][size];
 
 	return 0;
 }
-
-

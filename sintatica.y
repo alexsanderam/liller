@@ -60,7 +60,7 @@ struct args
 	/*controle para alertar a recursão de operações relacionais*/
 	unsigned int relationalCounter;
 
-	int intValue; /*utlizado no case, que apenas permite constantes*/
+	int intValue; /*utlizado em locais onde apenas se permite constantes*/
 
 	/*utilizado para identificar funções*/
 	string idFunction;
@@ -78,7 +78,11 @@ struct args
 	unsigned int line;
 
 	/*utilizado no tratamento de vetores*/
+	vector<YYSTYPE> vectPositions;
 	vector<unsigned int> vectSizes;
+	/*posição de acesso, refere-se a um label*/
+	string posLabel;
+
 };
 
 typedef struct opStruct
@@ -197,10 +201,10 @@ int runComputingIntValue(YYSTYPE, YYSTYPE, string);
 YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE toString(YYSTYPE);
 YYSTYPE* runCast(YYSTYPE, YYSTYPE);
-unsigned int computingPosition(vector<unsigned int>, vector<unsigned int>);
+YYSTYPE computingPosition(vector<unsigned int>, vector<YYSTYPE>);
 bool verifyCast(string, string);
-YYSTYPE assign(string, YYSTYPE, unsigned int, YYSTYPE);
-YYSTYPE stringAssign(string, YYSTYPE, unsigned int, YYSTYPE);
+YYSTYPE assign(string, YYSTYPE, YYSTYPE);
+YYSTYPE stringAssign(string, YYSTYPE, YYSTYPE);
 YYSTYPE assignNotExpression(YYSTYPE);
 YYSTYPE generateIntValue(int);
 string generateID();
@@ -414,7 +418,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							/*muda o estado da função para definida*/
 							functionMap = stackFunctionMap.front();
 							if((*functionMap)[$1.idFunction].defined == false)
-	                            (*functionMap)[$1.idFunction].defined = true;
+                            				(*functionMap)[$1.idFunction].defined = true;
 							else
 							{
 								line = yylineno;
@@ -681,18 +685,25 @@ CALL_FUNCTION			: COUT
                         
 COUT                    : TK_COUT '(' E_C ')'
                         {
-                                $$.translation = $3.translation + "\n\tcout << " + $3.label + ";\n";
+                                $$.translation = $3.translation + "\n\tcout << ";
+								$$.translation += $3.label + ($3.vectPositions.size() > 0 ? "[" + $3.posLabel + "]" : "") + ";\n";
                         }
                         | TK_COUTN '(' E_C ')'
                         {
-	                           $$.translation = $3.translation + "\n\tcout << " + $3.label + " << endl;\n";
+								$$.translation = $3.translation + "\n\tcout << ";
+								$$.translation += $3.label + ($3.vectPositions.size() > 0 ? "[" + $3.posLabel + "]" : "") + " << endl;\n";
                         }
+						| TK_COUTN '(' ')'
+						{
+								$$.translation = "\n\tcout << endl;";
+						}
                         ;
 
 
 CIN                    : TK_CIN '(' E_C ')'
                         {
-                                $$.translation = $3.translation + "\n\tcin >> " + $3.label + ";\n";
+                                $$.translation = $3.translation;
+								$$.translation += "\n\tcin >> " + $3.label + ($3.vectPositions.size() > 0 ? "[" + $3.posLabel + "]" : "") + ";\n";
                         }
                         ;
 
@@ -989,19 +1000,7 @@ OPTIONAL_E_OR_DECLARATION	: OPTIONAL_E
 
 
 ATTRIBUITION_OR_TERMINAL:	ATTRIBUITION
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
 							| TERMINAL
-							{
-								$$.translation = $1.translation;
-								$$.label = $1.label;
-								$$.type = $1.type;
-								$$.modifier = $1.modifier;
-							}
 							;
 
 
@@ -1222,13 +1221,13 @@ GOTO			: TK_GOTO TK_ID
 
 				if((l = findLabel($2.label)) != NULL)
 					$$.label = l->label;
-                                else
+                else
 					$$.label = generateLabel();
 
 				labelMap[$2.label].found = false;
 				labelMap[$2.label].label = $$.label;
 				labelMap[$2.label].line = yylineno;
-                                $$.translation = "\tgoto " + $$.label + ";\n";
+                $$.translation = "\tgoto " + $$.label + ";\n";
 			}
 			;
 
@@ -1272,7 +1271,7 @@ SWITCH_C		: TK_SWITCH
 				/*controle do case e do default*/
 				flagWithinSwitch = true;
 
-                                string labelEndSwitch = generateLabel();
+                string labelEndSwitch = generateLabel();
 
 				/*empilha os labels*/
 				stackEndLabels.push_front(labelEndSwitch);
@@ -1284,7 +1283,7 @@ SWITCH_C		: TK_SWITCH
 			;
 
 
-SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
+SWITCH		: SWITCH_C '(' E_C ')' STATEMENT
 			{
 				YYSTYPE ass;
 				YYSTYPE op;
@@ -1331,8 +1330,8 @@ SWITCH			: SWITCH_C '(' E_C ')' STATEMENT
 
 E_C						: E
 						{
-							/*controle para alertar a recursão de operações relacionais*/
-						                    $$.relationalCounter = 0;
+											/*controle para alertar a recursão de operações relacionais*/
+						                   	$$.relationalCounter = 0;
 
 						                    /*controle da tradução do incremento/decremento*/
 						                    if(flagIncreaseTranslation)
@@ -1354,6 +1353,8 @@ E                       : '(' E ')'
                                 $$.type = $2.type;
                                 $$.modifier = $2.modifier;                
                                 $$.isConstant = $2.isConstant; 
+                                $$.posLabel = $2.posLabel;
+								$$.intValue = $2.intValue;
                         }
 						| CALL_FUNCTION
                         | TERMINAL
@@ -1365,7 +1366,7 @@ E                       : '(' E ')'
 							if($$.label == "")
 			                	yyerror("cast from " + $4.type + " to " + $2.type + " not allowed");
 
-								$$.translation = $4.translation + $$.translation;
+							$$.translation = $4.translation + $$.translation;
                         }
                         | E TK_OP_SUM E
                         {
@@ -1456,6 +1457,7 @@ E                       : '(' E ')'
                                 $$.label = generateID();
                                 $$.type = "int";
                                 $$.modifier = "unsigned short";
+								$$.posLabel = $2.posLabel;
 
                                 $$.translation = $2.translation + "\t" + $$.label + " = " + $1.translation + " " + $2.label + ";\n";                                
                                 
@@ -1475,6 +1477,7 @@ E                       : '(' E ')'
 
                                 $$.type = $2.type;
                                 $$.modifier = $2.type;
+								$$.posLabel = $2.posLabel;
                                                              
                                 if($2.type == "int")
                                 	$$.intValue = ~$2.intValue;
@@ -1521,7 +1524,7 @@ INCREASE                : TK_ID TK_OP_INCREASE
                                         operation = ($2.translation == "++" ? "+" : "-");
         
                                         op = runBasicOperation(op_id, value, operation);
-                                        ass = assign(voidStr, $1, 0, op);
+                                        ass = assign(voidStr, $1, op);
 
                                         auxIncreaseTranslation = ass.translation;
                                         flagIncreaseTranslation = true;
@@ -1559,7 +1562,7 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
                                         operation = ($1.translation == "++" ? "+" : "-");
         
                                         op = runBasicOperation(op_id, value, operation);
-                                        ass = assign(voidStr, $2, 0, op);
+                                        ass = assign(voidStr, $2, op);
                                         
                                         $$.translation = ass.translation;
                                         $$.label = ass.label;
@@ -1574,33 +1577,35 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
 
 ATTRIBUITION       	: TK_ID VECTOR_P TK_ASSIGN E
                         {
-								unsigned int pos = 0;
+								YYSTYPE pos;
 								id_struct* id;
 
                                 if((id = findID($1.label)) == NULL)
                                         yyerror("identifier: '" + $1.label + "' was not declared in this scope.");
                                 else
 								{
-										if(($2.vectSizes.size() > 0) && (id->vectSizes.size() > 0))
-										{
-											pos = computingPosition(id->vectSizes, $2.vectSizes);
-	                                        $$ = assign(voidStr, $1, pos, $4);
-										}
-										else if ($2.vectSizes.size() > 0)
+										if (($2.vectPositions.size() == 0) && (id->vectSizes.size() > 0))
+											yyerror("incompatible types when assigning to '" + $1.label + $2.translation + "' from type '" + $4.type);
+										else if (($2.vectPositions.size() > 0) && (id->vectSizes.size() == 0))
 											yyerror("subscripted value is neither array nor pointer nor vector");
-										else if (id->vectSizes.size() > 0)
-											yyerror("incompatible types when assigning to '" + $1.label + "[" + $2.translation + "]' from type '" + $4.type);
-										else												
-	                                        $$ = assign(voidStr, $1, pos, $4);
+										else
+										{
+											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
+												pos = computingPosition(id->vectSizes, $2.vectPositions);
 
+											$1.posLabel = pos.label;
+		                                    $$ = assign(voidStr, $1, $4);
+											$$.translation = pos.translation + $$.translation;
+										}
 								}
                         }
                         | OP_ASSIGN
                         ;      
 
 
-OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
+OP_ASSIGN                : TK_ID VECTOR_P TK_OP_ASSIGN E
                         {
+								YYSTYPE pos;
                                 string operation;
                                 id_struct* id;
 
@@ -1618,39 +1623,52 @@ OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
                                         $1.modifier = id->modifier;
 
 										/*verifica qual operação deve ser realizada*/
-										if ($2.translation == "+=")
+										if ($3.translation == "+=")
 											operation = "+";
-										else if ($2.translation == "-=")
+										else if ($3.translation == "-=")
 											operation = "-";
-										else if ($2.translation == "*=")
+										else if ($3.translation == "*=")
 											operation = "*";
-										else if ($2.translation == "/=")
+										else if ($3.translation == "/=")
 											operation = "/";
-										else if ($2.translation == "%=")
+										else if ($3.translation == "%=")
 											operation = "%";
-										else if ($2.translation == "<<=")
+										else if ($3.translation == "<<=")
 											operation = "<<";
-										else if ($2.translation == ">>=")
+										else if ($3.translation == ">>=")
 											operation = ">>";
-										else if ($2.translation == "&=")
+										else if ($3.translation == "&=")
 											operation = "&";
-										else if ($2.translation == "|=")
+										else if ($3.translation == "|=")
 											operation = "|";
-										else if ($2.translation == "^=")
+										else if ($3.translation == "^=")
 											operation = "^";
 
                                         /*Realiza as operações referentes a operação*/
                                         op_id = $1;
                                         op_id.label = id->label;
-                                        
 
-                                        op = runBasicOperation(op_id, $3, operation);
-                                        ass = assign(voidStr, $1, 0, op);
 
-                                        $$.translation = ass.translation;
-                                        $$.label = ass.label;
-                                        $$.type = ass.type;
-                                        $$.modifier = ass.modifier;
+										if (($2.vectPositions.size() == 0) && (id->vectSizes.size() > 0))
+											yyerror("incompatible types when assigning to '" + $1.label + "[" + $2.translation + "]' from type '" + $4.type);
+										else if (($2.vectPositions.size() > 0) && (id->vectSizes.size() == 0))
+											yyerror("subscripted value is neither array nor pointer nor vector");
+										else
+										{
+											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
+												pos = computingPosition(id->vectSizes, $2.vectPositions);
+
+											$1.posLabel = pos.label;
+											op_id.posLabel = $1.posLabel;
+
+		                                    op = runBasicOperation(op_id, $4, operation);
+		                                    ass = assign(voidStr, $1, op);
+
+		                                    $$.translation = pos.translation + ass.translation;
+		                                    $$.label = ass.label;
+		                                    $$.type = ass.type;
+		                                    $$.modifier = ass.modifier;
+										}											
                                 }                                                                
                                 
                         }
@@ -1658,7 +1676,7 @@ OP_ASSIGN                : TK_ID TK_OP_ASSIGN E
 
 
 
-DECLARATION        		: DECLARATION ',' TK_ID VECTOR_P
+DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                         {
 								int size = 1;
 
@@ -1706,7 +1724,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_P
                                 else
                                         yyerror("identifier: '" + $3.label + "'  previously declared here.");
                   
-                                $$ = assign($1.translation, $3, 0, $5);
+                                $$ = assign($1.translation, $3,$5);
 								length = getDeclarationLength($$);
 
                                 if ($$.modifier != "")
@@ -1715,7 +1733,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_P
                                         declare($$.label, $$.type, length);
                                                         
                         }
-                        | TYPE TK_ID VECTOR_P
+                        | TYPE TK_ID VECTOR_SIZES
                         {
 								int size = 1;
 
@@ -1763,7 +1781,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_P
                                 else
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
-                                $$ = assign(voidStr, $2, 0, $4);
+                                $$ = assign(voidStr, $2, $4);
 								length = getDeclarationLength($$);
 				
                                 if ($$.modifier != "")
@@ -1936,7 +1954,6 @@ TERMINAL        :       TK_INT
                                 $$.modifier = "";
                                	$$.isConstant = true;
 								$$.intValue = $1.intValue;
- 
 
                                 $$.translation = "\t" + $$.label + " = " + $1.translation + ";\n";
 
@@ -2055,7 +2072,8 @@ TERMINAL        :       TK_INT
                         | TK_ID VECTOR_P
                         {
                                 id_struct* id;
-								unsigned int pos;
+								YYSTYPE pos;
+								string posLabel;
                         
                                 if((id = findID($1.label)) == NULL)       
                                         yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
@@ -2067,38 +2085,43 @@ TERMINAL        :       TK_INT
                                         $$.modifier = id->modifier;
                                         $$.translation = "";
 
-										if($2.vectSizes.size() > 0)
+										if($2.vectPositions.size() > 0)
 										{
-											pos = computingPosition(id->vectSizes, $2.vectSizes);
-											$$.label += "[" + intToString(pos) + "]";
+											pos = computingPosition(id->vectSizes, $2.vectPositions);
+											$$.translation = pos.translation;
+											posLabel = pos.label;
 										}
                                 }
 
+								$$.vectPositions = $2.vectPositions;
+								$$.posLabel = posLabel;
                                	$$.isConstant = false;
                         }
                         | SIGNAL TK_ID VECTOR_P
                         {
                                 id_struct* id;
-								string label;
-								unsigned int pos;
+								YYSTYPE pos;
+								string posLabel;
                         
                                 if((id = findID($2.label)) == NULL)       
                                         yyerror("identifier: '" + $2.label + "'  was not declared in this scope.");
                                 else
                                 {
 										string modifier;
-										label = id->label;
 
 										if($3.vectSizes.size() > 0)
 										{
-											pos = computingPosition(id->vectSizes, $3.vectSizes);
-											label += "[" + intToString(pos) + "]";
+											pos = computingPosition(id->vectSizes, $3.vectPositions);
+											$$.translation = pos.translation;
+											posLabel = pos.label;
 										}
 
                                         $$.label = generateID();
+										$$.vectPositions = $3.vectPositions;
+										$$.posLabel = posLabel;
                                         $$.type = id->type;
                                         $$.modifier = id->modifier;
-                                        $$.translation = "\t" + $$.label + " = " + $1.translation + id->label + ";\n";
+                                        $$.translation += "\t" + $$.label + " = " + $1.translation + id->label + posLabel + ";\n";
 
 										modifier = $$.modifier;
 										if(modifier != "")
@@ -2117,13 +2140,38 @@ SIGNAL                	: TK_OP_SUM | TK_OP_SUB
 
 
 
-VECTOR_P				: '[' TK_INT ']' VECTOR_P
+VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 						{
-							$$.vectSizes = $4.vectSizes;
-							$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
-							$$.translation = "[" + $2.translation + "]" + $4.translation;
+							if($2.type != "int")
+								yyerror("size of array has non-integer type");
+
+								$$.vectSizes = $4.vectSizes;
+								$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
 						}
 						|
+						{
+							$$.vectSizes.clear();
+						}
+						;
+
+
+
+VECTOR_P				: '[' E_C ']' VECTOR_P
+						{
+							if($2.type != "int")
+								yyerror("size of array has non-integer type");
+							else
+							{
+								$$.vectPositions = $4.vectPositions;
+								$$.vectPositions.insert($$.vectPositions.begin(), $2);
+								$$.translation = "[]" + $4.translation;
+							}
+						}
+						|
+						{
+							$$.vectPositions.clear();
+							$$.translation = "";
+						}
 						;
 
 
@@ -2215,20 +2263,20 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
         
         string resultOperationType;
 
-	/*operando chave - operando em que o cast 
-	será atribuído, qual este for necessário*/
-        YYSTYPE keyOperand;
+		/*operando chave - operando em que o cast 
+		será atribuído, qual este for necessário*/
+	    YYSTYPE keyOperand;
 
-	//Tipo forte
-	string strongType;	
+		//Tipo forte
+		string strongType;	
 
-	/*no caso de operação com strings*/
-	if((operand1.type == "string") || (operand2.type == "string"))
-		return stringOperation(operand1, operand2, operation);
+		/*no caso de operação com strings*/
+		if((operand1.type == "string") || (operand2.type == "string"))
+			return stringOperation(operand1, operand2, operation);
 
-	/*no caso de inteiros, preenche-se o campo intValue*/
-	if(operand1.type == "int" && operand2.type == "int")
-		res->intValue = runComputingIntValue(operand1, operand2, operation);
+		/*no caso de inteiros, preenche-se o campo intValue*/
+		if(operand1.type == "int" && operand2.type == "int")
+			res->intValue = runComputingIntValue(operand1, operand2, operation);
 		
 
         res->label = generateID();
@@ -2243,32 +2291,39 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 
         res->type = resultOperationType;
         res->modifier = ""; /*desconsidera-se os modificadores*/
-	res->isConstant = operand1.isConstant && operand2.isConstant;
+		res->isConstant = operand1.isConstant && operand2.isConstant;
 
         declare(res->label, res->type, 1);
 
 
         if(((operand1.modifier == operand2.modifier) || ((operand1.modifier == "") || (operand2.modifier == ""))) && (operand1.type == operand2.type))
         {
-                res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + operand2.label + ";\n";
+                res->translation += "\t" + res->label + " = ";
+				res->translation += operand1.label + (operand1.vectPositions.size() > 0 ? "[" + operand1.posLabel + "]" : "" );
+				res->translation += " " + operation + " ";
+				res->translation += operand2.label + (operand2.vectPositions.size() > 0 ? "[" + operand2.posLabel + "]" : "" ) + ";\n";
         }
         else
         {	
-		strongType = verifyStrongType(operand1.type, operand2.type);
+				strongType = verifyStrongType(operand1.type, operand2.type);
 
                 if(operand1.type == strongType)
                 {
-			keyOperand = *runCast(operand2, operand1);
+						keyOperand = *runCast(operand2, operand1);
 
-			res->translation += keyOperand.translation;
-                        res->translation += "\t" + res->label + " = " + operand1.label + " " + operation + " " + keyOperand.label + ";\n";
+						res->translation += keyOperand.translation;
+                        res->translation += "\t" + res->label + " = ";
+						res->translation += operand1.label + (operand1.vectPositions.size() > 0 ? "[" + operand1.posLabel + "]" : "" );
+						res->translation += " " + operation + " " + keyOperand.label + ";\n";
                 }
                 else
                 {
-			keyOperand = *runCast(operand1, operand2);
+						keyOperand = *runCast(operand1, operand2);
 
-			res->translation += keyOperand.translation;
-                        res->translation += "\t" + res->label + " = " + keyOperand.label + " " + operation + " " + operand2.label + ";\n";
+						res->translation += keyOperand.translation;
+                        res->translation += "\t" + res->label + " = " + keyOperand.label;
+						res->translation += " " + operation + " ";
+						res->translation += operand2.label + (operand2.vectPositions.size() > 0 ? "[" + operand2.posLabel + "]" : "" ) + ";\n";
                 }
         }
 
@@ -2504,7 +2559,8 @@ YYSTYPE* runCast(YYSTYPE from, YYSTYPE to)
 		res->modifier = to.modifier;
 		res->isConstant = from.isConstant && to.isConstant;
 
-		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") " + from.label + ";\n";
+		res->translation = "\t" + res->label + " = (" + modifier + to.type + ") ";
+		res->translation += from.label + (from.vectPositions.size() > 0 ? "[" + from.posLabel + "]" : "") + ";\n";
 
 		declare(res->label, modifier + res->type, 1); 
 
@@ -2542,31 +2598,54 @@ bool verifyCast(string from, string to)
 }
 
 
-unsigned int computingPosition(vector<unsigned int> declaration, vector<unsigned int> call)
+YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call)
 {
-	int pos = 0;
-	int mul;
+	YYSTYPE* res;
+	YYSTYPE opMul;
+	YYSTYPE opSum;
+	YYSTYPE ass;
+	YYSTYPE value;
+	YYSTYPE value_2;
 
-	if(call.size() > declaration.size())
+	if(declaration.size() < call.size())
+	{
 		yyerror("subscripted value is neither array nor pointer nor vector");
+		res = NULL;
+	}
 	else
-	{		
+	{	
+		res = new YYSTYPE();
+		opSum = generateIntValue(0);
+		res->translation = opSum.translation;
+
 
 		//Calcula a posição de acesso
 		for(int i = 0; i < call.size(); i++)
 		{
-			mul = call.at(i);
+			value = call.at(i);
+			res->translation += value.translation;
 
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
-				mul *= declaration.at(j);
+				value_2 = generateIntValue(declaration.at(j));
+				res->translation += value_2.translation;
+
+				opMul = runBasicOperation(value, value_2, "*");
+				res->translation += opMul.translation;
 			}
 
-			pos += mul;
+			opSum = runBasicOperation(opSum, opMul, "+");
+			res->translation += opSum.translation;
 		}
+
+		res->label = opSum.label;
+		res->type = opSum.type;
+		res->modifier = opSum.modifier;	
+
+		declare(res->label, res->modifier + (res->modifier != "" ? " " : "") + res->type, 1);
 	}
 
-	return pos;
+	return *res;
 }
 
 
@@ -2637,7 +2716,7 @@ bool isDeclaredFunctionInCurrentScope(string idFunction)
 		return true;           
 }
 
-YYSTYPE assign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYPE exp)
+YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
         YYSTYPE* res; 
         res = new YYSTYPE();
@@ -2656,7 +2735,7 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYPE exp)
 	
 		/*no caso de operação com strings*/
 		if(identifier->type == "string")
-			return stringAssign(addtranslation, *res, pos, exp);
+			return stringAssign(addtranslation, *res, exp);
 
 		    if (((exp.modifier != identifier->modifier)) || (exp.type != identifier->type))
 		    {	
@@ -2666,17 +2745,20 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYPE exp)
 				yyerror("assign from " + exp.type + " to " + identifier->type + " not allowed");
 
 
-			    res->translation = addtranslation + exp.translation + cast->translation + "\t" + res->label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + " = " + cast->label + ";\n";
+			    res->translation = addtranslation + exp.translation + cast->translation;
+				res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = " + cast->label + ";\n";
 		    }
 		else
-			res->translation = addtranslation + exp.translation + "\t" + res->label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + " = " + exp.label + ";\n";
-
+		{
+			res->translation = addtranslation + exp.translation;
+			res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = " + exp.label + ";\n";
+		}
 
         return *res;
 }
 
 
-YYSTYPE stringAssign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYPE exp)
+YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 {
 	YYSTYPE* res; 
 	YYSTYPE expStr; 
@@ -2704,8 +2786,8 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYP
 		length = getDeclarationLength(id) + 1;
 
 	res->translation = addtranslation + expStr.translation;
-	res->translation += "\tstrcpy(" + id.label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + ", " + expStr.label + ");\n";
-	res->translation += "\t" + id.label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + "[" + intToString(length - 1) + "] = '\\0';\n";
+	res->translation += "\tstrcpy(" + id.label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + ", " + expStr.label + ");\n";
+	res->translation += "\t" + id.label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + "[" + intToString(length - 1) + "] = '\\0';\n";
 
 	if(res->modifier != "")
 		modifier += " ";

@@ -2705,7 +2705,7 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, unsigned int pos, YYSTYP
 
 	res->translation = addtranslation + expStr.translation;
 	res->translation += "\tstrcpy(" + id.label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + ", " + expStr.label + ");\n";
-	res->translation += "\t" + id.label + (pos > 0 ? "[" + pos + "]" : "") + "[" + intToString(length - 1) + "] = '\\0';\n";
+	res->translation += "\t" + id.label + (pos > 0 ? "[" + intToString(pos) + "]" : "") + "[" + intToString(length - 1) + "] = '\\0';\n";
 
 	if(res->modifier != "")
 		modifier += " ";
