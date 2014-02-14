@@ -36,6 +36,9 @@ typedef struct
 
 		unsigned int last_call_line;
 
+		/*traduções de comandos free*/
+		string freeTranslation;
+
 } function_struct;
 
 typedef struct
@@ -168,7 +171,6 @@ string scopeMainTranslation = "";
 bool error = false;
 bool warning = false;
 
-
 /*variáveis auxiliares para o controle da tradução do incremento/decremento*/
 string auxIncreaseTranslation = "";
 bool flagIncreaseTranslation = false;
@@ -188,6 +190,10 @@ bool flagWithinSwitch = false;
 /*controle da função main
 verifica se há main, e quantas*/
 unsigned int countMain = 0;
+
+/*tradução de frees na main*/
+string freeMainTranslation = "";
+
 
 int yylex(void);
 void yyerror(string);
@@ -404,7 +410,8 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							$$.translation = $1.translation;
 							$$.translation += "(" + getFunctionArgs() + ")";
 							$$.translation += "\n{\n" + declarations + "\n";
-							$$.translation += $2.translation + "}\n\n";
+							$$.translation += $2.translation;
+							$$.translation += (*functionMap)[$1.idFunction].freeTranslation + "}\n\n";
 
 							declarations = "";
 
@@ -418,7 +425,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							/*muda o estado da função para definida*/
 							functionMap = stackFunctionMap.front();
 							if((*functionMap)[$1.idFunction].defined == false)
-                            				(*functionMap)[$1.idFunction].defined = true;
+                				(*functionMap)[$1.idFunction].defined = true;
 							else
 							{
 								line = yylineno;
@@ -451,10 +458,10 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 
                         
                         
-FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
+FUNCTION_HEADER			: TYPE TK_ID VECTOR_P OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
-							$$.idFunction = $2.label + "(" + $4.typesArgsFunction + ")";
+							$$.idFunction = $2.label + "(" + $5.typesArgsFunction + ")";
 							idOfCurrentFunction.push_front($$.idFunction);
 
 							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
@@ -474,15 +481,15 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 									id = (*functionMap)[$$.idFunction].label;
 
 							$$.label = id;
-							$$.typesArgsFunction = $4.typesArgsFunction;
+							$$.typesArgsFunction = $5.typesArgsFunction;
 							$$.translation = $1.type + " " + id;
-							$$.hasIdInArgs = $4.hasIdInArgs;
-							$$.line = $4.line;
+							$$.hasIdInArgs = $5.hasIdInArgs;
+							$$.line = $5.line;
 						}
-						| TK_ID OPEN_ARGS ARGS CLOSE_ARGS
+						| TK_ID VECTOR_P OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
-							$$.idFunction = $1.label + "(" + $3.typesArgsFunction + ")";
+							$$.idFunction = $1.label + "(" + $4.typesArgsFunction + ")";
 							idOfCurrentFunction.push_front($$.idFunction);
 
 							functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
@@ -502,10 +509,10 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 									id = (*functionMap)[$$.idFunction].label;
 
 							$$.label = id;
-							$$.typesArgsFunction = $3.typesArgsFunction;
+							$$.typesArgsFunction = $4.typesArgsFunction;
 		                    $$.translation = "void" + id;
-							$$.hasIdInArgs = $3.hasIdInArgs;
-							$$.line = $3.line;
+							$$.hasIdInArgs = $4.hasIdInArgs;
+							$$.line = $4.line;
 						}
 						;
 
@@ -704,6 +711,10 @@ CIN                    : TK_CIN '(' E_C ')'
                         {
                                 $$.translation = $3.translation;
 								$$.translation += "\n\tcin >> " + $3.label + ($3.vectPositions.size() > 0 ? "[" + $3.posLabel + "]" : "") + ";\n";
+
+								//redeclara, atualizando o tamanho da string*/
+								if(($3.type == "string") && (getDeclarationLength($3) < 100))
+									declare($3.label, $3.modifier + ($3.modifier != "" ? " " : "") + $3.type, 100);
                         }
                         ;
 
@@ -800,9 +811,15 @@ RETURN                  : TK_RETURN E_C
 								YYSTYPE* cast;
 								YYSTYPE func;
 								function_struct* f;
+				
+								string free = "";
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
 								i = functionMap->find(idOfCurrentFunction.front());
+
+								/*enxerta as traduções de free antes do return no main*/
+								if(idOfCurrentFunction.front() == "main (void)")
+									free = freeMainTranslation;
 
 								if(i != functionMap->end())
 								{
@@ -819,13 +836,13 @@ RETURN                  : TK_RETURN E_C
 										if(cast == NULL)
 							            	yyerror("cast from " + $2.type + " to " + func.modifier + " " + func.type + " not allowed");
 										else
-											$$.translation = $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
+											$$.translation = free + $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
 									}
 									else
-		                                	$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+		                                	$$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
 								}
 								else
-	                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";		
+	                                $$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";		
                         }
                         ;
 
@@ -1696,7 +1713,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                 
                                 $$.label = (*IDMap)[$3.label].label;
                                 $$.type = $1.type;//(*IDMap)[$3.label].type;
-                                $$.modifier = (*IDMap)[$3.label].modifier;
+                                $$.modifier = $1.modifier;//(*IDMap)[$3.label].modifier;
                                 $$.translation = $1.translation;
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
@@ -1704,6 +1721,24 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
 								{
 									YYSTYPE sizesToMalloc;
 									pointer = "*";
+
+									/*tratamento de alocação "dinâmica"*/
+									functions_map* functionMap;
+									functions_map::iterator i;
+									function_struct* f;
+
+									functionMap = *next(stackFunctionMap.begin(), 2);
+									i = functionMap->find(idOfCurrentFunction.front());
+
+									if(idOfCurrentFunction.front() == "main (void)")
+										freeMainTranslation += "\t free(" + $$.label + ");\n";
+									else if (i != functionMap->end())
+									{
+										f = &(i->second);
+										f->freeTranslation += "\t free(" + $$.label + ");\n";
+									}
+									else
+										yyerror("unkonow");
 
 									sizesToMalloc = generateIntValue(1);
 
@@ -1775,13 +1810,31 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                 $$.label = (*IDMap)[$2.label].label;
                                 $$.translation = "";
                                 $$.type = $1.type;//(*IDMap)[$2.label].type;
-                                $$.modifier = (*IDMap)[$2.label].modifier;
+                                $$.modifier = $1.modifier;//(*IDMap)[$2.label].modifier;
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
 								{
 									YYSTYPE sizesToMalloc;
 									pointer = "*";
+
+									/*tratamento de alocação "dinâmica"*/
+									functions_map* functionMap;
+									functions_map::iterator i;
+									function_struct* f;
+
+									functionMap = *next(stackFunctionMap.begin(), 2);
+									i = functionMap->find(idOfCurrentFunction.front());
+
+									if(idOfCurrentFunction.front() == "main (void)")
+										freeMainTranslation += "\t free(" + $$.label + ");\n";
+									else if(i != functionMap->end()) 
+									{
+										f = &(i->second);
+										f->freeTranslation += "\t free(" + $$.label + ");\n";
+									}
+									else
+										yyerror("unkonow");
 
 									sizesToMalloc = generateIntValue(1);
 
