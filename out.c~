@@ -4,33 +4,88 @@
 #include <iostream>
 #include<string.h>
 #include<stdio.h>
-
+#include<stdlib.h>
 using namespace std;
 
 /*-----Cabeçalhos de funções-------*/
 /*-------------------------------*/
 
 /*--------Variáveis globais--------*/
+	char _temp17[100];
+	char _temp23[100];
 /*-------------------------------*/
 
-int main()
+int main(void)
 {
-	int _temp0[20];
+	int _temp0;
 	int _temp1;
-	int _temp2;
+	int _temp10;
+	int _temp11;
+	int _temp2[6];
 	int _temp3;
+	int _temp4;
+	int _temp5;
+	int _temp6;
+	int _temp7;
+	int _temp8;
+	int _temp9;
 
+	char* _temp17;
+	char* _temp23;
 	/*Atribuição de variáveis globais*/
 	/*-------------------------------*/
 
 
-
-	_temp2 = 5;
-	_temp0[16] = _temp2;
-
+	_temp6 = 0;
 	_temp3 = 0;
+	_temp7 = 3;
+	_temp8 = _temp3 * _temp7;
+	_temp6 = 0;
+	_temp3 = 0;
+	_temp7 = 3;
+	_temp8 = _temp3 * _temp7;
+	_temp9 = _temp6 + _temp8;
+	_temp6 = 0;
+	_temp3 = 0;
+	_temp7 = 3;
+	_temp8 = _temp3 * _temp7;
+	_temp9 = _temp6 + _temp8;
+	_temp3 = 0;
+	_temp7 = 3;
+	_temp8 = _temp3 * _temp7;
+	_temp10 = _temp9 + _temp8;
+	_temp5 = 0;
+	_temp2[_temp10] = _temp5;
 
-	return _temp3;
+	_temp11 = 0;
+
+	return _temp11;
+}
+
+char* _temp14(char _temp13[1], int _temp12)
+{
+	char _temp15[100];
+	char _temp16[100];
+
+	strcpy(_temp17, _temp16);
+	snprintf(_temp15, 100, "%d", _temp12);
+	strcpy(_temp16, _temp13);
+	strcat(_temp16, _temp15);
+
+	return _temp17;
+}
+
+char* _temp20(char _temp19[1], int _temp18)
+{
+	char _temp21[100];
+	char _temp22[100];
+
+	strcpy(_temp23, _temp22);
+	snprintf(_temp21, 100, "%d", _temp18);
+	strcpy(_temp22, _temp19);
+	strcat(_temp22, _temp21);
+
+	return _temp23;
 }
 
 

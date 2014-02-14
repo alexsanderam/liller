@@ -412,7 +412,6 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							$$.translation += "(" + getFunctionArgs() + ")";
 							$$.translation += "\n{\n" + declarations + "\n";
 							$$.translation += $2.translation;
-							$$.translation += (*functionMap)[$1.idFunction].freeTranslation + "}\n\n";
 
 							declarations = "";
 
@@ -423,8 +422,10 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							/*desempilha o identificador da função corrente*/
 							idOfCurrentFunction.pop_front();
 
-							/*muda o estado da função para definida*/
 							functionMap = stackFunctionMap.front();
+							$$.translation += (*functionMap)[$1.idFunction].freeTranslation + "}\n\n";
+
+							/*muda o estado da função para definida*/
 							if((*functionMap)[$1.idFunction].defined == false)
                 				(*functionMap)[$1.idFunction].defined = true;
 							else
@@ -435,9 +436,9 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 								yylineno = line;
 							}
 
-							/*verifica se precisa a função tem retorno quando essa necessita*/
+							/*verifica se a função tem retorno quando essa necessita*/
 							if(((*functionMap)[$1.idFunction].typeOfReturn != "void") && ((*functionMap)[$1.idFunction].hasReturn == false))
-								yywarning("control reaches end of non-void function [-Wreturn-type]");
+								yywarning("control reaches end of non-void function: '" + $1.idFunction + "' [-Wreturn-type]");
 						}
 						| MAIN_HEADER SCOPE
 						{
@@ -483,7 +484,8 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							$$.label = id;
 							$$.typesArgsFunction = $4.typesArgsFunction;
-							$$.translation = $1.type + " " + id;
+							//$$.translation = $1.type + " " + id;
+							$$.translation = normalizedType($1.type) + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}
@@ -511,7 +513,7 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 
 							$$.label = id;
 							$$.typesArgsFunction = $3.typesArgsFunction;
-		                    $$.translation = "void" + id;
+		                    $$.translation = "void " + id;
 							$$.hasIdInArgs = $3.hasIdInArgs;
 							$$.line = $3.line;
 						}
@@ -538,7 +540,7 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 								if($2.label != "")							   	
 								{
 									identifiers_map* IDMap = stackIDMap.front();
-									unsigned int size = 0;
+									unsigned int size = 1;
 
 		                            (*IDMap)[$2.label].label = generateID();
 		                            (*IDMap)[$2.label].type = $1.type;
@@ -553,6 +555,10 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 										for(int i = 0; i < $2.vectSizes.size(); i++)
 											size *= $2.vectSizes.at(i);
 									}
+
+									/*chuta-se um tamanho para argumentos do tipo string*/
+									if($1.type == "string")
+											size *= 100;
 
 									$$.translation = $$.type + " " + $$.label + $2.translation + ", " + $4.translation;
 									$$.typesArgsFunction = $$.type + $2.translation + ", " + $4.typesArgsFunction;
@@ -577,7 +583,7 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 							if($2.label != "")
 							{
 								identifiers_map* IDMap = stackIDMap.front();
-								unsigned int size = 0;
+								unsigned int size = 1;
 
 		                        (*IDMap)[$2.label].label = generateID();
 		                        (*IDMap)[$2.label].type = $1.type;
@@ -592,6 +598,11 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 									for(int i = 0; i < $2.vectSizes.size(); i++)
 										size *= $2.vectSizes.at(i);
 								}
+
+								/*chuta-se um tamanho para argumentos do tipo string*/
+								if($1.type == "string")
+										size *= 100;
+
 
 								$$.translation = $$.type + " " + $$.label + $2.translation;
 								$$.typesArgsFunction = $1.type + $2.translation;
@@ -845,6 +856,7 @@ RETURN                  : TK_RETURN E_C
 								function_struct* f;
 				
 								string free = "";
+								string label;
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
 								i = functionMap->find(idOfCurrentFunction.front());
@@ -855,7 +867,7 @@ RETURN                  : TK_RETURN E_C
 
 								if(i != functionMap->end())
 								{
-									f = &i->second;
+									f = &(i->second);
 									f->hasReturn = true;
 
 									if(f->typeOfReturn != $2.type)
@@ -867,14 +879,40 @@ RETURN                  : TK_RETURN E_C
 
 										if(cast == NULL)
 							            	yyerror("cast from " + $2.type + " to " + func.modifier + " " + func.type + " not allowed");
+
+										else if(f->typeOfReturn == "string")
+										{
+											label = generateID();
+
+											declarations_map* declarationsMap = stackDeclarationsMap.back();
+											(*declarationsMap)[label] = {"char*", getDeclarationLength(*cast)};
+
+											$$.translation = free + $2.translation + cast->translation;
+											$$.translation += "\tstrcpy(" + label + ", " + cast->label + ");\n";
+											$$.translation += "\n\t" + $1.translation + " " + label + ";";
+											freeMainTranslation += "\tfree(" + label + ")";
+										}
 										else
 											$$.translation = free + $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
 									}
+									else if(f->typeOfReturn == "string")
+									{
+										label = generateID();
+
+										declarations_map* declarationsMap = stackDeclarationsMap.back();
+										(*declarationsMap)[label] = {"char*", getDeclarationLength($2)};
+
+										headMainTranslation += "\tchar* " + label + ";\n";
+										$$.translation = "\tstrcpy(" + label + ", " + $2.label + ");\n";
+										$$.translation += free + $2.translation + "\n\t" + $1.translation + " " + label+ ";";
+										freeMainTranslation += "\tfree(" + label + ")";
+									}
 									else
 		                                	$$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+
 								}
 								else
-	                                $$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";		
+	                                $$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
                         }
                         ;
 
@@ -885,7 +923,7 @@ RETURN                  : TK_RETURN E_C
 IF_C					: TK_IF
 						{
 							/*controle de declaraçãoes*/
-							                flagDeclarationNotAllowed = true;
+							flagDeclarationNotAllowed = true;
 						}
 						;
 
@@ -1379,16 +1417,16 @@ SWITCH		: SWITCH_C '(' E_C ')' STATEMENT
 
 E_C						: E
 						{
-											/*controle para alertar a recursão de operações relacionais*/
-						                   	$$.relationalCounter = 0;
+							/*controle para alertar a recursão de operações relacionais*/
+		                   	$$.relationalCounter = 0;
 
-						                    /*controle da tradução do incremento/decremento*/
-						                    if(flagIncreaseTranslation)
-						                    {
-						                            $$.translation += auxIncreaseTranslation;
-						                            flagIncreaseTranslation = false;
-						                            auxIncreaseTranslation = "";
-						                    }
+		                    /*controle da tradução do incremento/decremento*/
+		                    if(flagIncreaseTranslation)
+		                    {
+		                            $$.translation += auxIncreaseTranslation;
+		                            flagIncreaseTranslation = false;
+		                            auxIncreaseTranslation = "";
+		                    }
 
 						}
 						;
@@ -1540,7 +1578,7 @@ E                       : '(' E ')'
 
 
 
-INCREASE                : TK_ID TK_OP_INCREASE
+INCREASE                : TK_ID VECTOR_P TK_OP_INCREASE
                         {
                                 id_struct* id;
                                 string operation;
@@ -1549,16 +1587,35 @@ INCREASE                : TK_ID TK_OP_INCREASE
                                 YYSTYPE op;
                                 YYSTYPE op_id;
                                 YYSTYPE value;
+
+								YYSTYPE pos;
+								string posTranslation = "";
+
+								$1.vectPositions = $2.vectPositions;
                         
                                 if((id = findID($1.label)) == NULL)       
                                         yyerror("identifier: '" + $1.label + "'  was not declared in this scope.");
                                 else
                                 {
+										if (($2.vectPositions.size() == 0) && (id->vectSizes.size() > 0))
+											yyerror("incompatible types when assigning to '" + $1.label + $2.translation + "' from type '" + $1.type);
+										else if (($2.vectPositions.size() > 0) && (id->vectSizes.size() == 0))
+											yyerror("subscripted value is neither array nor pointer nor vector");
+										else
+										{
+											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
+												pos = computingPosition(id->vectSizes, $2.vectPositions);
+
+											$1.posLabel = pos.label;
+											posTranslation = pos.translation;
+										}
+
+
                                         $1.translation = "";
                                         $1.type = id->type;
                                         $1.modifier = id->modifier;
 
-                                        $$.translation = $1.translation;
+                                        $$.translation = posTranslation;
                                         $$.label = id->label;
                                         $$.type = $1.type;
                                         $$.modifier = $1.modifier;
@@ -1570,12 +1627,12 @@ INCREASE                : TK_ID TK_OP_INCREASE
 
                                         value = generateIntValue(1);
 
-                                        operation = ($2.translation == "++" ? "+" : "-");
+                                        operation = ($3.translation == "++" ? "+" : "-");
         
                                         op = runBasicOperation(op_id, value, operation);
                                         ass = assign(voidStr, $1, op);
 
-                                        auxIncreaseTranslation = ass.translation;
+                                        auxIncreaseTranslation = posTranslation + ass.translation;
                                         flagIncreaseTranslation = true;
                                 }
                         }
@@ -1583,7 +1640,7 @@ INCREASE                : TK_ID TK_OP_INCREASE
 
 
 
-PREV_INCREASE                : TK_OP_INCREASE TK_ID
+PREV_INCREASE                : TK_OP_INCREASE TK_ID VECTOR_P
                         {
                                 id_struct* id;
                                 string operation;
@@ -1592,6 +1649,12 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
                                 YYSTYPE op;
                                 YYSTYPE op_id;
                                 YYSTYPE value;
+
+								YYSTYPE pos;
+								string posTranslation = "";
+
+								$2.vectPositions = $3.vectPositions;
+
                         
                                 if((id = findID($2.label)) == NULL)       
                                         yyerror("identifier: '" + $2.label + "'  was not declared in this scope.");
@@ -1600,6 +1663,19 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
                                         $2.translation = "";
                                         $2.type = id->type;
                                         $2.modifier = id->modifier;
+
+										if (($3.vectPositions.size() == 0) && (id->vectSizes.size() > 0))
+											yyerror("incompatible types when assigning to '" + $1.label + $2.translation + "' from type '" + $1.type);
+										else if (($3.vectPositions.size() > 0) && (id->vectSizes.size() == 0))
+											yyerror("subscripted value is neither array nor pointer nor vector");
+										else
+										{
+											if(($3.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
+												pos = computingPosition(id->vectSizes, $2.vectPositions);
+
+											$2.posLabel = pos.label;
+											posTranslation = pos.translation;
+										}
                                 
                                         /*Realiza as operações referentes ao incremento*/
 
@@ -1613,7 +1689,7 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID
                                         op = runBasicOperation(op_id, value, operation);
                                         ass = assign(voidStr, $2, op);
                                         
-                                        $$.translation = ass.translation;
+                                        $$.translation = posTranslation + ass.translation;
                                         $$.label = ass.label;
                                         $$.type = ass.type;
                                         $$.modifier = ass.modifier;
@@ -1708,7 +1784,9 @@ OP_ASSIGN                : TK_ID VECTOR_P TK_OP_ASSIGN E
 												pos = computingPosition(id->vectSizes, $2.vectPositions);
 
 											$1.posLabel = pos.label;
+											$1.vectPositions = $2.vectPositions;
 											op_id.posLabel = $1.posLabel;
+											op_id.vectPositions = $1.vectPositions;
 
 		                                    op = runBasicOperation(op_id, $4, operation);
 		                                    ass = assign(voidStr, $1, op);
@@ -1750,7 +1828,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								//if(($4.vectSizes.size() > 0) && ($4.vectPositions.size() > 0))
-								if($4.vectPositions.size() > 0)
+								if($4.isConstant == false)
 								{
 									pointer = "*";
 									$$.translation += dinamicallyVectDeclaration($$, $4);
@@ -1818,7 +1896,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								//if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
-								if($3.vectPositions.size() > 0)
+								if($3.isConstant == false)
 								{
 									pointer = "*";
 									$$.translation += dinamicallyVectDeclaration($$, $3);
@@ -2702,14 +2780,13 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 		for(int i = 0; i < call.size(); i++)
 		{
 			value = call.at(i);
-			//res->translation += value.translation;
+			opMul = generateIntValue(1);
 
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
 				value_2 = generateIntValue(declaration.at(j));
-				//res->translation += value_2.translation;
-
 				opMul = runBasicOperation(value, value_2, "*");
+
 				res->translation += opMul.translation;
 			}
 
@@ -2863,12 +2940,14 @@ YYSTYPE assign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 
 
 			    res->translation = addtranslation + exp.translation + cast->translation;
-				res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = " + cast->label + ";\n";
+				res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = ";
+				res->translation += cast->label + (cast->posLabel != "" ? "[" + cast->posLabel + "]" : "") + ";\n";
 		    }
 		else
 		{
 			res->translation = addtranslation + exp.translation;
-			res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = " + exp.label + ";\n";
+			res->translation += "\t" + res->label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + " = ";
+			res->translation += exp.label + (exp.posLabel != "" ? "[" + exp.posLabel + "]" : "") + ";\n";
 		}
 
         return *res;
@@ -2903,7 +2982,8 @@ YYSTYPE stringAssign(string addtranslation, YYSTYPE id, YYSTYPE exp)
 		length = getDeclarationLength(id) + 1;
 
 	res->translation = addtranslation + expStr.translation;
-	res->translation += "\tstrcpy(" + id.label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + ", " + expStr.label + ");\n";
+	res->translation += "\tstrcpy(" + id.label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + ", ";
+	res->translation += expStr.label + (expStr.posLabel != "" ? "[" + expStr.posLabel + "]" : "") + ");\n";
 	res->translation += "\t" + id.label + (id.posLabel != "" ? "[" + id.posLabel + "]" : "") + "[" + intToString(length - 1) + "] = '\\0';\n";
 
 	if(res->modifier != "")
@@ -2923,7 +3003,8 @@ YYSTYPE assignNotExpression(YYSTYPE expr)
         res->type = expr.type;
         res->modifier = expr.modifier;
         res->isConstant = false;
-        res->translation = "\t" + res->label + " = !" + expr.label + ";\n";
+        res->translation = "\t" + res->label + " = !";
+		res->translation += expr.label + (expr.posLabel != "" ? "[" + expr.posLabel + "]" : "") + ";\n";
 
         if(modifier != "")
                 modifier += " ";

@@ -1,19 +1,44 @@
 int main(void)
 {
-	/*int d;
-	int size;
-	
-	cout("\nEnter the value to d: ");
-	cin(d);
 
-	cout("\nEnter the size of matrix: ");
-	cin(size);
+	int a[2][3];
 
-	float matrix[size][size];*/
+	int b[3][3][3];
+	int i = 1;
+	int x[5];
 
-	string a;
+	a[0][0] = 0;
 
-	cin(a);
+	b[0][0][0] = a[0][i];
+
+	string abb = "oi";
+	coutn(abb);
+
+	for(int v = 0; v < 5; v++)
+		x[v] = v;
+
+	for(int v = 0; v < 5; v++)
+		coutn(x[v]);
+
+
+	a[0][0]++;
+	++a[0][0];
+	a[0][0] += 2;
+
+	coutn(a[0][0]);
 
 	return 0;
+}
+
+string a(string a, int b)
+{
+	return a + b;
+
+}
+
+
+string c(string a[2], string b)
+{
+	return a + b;
+
 }
