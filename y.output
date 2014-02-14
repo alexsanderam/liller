@@ -34,7 +34,7 @@ Gramática
 
    15 CLOSE_ARGS: ')'
 
-   16 ARGS: TYPE OPTIONAL_ID ',' ARGS
+   16 ARGS: ARGS ',' TYPE OPTIONAL_ID
    17     | TYPE OPTIONAL_ID
    18     | /* vazio */
 
@@ -946,24 +946,25 @@ estado 47
 estado 48
 
    13 FUNCTION_HEADER: TK_ID OPEN_ARGS ARGS . CLOSE_ARGS
+   16 ARGS: ARGS . ',' TYPE OPTIONAL_ID
 
     ')'  deslocar, e ir ao estado 122
+    ','  deslocar, e ir ao estado 123
 
-    CLOSE_ARGS  ir ao estado 123
+    CLOSE_ARGS  ir ao estado 124
 
 
 estado 49
 
-   16 ARGS: TYPE . OPTIONAL_ID ',' ARGS
-   17     | TYPE . OPTIONAL_ID
+   17 ARGS: TYPE . OPTIONAL_ID
 
-    TK_ID  deslocar, e ir ao estado 124
+    TK_ID  deslocar, e ir ao estado 125
     '['    deslocar, e ir ao estado 119
 
     $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
 
-    OPTIONAL_ID   ir ao estado 125
-    VECTOR_SIZES  ir ao estado 126
+    OPTIONAL_ID   ir ao estado 126
+    VECTOR_SIZES  ir ao estado 127
 
 
 estado 50
@@ -971,10 +972,10 @@ estado 50
     3 MAIN_HEADER: TK_TYPE_INT TK_MAIN OPEN_ARGS . TK_TYPE_VOID CLOSE_ARGS
     4            | TK_TYPE_INT TK_MAIN OPEN_ARGS . CLOSE_ARGS
 
-    TK_TYPE_VOID  deslocar, e ir ao estado 127
+    TK_TYPE_VOID  deslocar, e ir ao estado 128
     ')'           deslocar, e ir ao estado 122
 
-    CLOSE_ARGS  ir ao estado 128
+    CLOSE_ARGS  ir ao estado 129
 
 
 estado 51
@@ -996,7 +997,7 @@ estado 53
   134 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
   136     | TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
 
-    TK_TYPE_INT  deslocar, e ir ao estado 129
+    TK_TYPE_INT  deslocar, e ir ao estado 130
 
     $padrão  reduzir usando a regra 136 (TYPE)
 
@@ -1020,7 +1021,7 @@ estado 56
   135 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG . TK_TYPE_INT
   137     | TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG .
 
-    TK_TYPE_INT  deslocar, e ir ao estado 130
+    TK_TYPE_INT  deslocar, e ir ao estado 131
 
     $padrão  reduzir usando a regra 137 (TYPE)
 
@@ -1083,13 +1084,13 @@ estado 64
   108 OP_ASSIGN: TK_ID . VECTOR_P TK_OP_ASSIGN E
   148 TERMINAL: TK_ID . VECTOR_P
 
-    TK_GO_LABEL  deslocar, e ir ao estado 131
-    '('          deslocar, e ir ao estado 132
-    '['          deslocar, e ir ao estado 133
+    TK_GO_LABEL  deslocar, e ir ao estado 132
+    '('          deslocar, e ir ao estado 133
+    '['          deslocar, e ir ao estado 134
 
     $padrão  reduzir usando a regra 155 (VECTOR_P)
 
-    VECTOR_P  ir ao estado 134
+    VECTOR_P  ir ao estado 135
 
 
 estado 65
@@ -1116,40 +1117,7 @@ estado 67
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
-    TK_OP_SUM        deslocar, e ir ao estado 65
-    TK_OP_SUB        deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
-    TK_COUT          deslocar, e ir ao estado 70
-    TK_COUTN         deslocar, e ir ao estado 71
-    TK_CIN           deslocar, e ir ao estado 72
-    TK_OP_INCREASE   deslocar, e ir ao estado 83
-    '('              deslocar, e ir ao estado 85
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    E              ir ao estado 136
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 68
-
-  101 E: TK_OP_BIN_NOT . E
-
-    TK_INT           deslocar, e ir ao estado 58
-    TK_FLOAT         deslocar, e ir ao estado 59
-    TK_SCIENTIFIC    deslocar, e ir ao estado 60
-    TK_CHAR          deslocar, e ir ao estado 61
-    TK_STRING        deslocar, e ir ao estado 62
-    TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -1172,9 +1140,9 @@ estado 68
     SIGNAL         ir ao estado 116
 
 
-estado 69
+estado 68
 
-   51 RETURN: TK_RETURN . E_C
+  101 E: TK_OP_BIN_NOT . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -1182,7 +1150,7 @@ estado 69
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -1196,7 +1164,40 @@ estado 69
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 138
+    E              ir ao estado 138
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
+
+
+estado 69
+
+   51 RETURN: TK_RETURN . E_C
+
+    TK_INT           deslocar, e ir ao estado 58
+    TK_FLOAT         deslocar, e ir ao estado 59
+    TK_SCIENTIFIC    deslocar, e ir ao estado 60
+    TK_CHAR          deslocar, e ir ao estado 61
+    TK_STRING        deslocar, e ir ao estado 62
+    TK_BOOL          deslocar, e ir ao estado 63
+    TK_ID            deslocar, e ir ao estado 136
+    TK_OP_SUM        deslocar, e ir ao estado 65
+    TK_OP_SUB        deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
+    TK_COUT          deslocar, e ir ao estado 70
+    TK_COUTN         deslocar, e ir ao estado 71
+    TK_CIN           deslocar, e ir ao estado 72
+    TK_OP_INCREASE   deslocar, e ir ao estado 83
+    '('              deslocar, e ir ao estado 85
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    E_C            ir ao estado 139
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -1210,7 +1211,7 @@ estado 70
 
    28 COUT: TK_COUT . '(' E_C ')'
 
-    '('  deslocar, e ir ao estado 139
+    '('  deslocar, e ir ao estado 140
 
 
 estado 71
@@ -1218,14 +1219,14 @@ estado 71
    29 COUT: TK_COUTN . '(' E_C ')'
    30     | TK_COUTN . '(' ')'
 
-    '('  deslocar, e ir ao estado 140
+    '('  deslocar, e ir ao estado 141
 
 
 estado 72
 
    31 CIN: TK_CIN . '(' E_C ')'
 
-    '('  deslocar, e ir ao estado 141
+    '('  deslocar, e ir ao estado 142
 
 
 estado 73
@@ -1252,7 +1253,7 @@ estado 75
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -1266,7 +1267,7 @@ estado 75
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 142
+    E_C            ir ao estado 143
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -1280,7 +1281,7 @@ estado 76
 
    70 LABEL: TK_DEFAULT . TK_GO_LABEL
 
-    TK_GO_LABEL  deslocar, e ir ao estado 143
+    TK_GO_LABEL  deslocar, e ir ao estado 144
 
 
 estado 77
@@ -1322,14 +1323,14 @@ estado 82
 
    71 GOTO: TK_GOTO . TK_ID
 
-    TK_ID  deslocar, e ir ao estado 144
+    TK_ID  deslocar, e ir ao estado 145
 
 
 estado 83
 
   105 PREV_INCREASE: TK_OP_INCREASE . TK_ID VECTOR_P
 
-    TK_ID  deslocar, e ir ao estado 145
+    TK_ID  deslocar, e ir ao estado 146
 
 
 estado 84
@@ -1350,7 +1351,7 @@ estado 85
     TK_CHAR               deslocar, e ir ao estado 61
     TK_STRING             deslocar, e ir ao estado 62
     TK_BOOL               deslocar, e ir ao estado 63
-    TK_ID                 deslocar, e ir ao estado 135
+    TK_ID                 deslocar, e ir ao estado 136
     TK_TYPE_CHAR          deslocar, e ir ao estado 5
     TK_TYPE_STRING        deslocar, e ir ao estado 6
     TK_TYPE_INT           deslocar, e ir ao estado 47
@@ -1375,12 +1376,12 @@ estado 85
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E              ir ao estado 146
+    E              ir ao estado 147
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
     ATTRIBUITION   ir ao estado 111
     OP_ASSIGN      ir ao estado 112
-    TYPE           ir ao estado 147
+    TYPE           ir ao estado 148
     TERMINAL       ir ao estado 115
     SIGNAL         ir ao estado 116
 
@@ -1417,9 +1418,9 @@ estado 90
 
    32 SCOPE: BEGIN_SCOPE COMMANDS . END_SCOPE
 
-    '}'  deslocar, e ir ao estado 148
+    '}'  deslocar, e ir ao estado 149
 
-    END_SCOPE  ir ao estado 149
+    END_SCOPE  ir ao estado 150
 
 
 estado 91
@@ -1474,7 +1475,7 @@ estado 91
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    COMMANDS       ir ao estado 150
+    COMMANDS       ir ao estado 151
     STATEMENT      ir ao estado 91
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
@@ -1507,7 +1508,7 @@ estado 92
 
    38 STATEMENT: RETURN . ';'
 
-    ';'  deslocar, e ir ao estado 151
+    ';'  deslocar, e ir ao estado 152
 
 
 estado 93
@@ -1515,7 +1516,7 @@ estado 93
    53 IF: IF_C . '(' E_C ')' STATEMENT
    54   | IF_C . '(' E_C ')' STATEMENT TK_ELSE STATEMENT
 
-    '('  deslocar, e ir ao estado 152
+    '('  deslocar, e ir ao estado 153
 
 
 estado 94
@@ -1529,7 +1530,7 @@ estado 95
 
    56 WHILE: WHILE_C . '(' E_C ')' STATEMENT
 
-    '('  deslocar, e ir ao estado 153
+    '('  deslocar, e ir ao estado 154
 
 
 estado 96
@@ -1589,7 +1590,7 @@ estado 97
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 154
+    STATEMENT      ir ao estado 155
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -1629,7 +1630,7 @@ estado 99
    66 FOR: FOR_C . '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
    67    | FOR_C . '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
 
-    '('  deslocar, e ir ao estado 155
+    '('  deslocar, e ir ao estado 156
 
 
 estado 100
@@ -1689,7 +1690,7 @@ estado 101
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 156
+    STATEMENT      ir ao estado 157
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -1721,28 +1722,28 @@ estado 102
 
    46 STATEMENT: GOTO . ';'
 
-    ';'  deslocar, e ir ao estado 157
+    ';'  deslocar, e ir ao estado 158
 
 
 estado 103
 
    47 STATEMENT: CONTINUE . ';'
 
-    ';'  deslocar, e ir ao estado 158
+    ';'  deslocar, e ir ao estado 159
 
 
 estado 104
 
    48 STATEMENT: BREAK . ';'
 
-    ';'  deslocar, e ir ao estado 159
+    ';'  deslocar, e ir ao estado 160
 
 
 estado 105
 
    75 SWITCH: SWITCH_C . '(' E_C ')' STATEMENT
 
-    '('  deslocar, e ir ao estado 160
+    '('  deslocar, e ir ao estado 161
 
 
 estado 106
@@ -1756,7 +1757,7 @@ estado 107
 
    37 STATEMENT: E_C . ';'
 
-    ';'  deslocar, e ir ao estado 161
+    ';'  deslocar, e ir ao estado 162
 
 
 estado 108
@@ -1781,24 +1782,24 @@ estado 108
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 76 (E_C)
 
@@ -1837,7 +1838,7 @@ estado 113
   109 DECLARATION: DECLARATION . ',' TK_ID VECTOR_SIZES
   110            | DECLARATION . ',' TK_ID TK_ASSIGN E
 
-    ';'  deslocar, e ir ao estado 180
+    ';'  deslocar, e ir ao estado 181
     ','  deslocar, e ir ao estado 45
 
 
@@ -1846,7 +1847,7 @@ estado 114
   111 DECLARATION: TYPE . TK_ID VECTOR_SIZES
   112            | TYPE . TK_ID TK_ASSIGN E
 
-    TK_ID  deslocar, e ir ao estado 181
+    TK_ID  deslocar, e ir ao estado 182
 
 
 estado 115
@@ -1864,11 +1865,11 @@ estado 116
   145         | SIGNAL . TK_CHAR
   149         | SIGNAL . TK_ID VECTOR_P
 
-    TK_INT         deslocar, e ir ao estado 182
-    TK_FLOAT       deslocar, e ir ao estado 183
-    TK_SCIENTIFIC  deslocar, e ir ao estado 184
-    TK_CHAR        deslocar, e ir ao estado 185
-    TK_ID          deslocar, e ir ao estado 186
+    TK_INT         deslocar, e ir ao estado 183
+    TK_FLOAT       deslocar, e ir ao estado 184
+    TK_SCIENTIFIC  deslocar, e ir ao estado 185
+    TK_CHAR        deslocar, e ir ao estado 186
+    TK_ID          deslocar, e ir ao estado 187
 
 
 estado 117
@@ -1876,12 +1877,12 @@ estado 117
   109 DECLARATION: DECLARATION ',' TK_ID . VECTOR_SIZES
   110            | DECLARATION ',' TK_ID . TK_ASSIGN E
 
-    TK_ASSIGN  deslocar, e ir ao estado 187
+    TK_ASSIGN  deslocar, e ir ao estado 188
     '['        deslocar, e ir ao estado 119
 
     $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
 
-    VECTOR_SIZES  ir ao estado 188
+    VECTOR_SIZES  ir ao estado 189
 
 
 estado 118
@@ -1894,7 +1895,7 @@ estado 118
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -1908,7 +1909,7 @@ estado 118
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E              ir ao estado 189
+    E              ir ao estado 190
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
     ATTRIBUITION   ir ao estado 111
@@ -1927,7 +1928,7 @@ estado 119
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -1941,7 +1942,7 @@ estado 119
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 190
+    E_C            ir ao estado 191
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -1969,7 +1970,7 @@ estado 120
 
     $padrão  reduzir usando a regra 18 (ARGS)
 
-    ARGS  ir ao estado 191
+    ARGS  ir ao estado 192
     TYPE  ir ao estado 49
 
 
@@ -1989,12 +1990,31 @@ estado 122
 
 estado 123
 
+   16 ARGS: ARGS ',' . TYPE OPTIONAL_ID
+
+    TK_TYPE_CHAR          deslocar, e ir ao estado 5
+    TK_TYPE_STRING        deslocar, e ir ao estado 6
+    TK_TYPE_INT           deslocar, e ir ao estado 47
+    TK_TYPE_VOID          deslocar, e ir ao estado 8
+    TK_TYPE_FLOAT         deslocar, e ir ao estado 9
+    TK_TYPE_DOUBLE        deslocar, e ir ao estado 10
+    TK_TYPE_BOOL          deslocar, e ir ao estado 11
+    TK_MODIFIER_UNSIGNED  deslocar, e ir ao estado 12
+    TK_MODIFIER_SIGNED    deslocar, e ir ao estado 13
+    TK_MODIFIER_SHORT     deslocar, e ir ao estado 14
+    TK_MODIFIER_LONG      deslocar, e ir ao estado 15
+
+    TYPE  ir ao estado 193
+
+
+estado 124
+
    13 FUNCTION_HEADER: TK_ID OPEN_ARGS ARGS CLOSE_ARGS .
 
     $padrão  reduzir usando a regra 13 (FUNCTION_HEADER)
 
 
-estado 124
+estado 125
 
    19 OPTIONAL_ID: TK_ID . VECTOR_SIZES
 
@@ -2002,64 +2022,61 @@ estado 124
 
     $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
 
-    VECTOR_SIZES  ir ao estado 192
+    VECTOR_SIZES  ir ao estado 194
 
 
-estado 125
+estado 126
 
-   16 ARGS: TYPE OPTIONAL_ID . ',' ARGS
-   17     | TYPE OPTIONAL_ID .
-
-    ','  deslocar, e ir ao estado 193
+   17 ARGS: TYPE OPTIONAL_ID .
 
     $padrão  reduzir usando a regra 17 (ARGS)
 
 
-estado 126
+estado 127
 
    20 OPTIONAL_ID: VECTOR_SIZES .
 
     $padrão  reduzir usando a regra 20 (OPTIONAL_ID)
 
 
-estado 127
+estado 128
 
     3 MAIN_HEADER: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID . CLOSE_ARGS
 
     ')'  deslocar, e ir ao estado 122
 
-    CLOSE_ARGS  ir ao estado 194
+    CLOSE_ARGS  ir ao estado 195
 
 
-estado 128
+estado 129
 
     4 MAIN_HEADER: TK_TYPE_INT TK_MAIN OPEN_ARGS CLOSE_ARGS .
 
     $padrão  reduzir usando a regra 4 (MAIN_HEADER)
 
 
-estado 129
+estado 130
 
   134 TYPE: TK_MODIFIER_UNSIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
 
     $padrão  reduzir usando a regra 134 (TYPE)
 
 
-estado 130
+estado 131
 
   135 TYPE: TK_MODIFIER_SIGNED TK_MODIFIER_LONG TK_MODIFIER_LONG TK_TYPE_INT .
 
     $padrão  reduzir usando a regra 135 (TYPE)
 
 
-estado 131
+estado 132
 
    68 LABEL: TK_ID TK_GO_LABEL .
 
     $padrão  reduzir usando a regra 68 (LABEL)
 
 
-estado 132
+estado 133
 
    27 CALL_FUNCTION: TK_ID '(' . OPTIONAL_PARAMETERS ')'
 
@@ -2069,7 +2086,7 @@ estado 132
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2082,12 +2099,12 @@ estado 132
 
     $padrão  reduzir usando a regra 22 (OPTIONAL_PARAMETERS)
 
-    OPTIONAL_PARAMETERS  ir ao estado 195
-    PARAMETERS           ir ao estado 196
+    OPTIONAL_PARAMETERS  ir ao estado 196
+    PARAMETERS           ir ao estado 197
     CALL_FUNCTION        ir ao estado 86
     COUT                 ir ao estado 87
     CIN                  ir ao estado 88
-    E                    ir ao estado 197
+    E                    ir ao estado 198
     INCREASE             ir ao estado 109
     PREV_INCREASE        ir ao estado 110
     ATTRIBUITION         ir ao estado 111
@@ -2096,7 +2113,7 @@ estado 132
     SIGNAL               ir ao estado 116
 
 
-estado 133
+estado 134
 
   154 VECTOR_P: '[' . E_C ']' VECTOR_P
 
@@ -2106,7 +2123,7 @@ estado 133
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2120,7 +2137,7 @@ estado 133
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 198
+    E_C            ir ao estado 199
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -2130,21 +2147,21 @@ estado 133
     SIGNAL         ir ao estado 116
 
 
-estado 134
+estado 135
 
   104 INCREASE: TK_ID VECTOR_P . TK_OP_INCREASE
   106 ATTRIBUITION: TK_ID VECTOR_P . TK_ASSIGN E
   108 OP_ASSIGN: TK_ID VECTOR_P . TK_OP_ASSIGN E
   148 TERMINAL: TK_ID VECTOR_P .
 
-    TK_ASSIGN       deslocar, e ir ao estado 199
-    TK_OP_INCREASE  deslocar, e ir ao estado 200
-    TK_OP_ASSIGN    deslocar, e ir ao estado 201
+    TK_ASSIGN       deslocar, e ir ao estado 200
+    TK_OP_INCREASE  deslocar, e ir ao estado 201
+    TK_OP_ASSIGN    deslocar, e ir ao estado 202
 
     $padrão  reduzir usando a regra 148 (TERMINAL)
 
 
-estado 135
+estado 136
 
    27 CALL_FUNCTION: TK_ID . '(' OPTIONAL_PARAMETERS ')'
   104 INCREASE: TK_ID . VECTOR_P TK_OP_INCREASE
@@ -2152,15 +2169,15 @@ estado 135
   108 OP_ASSIGN: TK_ID . VECTOR_P TK_OP_ASSIGN E
   148 TERMINAL: TK_ID . VECTOR_P
 
-    '('  deslocar, e ir ao estado 132
-    '['  deslocar, e ir ao estado 133
+    '('  deslocar, e ir ao estado 133
+    '['  deslocar, e ir ao estado 134
 
     $padrão  reduzir usando a regra 155 (VECTOR_P)
 
-    VECTOR_P  ir ao estado 134
+    VECTOR_P  ir ao estado 135
 
 
-estado 136
+estado 137
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -2185,7 +2202,7 @@ estado 136
     $padrão  reduzir usando a regra 100 (E)
 
 
-estado 137
+estado 138
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -2210,14 +2227,14 @@ estado 137
     $padrão  reduzir usando a regra 101 (E)
 
 
-estado 138
+estado 139
 
    51 RETURN: TK_RETURN E_C .
 
     $padrão  reduzir usando a regra 51 (RETURN)
 
 
-estado 139
+estado 140
 
    28 COUT: TK_COUT '(' . E_C ')'
 
@@ -2227,7 +2244,7 @@ estado 139
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2241,43 +2258,7 @@ estado 139
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 202
-    E              ir ao estado 108
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 140
-
-   29 COUT: TK_COUTN '(' . E_C ')'
-   30     | TK_COUTN '(' . ')'
-
-    TK_INT           deslocar, e ir ao estado 58
-    TK_FLOAT         deslocar, e ir ao estado 59
-    TK_SCIENTIFIC    deslocar, e ir ao estado 60
-    TK_CHAR          deslocar, e ir ao estado 61
-    TK_STRING        deslocar, e ir ao estado 62
-    TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
-    TK_OP_SUM        deslocar, e ir ao estado 65
-    TK_OP_SUB        deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
-    TK_COUT          deslocar, e ir ao estado 70
-    TK_COUTN         deslocar, e ir ao estado 71
-    TK_CIN           deslocar, e ir ao estado 72
-    TK_OP_INCREASE   deslocar, e ir ao estado 83
-    '('              deslocar, e ir ao estado 85
-    ')'              deslocar, e ir ao estado 203
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    E_C            ir ao estado 204
+    E_C            ir ao estado 203
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -2289,7 +2270,8 @@ estado 140
 
 estado 141
 
-   31 CIN: TK_CIN '(' . E_C ')'
+   29 COUT: TK_COUTN '(' . E_C ')'
+   30     | TK_COUTN '(' . ')'
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2297,7 +2279,7 @@ estado 141
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2307,6 +2289,7 @@ estado 141
     TK_CIN           deslocar, e ir ao estado 72
     TK_OP_INCREASE   deslocar, e ir ao estado 83
     '('              deslocar, e ir ao estado 85
+    ')'              deslocar, e ir ao estado 204
 
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
@@ -2323,37 +2306,71 @@ estado 141
 
 estado 142
 
-   69 LABEL: TK_CASE E_C . TK_GO_LABEL
+   31 CIN: TK_CIN '(' . E_C ')'
 
-    TK_GO_LABEL  deslocar, e ir ao estado 206
+    TK_INT           deslocar, e ir ao estado 58
+    TK_FLOAT         deslocar, e ir ao estado 59
+    TK_SCIENTIFIC    deslocar, e ir ao estado 60
+    TK_CHAR          deslocar, e ir ao estado 61
+    TK_STRING        deslocar, e ir ao estado 62
+    TK_BOOL          deslocar, e ir ao estado 63
+    TK_ID            deslocar, e ir ao estado 136
+    TK_OP_SUM        deslocar, e ir ao estado 65
+    TK_OP_SUB        deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
+    TK_COUT          deslocar, e ir ao estado 70
+    TK_COUTN         deslocar, e ir ao estado 71
+    TK_CIN           deslocar, e ir ao estado 72
+    TK_OP_INCREASE   deslocar, e ir ao estado 83
+    '('              deslocar, e ir ao estado 85
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    E_C            ir ao estado 206
+    E              ir ao estado 108
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
 
 
 estado 143
+
+   69 LABEL: TK_CASE E_C . TK_GO_LABEL
+
+    TK_GO_LABEL  deslocar, e ir ao estado 207
+
+
+estado 144
 
    70 LABEL: TK_DEFAULT TK_GO_LABEL .
 
     $padrão  reduzir usando a regra 70 (LABEL)
 
 
-estado 144
+estado 145
 
    71 GOTO: TK_GOTO TK_ID .
 
     $padrão  reduzir usando a regra 71 (GOTO)
 
 
-estado 145
+estado 146
 
   105 PREV_INCREASE: TK_OP_INCREASE TK_ID . VECTOR_P
 
-    '['  deslocar, e ir ao estado 133
+    '['  deslocar, e ir ao estado 134
 
     $padrão  reduzir usando a regra 155 (VECTOR_P)
 
-    VECTOR_P  ir ao estado 207
+    VECTOR_P  ir ao estado 208
 
 
-estado 146
+estado 147
 
    77 E: '(' E . ')'
    82  | E . TK_OP_SUM E
@@ -2375,63 +2392,63 @@ estado 146
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
-    ')'                  deslocar, e ir ao estado 208
-
-
-estado 147
-
-   81 E: '(' TYPE . ')' TERMINAL
-
-    ')'  deslocar, e ir ao estado 209
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
+    ')'                  deslocar, e ir ao estado 209
 
 
 estado 148
+
+   81 E: '(' TYPE . ')' TERMINAL
+
+    ')'  deslocar, e ir ao estado 210
+
+
+estado 149
 
    34 END_SCOPE: '}' .
 
     $padrão  reduzir usando a regra 34 (END_SCOPE)
 
 
-estado 149
+estado 150
 
    32 SCOPE: BEGIN_SCOPE COMMANDS END_SCOPE .
 
     $padrão  reduzir usando a regra 32 (SCOPE)
 
 
-estado 150
+estado 151
 
    35 COMMANDS: STATEMENT COMMANDS .
 
     $padrão  reduzir usando a regra 35 (COMMANDS)
 
 
-estado 151
+estado 152
 
    38 STATEMENT: RETURN ';' .
 
     $padrão  reduzir usando a regra 38 (STATEMENT)
 
 
-estado 152
+estado 153
 
    53 IF: IF_C '(' . E_C ')' STATEMENT
    54   | IF_C '(' . E_C ')' STATEMENT TK_ELSE STATEMENT
@@ -2442,41 +2459,7 @@ estado 152
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
-    TK_OP_SUM        deslocar, e ir ao estado 65
-    TK_OP_SUB        deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
-    TK_COUT          deslocar, e ir ao estado 70
-    TK_COUTN         deslocar, e ir ao estado 71
-    TK_CIN           deslocar, e ir ao estado 72
-    TK_OP_INCREASE   deslocar, e ir ao estado 83
-    '('              deslocar, e ir ao estado 85
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    E_C            ir ao estado 210
-    E              ir ao estado 108
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 153
-
-   56 WHILE: WHILE_C '(' . E_C ')' STATEMENT
-
-    TK_INT           deslocar, e ir ao estado 58
-    TK_FLOAT         deslocar, e ir ao estado 59
-    TK_SCIENTIFIC    deslocar, e ir ao estado 60
-    TK_CHAR          deslocar, e ir ao estado 61
-    TK_STRING        deslocar, e ir ao estado 62
-    TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2502,12 +2485,46 @@ estado 153
 
 estado 154
 
-   58 DO_WHILE: DO_WHILE_C STATEMENT . TK_WHILE '(' E_C ')' ';'
+   56 WHILE: WHILE_C '(' . E_C ')' STATEMENT
 
-    TK_WHILE  deslocar, e ir ao estado 212
+    TK_INT           deslocar, e ir ao estado 58
+    TK_FLOAT         deslocar, e ir ao estado 59
+    TK_SCIENTIFIC    deslocar, e ir ao estado 60
+    TK_CHAR          deslocar, e ir ao estado 61
+    TK_STRING        deslocar, e ir ao estado 62
+    TK_BOOL          deslocar, e ir ao estado 63
+    TK_ID            deslocar, e ir ao estado 136
+    TK_OP_SUM        deslocar, e ir ao estado 65
+    TK_OP_SUB        deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
+    TK_COUT          deslocar, e ir ao estado 70
+    TK_COUTN         deslocar, e ir ao estado 71
+    TK_CIN           deslocar, e ir ao estado 72
+    TK_OP_INCREASE   deslocar, e ir ao estado 83
+    '('              deslocar, e ir ao estado 85
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    E_C            ir ao estado 212
+    E              ir ao estado 108
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
 
 
 estado 155
+
+   58 DO_WHILE: DO_WHILE_C STATEMENT . TK_WHILE '(' E_C ')' ';'
+
+    TK_WHILE  deslocar, e ir ao estado 213
+
+
+estado 156
 
    66 FOR: FOR_C '(' . OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
    67    | FOR_C '(' . ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT
@@ -2518,7 +2535,7 @@ estado 155
     TK_CHAR               deslocar, e ir ao estado 61
     TK_STRING             deslocar, e ir ao estado 62
     TK_BOOL               deslocar, e ir ao estado 63
-    TK_ID                 deslocar, e ir ao estado 135
+    TK_ID                 deslocar, e ir ao estado 136
     TK_TYPE_CHAR          deslocar, e ir ao estado 5
     TK_TYPE_STRING        deslocar, e ir ao estado 6
     TK_TYPE_INT           deslocar, e ir ao estado 47
@@ -2545,50 +2562,50 @@ estado 155
     CALL_FUNCTION              ir ao estado 86
     COUT                       ir ao estado 87
     CIN                        ir ao estado 88
-    OPTIONAL_E                 ir ao estado 213
-    OPTIONAL_E_OR_DECLARATION  ir ao estado 214
-    ATTRIBUITION_OR_TERMINAL   ir ao estado 215
-    E_C                        ir ao estado 216
+    OPTIONAL_E                 ir ao estado 214
+    OPTIONAL_E_OR_DECLARATION  ir ao estado 215
+    ATTRIBUITION_OR_TERMINAL   ir ao estado 216
+    E_C                        ir ao estado 217
     E                          ir ao estado 108
     INCREASE                   ir ao estado 109
     PREV_INCREASE              ir ao estado 110
-    ATTRIBUITION               ir ao estado 217
+    ATTRIBUITION               ir ao estado 218
     OP_ASSIGN                  ir ao estado 112
-    DECLARATION                ir ao estado 218
+    DECLARATION                ir ao estado 219
     TYPE                       ir ao estado 114
-    TERMINAL                   ir ao estado 219
+    TERMINAL                   ir ao estado 220
     SIGNAL                     ir ao estado 116
 
 
-estado 156
+estado 157
 
    45 STATEMENT: LABEL STATEMENT .
 
     $padrão  reduzir usando a regra 45 (STATEMENT)
 
 
-estado 157
+estado 158
 
    46 STATEMENT: GOTO ';' .
 
     $padrão  reduzir usando a regra 46 (STATEMENT)
 
 
-estado 158
+estado 159
 
    47 STATEMENT: CONTINUE ';' .
 
     $padrão  reduzir usando a regra 47 (STATEMENT)
 
 
-estado 159
+estado 160
 
    48 STATEMENT: BREAK ';' .
 
     $padrão  reduzir usando a regra 48 (STATEMENT)
 
 
-estado 160
+estado 161
 
    75 SWITCH: SWITCH_C '(' . E_C ')' STATEMENT
 
@@ -2598,7 +2615,7 @@ estado 160
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2612,7 +2629,7 @@ estado 160
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 220
+    E_C            ir ao estado 221
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -2622,14 +2639,14 @@ estado 160
     SIGNAL         ir ao estado 116
 
 
-estado 161
+estado 162
 
    37 STATEMENT: E_C ';' .
 
     $padrão  reduzir usando a regra 37 (STATEMENT)
 
 
-estado 162
+estado 163
 
    82 E: E TK_OP_SUM . E
 
@@ -2639,40 +2656,7 @@ estado 162
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
-    TK_OP_SUM        deslocar, e ir ao estado 65
-    TK_OP_SUB        deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
-    TK_COUT          deslocar, e ir ao estado 70
-    TK_COUTN         deslocar, e ir ao estado 71
-    TK_CIN           deslocar, e ir ao estado 72
-    TK_OP_INCREASE   deslocar, e ir ao estado 83
-    '('              deslocar, e ir ao estado 85
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    E              ir ao estado 221
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 163
-
-   83 E: E TK_OP_SUB . E
-
-    TK_INT           deslocar, e ir ao estado 58
-    TK_FLOAT         deslocar, e ir ao estado 59
-    TK_SCIENTIFIC    deslocar, e ir ao estado 60
-    TK_CHAR          deslocar, e ir ao estado 61
-    TK_STRING        deslocar, e ir ao estado 62
-    TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2697,7 +2681,7 @@ estado 163
 
 estado 164
 
-   84 E: E TK_OP_MUL . E
+   83 E: E TK_OP_SUB . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2705,7 +2689,7 @@ estado 164
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2730,7 +2714,7 @@ estado 164
 
 estado 165
 
-   85 E: E TK_OP_DIV . E
+   84 E: E TK_OP_MUL . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2738,7 +2722,7 @@ estado 165
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2763,7 +2747,7 @@ estado 165
 
 estado 166
 
-   86 E: E TK_OP_MOD . E
+   85 E: E TK_OP_DIV . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2771,7 +2755,7 @@ estado 166
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2796,7 +2780,7 @@ estado 166
 
 estado 167
 
-   91 E: E TK_OP_REL_LESS . E
+   86 E: E TK_OP_MOD . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2804,7 +2788,7 @@ estado 167
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2829,7 +2813,7 @@ estado 167
 
 estado 168
 
-   92 E: E TK_OP_REL_GREATER . E
+   91 E: E TK_OP_REL_LESS . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2837,7 +2821,7 @@ estado 168
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2862,7 +2846,7 @@ estado 168
 
 estado 169
 
-   93 E: E TK_OP_REL_EQLESS . E
+   92 E: E TK_OP_REL_GREATER . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2870,7 +2854,7 @@ estado 169
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2895,7 +2879,7 @@ estado 169
 
 estado 170
 
-   94 E: E TK_OP_REL_EQGREATER . E
+   93 E: E TK_OP_REL_EQLESS . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2903,7 +2887,7 @@ estado 170
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2928,7 +2912,7 @@ estado 170
 
 estado 171
 
-   89 E: E TK_OP_REL_EQ . E
+   94 E: E TK_OP_REL_EQGREATER . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2936,7 +2920,7 @@ estado 171
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2961,7 +2945,7 @@ estado 171
 
 estado 172
 
-   90 E: E TK_OP_REL_DIFF . E
+   89 E: E TK_OP_REL_EQ . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -2969,7 +2953,7 @@ estado 172
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -2994,7 +2978,7 @@ estado 172
 
 estado 173
 
-   88 E: E TK_OP_LOGIC_AND . E
+   90 E: E TK_OP_REL_DIFF . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3002,7 +2986,7 @@ estado 173
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3027,7 +3011,7 @@ estado 173
 
 estado 174
 
-   87 E: E TK_OP_LOGIC_OR . E
+   88 E: E TK_OP_LOGIC_AND . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3035,7 +3019,7 @@ estado 174
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3060,7 +3044,7 @@ estado 174
 
 estado 175
 
-   95 E: E TK_OP_BIN_AND . E
+   87 E: E TK_OP_LOGIC_OR . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3068,7 +3052,7 @@ estado 175
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3093,7 +3077,7 @@ estado 175
 
 estado 176
 
-   96 E: E TK_OP_BIN_OR . E
+   95 E: E TK_OP_BIN_AND . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3101,7 +3085,7 @@ estado 176
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3126,7 +3110,7 @@ estado 176
 
 estado 177
 
-   97 E: E TK_OP_BIN_XOR . E
+   96 E: E TK_OP_BIN_OR . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3134,7 +3118,7 @@ estado 177
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3159,7 +3143,7 @@ estado 177
 
 estado 178
 
-   98 E: E TK_OP_BIN_SHIFTR . E
+   97 E: E TK_OP_BIN_XOR . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3167,7 +3151,7 @@ estado 178
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3192,7 +3176,7 @@ estado 178
 
 estado 179
 
-   99 E: E TK_OP_BIN_SHIFTL . E
+   98 E: E TK_OP_BIN_SHIFTR . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3200,7 +3184,7 @@ estado 179
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3225,66 +3209,7 @@ estado 179
 
 estado 180
 
-   39 STATEMENT: DECLARATION ';' .
-
-    $padrão  reduzir usando a regra 39 (STATEMENT)
-
-
-estado 181
-
-  111 DECLARATION: TYPE TK_ID . VECTOR_SIZES
-  112            | TYPE TK_ID . TK_ASSIGN E
-
-    TK_ASSIGN  deslocar, e ir ao estado 118
-    '['        deslocar, e ir ao estado 119
-
-    $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
-
-    VECTOR_SIZES  ir ao estado 121
-
-
-estado 182
-
-  142 TERMINAL: SIGNAL TK_INT .
-
-    $padrão  reduzir usando a regra 142 (TERMINAL)
-
-
-estado 183
-
-  143 TERMINAL: SIGNAL TK_FLOAT .
-
-    $padrão  reduzir usando a regra 143 (TERMINAL)
-
-
-estado 184
-
-  144 TERMINAL: SIGNAL TK_SCIENTIFIC .
-
-    $padrão  reduzir usando a regra 144 (TERMINAL)
-
-
-estado 185
-
-  145 TERMINAL: SIGNAL TK_CHAR .
-
-    $padrão  reduzir usando a regra 145 (TERMINAL)
-
-
-estado 186
-
-  149 TERMINAL: SIGNAL TK_ID . VECTOR_P
-
-    '['  deslocar, e ir ao estado 133
-
-    $padrão  reduzir usando a regra 155 (VECTOR_P)
-
-    VECTOR_P  ir ao estado 239
-
-
-estado 187
-
-  110 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN . E
+   99 E: E TK_OP_BIN_SHIFTL . E
 
     TK_INT           deslocar, e ir ao estado 58
     TK_FLOAT         deslocar, e ir ao estado 59
@@ -3292,7 +3217,7 @@ estado 187
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3306,7 +3231,7 @@ estado 187
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E              ir ao estado 240
+    E              ir ao estado 239
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
     ATTRIBUITION   ir ao estado 111
@@ -3315,14 +3240,106 @@ estado 187
     SIGNAL         ir ao estado 116
 
 
+estado 181
+
+   39 STATEMENT: DECLARATION ';' .
+
+    $padrão  reduzir usando a regra 39 (STATEMENT)
+
+
+estado 182
+
+  111 DECLARATION: TYPE TK_ID . VECTOR_SIZES
+  112            | TYPE TK_ID . TK_ASSIGN E
+
+    TK_ASSIGN  deslocar, e ir ao estado 118
+    '['        deslocar, e ir ao estado 119
+
+    $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
+
+    VECTOR_SIZES  ir ao estado 121
+
+
+estado 183
+
+  142 TERMINAL: SIGNAL TK_INT .
+
+    $padrão  reduzir usando a regra 142 (TERMINAL)
+
+
+estado 184
+
+  143 TERMINAL: SIGNAL TK_FLOAT .
+
+    $padrão  reduzir usando a regra 143 (TERMINAL)
+
+
+estado 185
+
+  144 TERMINAL: SIGNAL TK_SCIENTIFIC .
+
+    $padrão  reduzir usando a regra 144 (TERMINAL)
+
+
+estado 186
+
+  145 TERMINAL: SIGNAL TK_CHAR .
+
+    $padrão  reduzir usando a regra 145 (TERMINAL)
+
+
+estado 187
+
+  149 TERMINAL: SIGNAL TK_ID . VECTOR_P
+
+    '['  deslocar, e ir ao estado 134
+
+    $padrão  reduzir usando a regra 155 (VECTOR_P)
+
+    VECTOR_P  ir ao estado 240
+
+
 estado 188
+
+  110 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN . E
+
+    TK_INT           deslocar, e ir ao estado 58
+    TK_FLOAT         deslocar, e ir ao estado 59
+    TK_SCIENTIFIC    deslocar, e ir ao estado 60
+    TK_CHAR          deslocar, e ir ao estado 61
+    TK_STRING        deslocar, e ir ao estado 62
+    TK_BOOL          deslocar, e ir ao estado 63
+    TK_ID            deslocar, e ir ao estado 136
+    TK_OP_SUM        deslocar, e ir ao estado 65
+    TK_OP_SUB        deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
+    TK_COUT          deslocar, e ir ao estado 70
+    TK_COUTN         deslocar, e ir ao estado 71
+    TK_CIN           deslocar, e ir ao estado 72
+    TK_OP_INCREASE   deslocar, e ir ao estado 83
+    '('              deslocar, e ir ao estado 85
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    E              ir ao estado 241
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
+
+
+estado 189
 
   109 DECLARATION: DECLARATION ',' TK_ID VECTOR_SIZES .
 
     $padrão  reduzir usando a regra 109 (DECLARATION)
 
 
-estado 189
+estado 190
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3344,98 +3361,91 @@ estado 189
    99  | E . TK_OP_BIN_SHIFTL E
   112 DECLARATION: TYPE TK_ID TK_ASSIGN E .
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 112 (DECLARATION)
 
 
-estado 190
+estado 191
 
   152 VECTOR_SIZES: '[' E_C . ']' VECTOR_SIZES
 
-    ']'  deslocar, e ir ao estado 241
-
-
-estado 191
-
-   12 FUNCTION_HEADER: TYPE TK_ID OPEN_ARGS ARGS . CLOSE_ARGS
-
-    ')'  deslocar, e ir ao estado 122
-
-    CLOSE_ARGS  ir ao estado 242
+    ']'  deslocar, e ir ao estado 242
 
 
 estado 192
+
+   12 FUNCTION_HEADER: TYPE TK_ID OPEN_ARGS ARGS . CLOSE_ARGS
+   16 ARGS: ARGS . ',' TYPE OPTIONAL_ID
+
+    ')'  deslocar, e ir ao estado 122
+    ','  deslocar, e ir ao estado 123
+
+    CLOSE_ARGS  ir ao estado 243
+
+
+estado 193
+
+   16 ARGS: ARGS ',' TYPE . OPTIONAL_ID
+
+    TK_ID  deslocar, e ir ao estado 125
+    '['    deslocar, e ir ao estado 119
+
+    $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
+
+    OPTIONAL_ID   ir ao estado 244
+    VECTOR_SIZES  ir ao estado 127
+
+
+estado 194
 
    19 OPTIONAL_ID: TK_ID VECTOR_SIZES .
 
     $padrão  reduzir usando a regra 19 (OPTIONAL_ID)
 
 
-estado 193
-
-   16 ARGS: TYPE OPTIONAL_ID ',' . ARGS
-
-    TK_TYPE_CHAR          deslocar, e ir ao estado 5
-    TK_TYPE_STRING        deslocar, e ir ao estado 6
-    TK_TYPE_INT           deslocar, e ir ao estado 47
-    TK_TYPE_VOID          deslocar, e ir ao estado 8
-    TK_TYPE_FLOAT         deslocar, e ir ao estado 9
-    TK_TYPE_DOUBLE        deslocar, e ir ao estado 10
-    TK_TYPE_BOOL          deslocar, e ir ao estado 11
-    TK_MODIFIER_UNSIGNED  deslocar, e ir ao estado 12
-    TK_MODIFIER_SIGNED    deslocar, e ir ao estado 13
-    TK_MODIFIER_SHORT     deslocar, e ir ao estado 14
-    TK_MODIFIER_LONG      deslocar, e ir ao estado 15
-
-    $padrão  reduzir usando a regra 18 (ARGS)
-
-    ARGS  ir ao estado 243
-    TYPE  ir ao estado 49
-
-
-estado 194
+estado 195
 
     3 MAIN_HEADER: TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS .
 
     $padrão  reduzir usando a regra 3 (MAIN_HEADER)
 
 
-estado 195
+estado 196
 
    27 CALL_FUNCTION: TK_ID '(' OPTIONAL_PARAMETERS . ')'
 
-    ')'  deslocar, e ir ao estado 244
+    ')'  deslocar, e ir ao estado 245
 
 
-estado 196
+estado 197
 
    21 OPTIONAL_PARAMETERS: PARAMETERS .
    23 PARAMETERS: PARAMETERS . ',' E
 
-    ','  deslocar, e ir ao estado 245
+    ','  deslocar, e ir ao estado 246
 
     $padrão  reduzir usando a regra 21 (OPTIONAL_PARAMETERS)
 
 
-estado 197
+estado 198
 
    24 PARAMETERS: E .
    82 E: E . TK_OP_SUM E
@@ -3457,36 +3467,36 @@ estado 197
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 24 (PARAMETERS)
 
 
-estado 198
+estado 199
 
   154 VECTOR_P: '[' E_C . ']' VECTOR_P
 
-    ']'  deslocar, e ir ao estado 246
+    ']'  deslocar, e ir ao estado 247
 
 
-estado 199
+estado 200
 
   106 ATTRIBUITION: TK_ID VECTOR_P TK_ASSIGN . E
 
@@ -3496,47 +3506,7 @@ estado 199
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
-    TK_OP_SUM        deslocar, e ir ao estado 65
-    TK_OP_SUB        deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
-    TK_COUT          deslocar, e ir ao estado 70
-    TK_COUTN         deslocar, e ir ao estado 71
-    TK_CIN           deslocar, e ir ao estado 72
-    TK_OP_INCREASE   deslocar, e ir ao estado 83
-    '('              deslocar, e ir ao estado 85
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    E              ir ao estado 247
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 200
-
-  104 INCREASE: TK_ID VECTOR_P TK_OP_INCREASE .
-
-    $padrão  reduzir usando a regra 104 (INCREASE)
-
-
-estado 201
-
-  108 OP_ASSIGN: TK_ID VECTOR_P TK_OP_ASSIGN . E
-
-    TK_INT           deslocar, e ir ao estado 58
-    TK_FLOAT         deslocar, e ir ao estado 59
-    TK_SCIENTIFIC    deslocar, e ir ao estado 60
-    TK_CHAR          deslocar, e ir ao estado 61
-    TK_STRING        deslocar, e ir ao estado 62
-    TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -3559,56 +3529,96 @@ estado 201
     SIGNAL         ir ao estado 116
 
 
+estado 201
+
+  104 INCREASE: TK_ID VECTOR_P TK_OP_INCREASE .
+
+    $padrão  reduzir usando a regra 104 (INCREASE)
+
+
 estado 202
 
-   28 COUT: TK_COUT '(' E_C . ')'
+  108 OP_ASSIGN: TK_ID VECTOR_P TK_OP_ASSIGN . E
 
-    ')'  deslocar, e ir ao estado 249
+    TK_INT           deslocar, e ir ao estado 58
+    TK_FLOAT         deslocar, e ir ao estado 59
+    TK_SCIENTIFIC    deslocar, e ir ao estado 60
+    TK_CHAR          deslocar, e ir ao estado 61
+    TK_STRING        deslocar, e ir ao estado 62
+    TK_BOOL          deslocar, e ir ao estado 63
+    TK_ID            deslocar, e ir ao estado 136
+    TK_OP_SUM        deslocar, e ir ao estado 65
+    TK_OP_SUB        deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT    deslocar, e ir ao estado 68
+    TK_COUT          deslocar, e ir ao estado 70
+    TK_COUTN         deslocar, e ir ao estado 71
+    TK_CIN           deslocar, e ir ao estado 72
+    TK_OP_INCREASE   deslocar, e ir ao estado 83
+    '('              deslocar, e ir ao estado 85
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    E              ir ao estado 249
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
 
 
 estado 203
+
+   28 COUT: TK_COUT '(' E_C . ')'
+
+    ')'  deslocar, e ir ao estado 250
+
+
+estado 204
 
    30 COUT: TK_COUTN '(' ')' .
 
     $padrão  reduzir usando a regra 30 (COUT)
 
 
-estado 204
-
-   29 COUT: TK_COUTN '(' E_C . ')'
-
-    ')'  deslocar, e ir ao estado 250
-
-
 estado 205
 
-   31 CIN: TK_CIN '(' E_C . ')'
+   29 COUT: TK_COUTN '(' E_C . ')'
 
     ')'  deslocar, e ir ao estado 251
 
 
 estado 206
 
+   31 CIN: TK_CIN '(' E_C . ')'
+
+    ')'  deslocar, e ir ao estado 252
+
+
+estado 207
+
    69 LABEL: TK_CASE E_C TK_GO_LABEL .
 
     $padrão  reduzir usando a regra 69 (LABEL)
 
 
-estado 207
+estado 208
 
   105 PREV_INCREASE: TK_OP_INCREASE TK_ID VECTOR_P .
 
     $padrão  reduzir usando a regra 105 (PREV_INCREASE)
 
 
-estado 208
+estado 209
 
    77 E: '(' E ')' .
 
     $padrão  reduzir usando a regra 77 (E)
 
 
-estado 209
+estado 210
 
    81 E: '(' TYPE ')' . TERMINAL
 
@@ -3618,65 +3628,65 @@ estado 209
     TK_CHAR        deslocar, e ir ao estado 61
     TK_STRING      deslocar, e ir ao estado 62
     TK_BOOL        deslocar, e ir ao estado 63
-    TK_ID          deslocar, e ir ao estado 252
+    TK_ID          deslocar, e ir ao estado 253
     TK_OP_SUM      deslocar, e ir ao estado 65
     TK_OP_SUB      deslocar, e ir ao estado 66
 
-    TERMINAL  ir ao estado 253
+    TERMINAL  ir ao estado 254
     SIGNAL    ir ao estado 116
-
-
-estado 210
-
-   53 IF: IF_C '(' E_C . ')' STATEMENT
-   54   | IF_C '(' E_C . ')' STATEMENT TK_ELSE STATEMENT
-
-    ')'  deslocar, e ir ao estado 254
 
 
 estado 211
 
-   56 WHILE: WHILE_C '(' E_C . ')' STATEMENT
+   53 IF: IF_C '(' E_C . ')' STATEMENT
+   54   | IF_C '(' E_C . ')' STATEMENT TK_ELSE STATEMENT
 
     ')'  deslocar, e ir ao estado 255
 
 
 estado 212
 
-   58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE . '(' E_C ')' ';'
+   56 WHILE: WHILE_C '(' E_C . ')' STATEMENT
 
-    '('  deslocar, e ir ao estado 256
+    ')'  deslocar, e ir ao estado 256
 
 
 estado 213
+
+   58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE . '(' E_C ')' ';'
+
+    '('  deslocar, e ir ao estado 257
+
+
+estado 214
 
    61 OPTIONAL_E_OR_DECLARATION: OPTIONAL_E .
 
     $padrão  reduzir usando a regra 61 (OPTIONAL_E_OR_DECLARATION)
 
 
-estado 214
+estado 215
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION . ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
 
-    ';'  deslocar, e ir ao estado 257
-
-
-estado 215
-
-   67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL . TK_DOT_DOT TERMINAL ')' STATEMENT
-
-    TK_DOT_DOT  deslocar, e ir ao estado 258
+    ';'  deslocar, e ir ao estado 258
 
 
 estado 216
+
+   67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL . TK_DOT_DOT TERMINAL ')' STATEMENT
+
+    TK_DOT_DOT  deslocar, e ir ao estado 259
+
+
+estado 217
 
    59 OPTIONAL_E: E_C .
 
     $padrão  reduzir usando a regra 59 (OPTIONAL_E)
 
 
-estado 217
+estado 218
 
    63 ATTRIBUITION_OR_TERMINAL: ATTRIBUITION .
    80 E: ATTRIBUITION .
@@ -3685,7 +3695,7 @@ estado 217
     $padrão    reduzir usando a regra 80 (E)
 
 
-estado 218
+estado 219
 
    62 OPTIONAL_E_OR_DECLARATION: DECLARATION .
   109 DECLARATION: DECLARATION . ',' TK_ID VECTOR_SIZES
@@ -3696,7 +3706,7 @@ estado 218
     $padrão  reduzir usando a regra 62 (OPTIONAL_E_OR_DECLARATION)
 
 
-estado 219
+estado 220
 
    64 ATTRIBUITION_OR_TERMINAL: TERMINAL .
    79 E: TERMINAL .
@@ -3705,14 +3715,14 @@ estado 219
     $padrão    reduzir usando a regra 79 (E)
 
 
-estado 220
+estado 221
 
    75 SWITCH: SWITCH_C '(' E_C . ')' STATEMENT
 
-    ')'  deslocar, e ir ao estado 259
+    ')'  deslocar, e ir ao estado 260
 
 
-estado 221
+estado 222
 
    82 E: E . TK_OP_SUM E
    82  | E TK_OP_SUM E .
@@ -3734,15 +3744,15 @@ estado 221
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 82 (E)
 
 
-estado 222
+estado 223
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3764,14 +3774,14 @@ estado 222
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 83 (E)
 
 
-estado 223
+estado 224
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3793,13 +3803,13 @@ estado 223
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 84 (E)
 
 
-estado 224
+estado 225
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3821,12 +3831,12 @@ estado 224
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 85 (E)
 
 
-estado 225
+estado 226
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3851,7 +3861,7 @@ estado 225
     $padrão  reduzir usando a regra 86 (E)
 
 
-estado 226
+estado 227
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3873,21 +3883,21 @@ estado 226
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         deslocar, e ir ao estado 162
-    TK_OP_SUB         deslocar, e ir ao estado 163
-    TK_OP_MUL         deslocar, e ir ao estado 164
-    TK_OP_DIV         deslocar, e ir ao estado 165
-    TK_OP_MOD         deslocar, e ir ao estado 166
-    TK_OP_BIN_AND     deslocar, e ir ao estado 175
-    TK_OP_BIN_OR      deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR     deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 179
+    TK_OP_SUM         deslocar, e ir ao estado 163
+    TK_OP_SUB         deslocar, e ir ao estado 164
+    TK_OP_MUL         deslocar, e ir ao estado 165
+    TK_OP_DIV         deslocar, e ir ao estado 166
+    TK_OP_MOD         deslocar, e ir ao estado 167
+    TK_OP_BIN_AND     deslocar, e ir ao estado 176
+    TK_OP_BIN_OR      deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR     deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 91 (E)
 
 
-estado 227
+estado 228
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3909,21 +3919,21 @@ estado 227
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         deslocar, e ir ao estado 162
-    TK_OP_SUB         deslocar, e ir ao estado 163
-    TK_OP_MUL         deslocar, e ir ao estado 164
-    TK_OP_DIV         deslocar, e ir ao estado 165
-    TK_OP_MOD         deslocar, e ir ao estado 166
-    TK_OP_BIN_AND     deslocar, e ir ao estado 175
-    TK_OP_BIN_OR      deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR     deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 179
+    TK_OP_SUM         deslocar, e ir ao estado 163
+    TK_OP_SUB         deslocar, e ir ao estado 164
+    TK_OP_MUL         deslocar, e ir ao estado 165
+    TK_OP_DIV         deslocar, e ir ao estado 166
+    TK_OP_MOD         deslocar, e ir ao estado 167
+    TK_OP_BIN_AND     deslocar, e ir ao estado 176
+    TK_OP_BIN_OR      deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR     deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 92 (E)
 
 
-estado 228
+estado 229
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3945,21 +3955,21 @@ estado 228
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         deslocar, e ir ao estado 162
-    TK_OP_SUB         deslocar, e ir ao estado 163
-    TK_OP_MUL         deslocar, e ir ao estado 164
-    TK_OP_DIV         deslocar, e ir ao estado 165
-    TK_OP_MOD         deslocar, e ir ao estado 166
-    TK_OP_BIN_AND     deslocar, e ir ao estado 175
-    TK_OP_BIN_OR      deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR     deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 179
+    TK_OP_SUM         deslocar, e ir ao estado 163
+    TK_OP_SUB         deslocar, e ir ao estado 164
+    TK_OP_MUL         deslocar, e ir ao estado 165
+    TK_OP_DIV         deslocar, e ir ao estado 166
+    TK_OP_MOD         deslocar, e ir ao estado 167
+    TK_OP_BIN_AND     deslocar, e ir ao estado 176
+    TK_OP_BIN_OR      deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR     deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 93 (E)
 
 
-estado 229
+estado 230
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -3981,21 +3991,21 @@ estado 229
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM         deslocar, e ir ao estado 162
-    TK_OP_SUB         deslocar, e ir ao estado 163
-    TK_OP_MUL         deslocar, e ir ao estado 164
-    TK_OP_DIV         deslocar, e ir ao estado 165
-    TK_OP_MOD         deslocar, e ir ao estado 166
-    TK_OP_BIN_AND     deslocar, e ir ao estado 175
-    TK_OP_BIN_OR      deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR     deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 179
+    TK_OP_SUM         deslocar, e ir ao estado 163
+    TK_OP_SUB         deslocar, e ir ao estado 164
+    TK_OP_MUL         deslocar, e ir ao estado 165
+    TK_OP_DIV         deslocar, e ir ao estado 166
+    TK_OP_MOD         deslocar, e ir ao estado 167
+    TK_OP_BIN_AND     deslocar, e ir ao estado 176
+    TK_OP_BIN_OR      deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR     deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR  deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL  deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 94 (E)
 
 
-estado 230
+estado 231
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4017,25 +4027,25 @@ estado 230
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 89 (E)
 
 
-estado 231
+estado 232
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4057,25 +4067,25 @@ estado 231
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 90 (E)
 
 
-estado 232
+estado 233
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4097,27 +4107,27 @@ estado 232
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 88 (E)
 
 
-estado 233
+estado 234
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4139,27 +4149,27 @@ estado 233
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 87 (E)
 
 
-estado 234
+estado 235
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4181,16 +4191,16 @@ estado 234
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  deslocar, e ir ao estado 162
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_SUM  deslocar, e ir ao estado 163
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 95 (E)
 
 
-estado 235
+estado 236
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4212,16 +4222,16 @@ estado 235
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  deslocar, e ir ao estado 162
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_SUM  deslocar, e ir ao estado 163
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 96 (E)
 
 
-estado 236
+estado 237
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4243,44 +4253,13 @@ estado 236
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM  deslocar, e ir ao estado 162
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_SUM  deslocar, e ir ao estado 163
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 97 (E)
-
-
-estado 237
-
-   82 E: E . TK_OP_SUM E
-   83  | E . TK_OP_SUB E
-   84  | E . TK_OP_MUL E
-   85  | E . TK_OP_DIV E
-   86  | E . TK_OP_MOD E
-   87  | E . TK_OP_LOGIC_OR E
-   88  | E . TK_OP_LOGIC_AND E
-   89  | E . TK_OP_REL_EQ E
-   90  | E . TK_OP_REL_DIFF E
-   91  | E . TK_OP_REL_LESS E
-   92  | E . TK_OP_REL_GREATER E
-   93  | E . TK_OP_REL_EQLESS E
-   94  | E . TK_OP_REL_EQGREATER E
-   95  | E . TK_OP_BIN_AND E
-   96  | E . TK_OP_BIN_OR E
-   97  | E . TK_OP_BIN_XOR E
-   98  | E . TK_OP_BIN_SHIFTR E
-   98  | E TK_OP_BIN_SHIFTR E .
-   99  | E . TK_OP_BIN_SHIFTL E
-
-    TK_OP_SUM  deslocar, e ir ao estado 162
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
-
-    $padrão  reduzir usando a regra 98 (E)
 
 
 estado 238
@@ -4302,26 +4281,57 @@ estado 238
    96  | E . TK_OP_BIN_OR E
    97  | E . TK_OP_BIN_XOR E
    98  | E . TK_OP_BIN_SHIFTR E
+   98  | E TK_OP_BIN_SHIFTR E .
+   99  | E . TK_OP_BIN_SHIFTL E
+
+    TK_OP_SUM  deslocar, e ir ao estado 163
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
+
+    $padrão  reduzir usando a regra 98 (E)
+
+
+estado 239
+
+   82 E: E . TK_OP_SUM E
+   83  | E . TK_OP_SUB E
+   84  | E . TK_OP_MUL E
+   85  | E . TK_OP_DIV E
+   86  | E . TK_OP_MOD E
+   87  | E . TK_OP_LOGIC_OR E
+   88  | E . TK_OP_LOGIC_AND E
+   89  | E . TK_OP_REL_EQ E
+   90  | E . TK_OP_REL_DIFF E
+   91  | E . TK_OP_REL_LESS E
+   92  | E . TK_OP_REL_GREATER E
+   93  | E . TK_OP_REL_EQLESS E
+   94  | E . TK_OP_REL_EQGREATER E
+   95  | E . TK_OP_BIN_AND E
+   96  | E . TK_OP_BIN_OR E
+   97  | E . TK_OP_BIN_XOR E
+   98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
    99  | E TK_OP_BIN_SHIFTL E .
 
-    TK_OP_SUM  deslocar, e ir ao estado 162
-    TK_OP_SUB  deslocar, e ir ao estado 163
-    TK_OP_MUL  deslocar, e ir ao estado 164
-    TK_OP_DIV  deslocar, e ir ao estado 165
-    TK_OP_MOD  deslocar, e ir ao estado 166
+    TK_OP_SUM  deslocar, e ir ao estado 163
+    TK_OP_SUB  deslocar, e ir ao estado 164
+    TK_OP_MUL  deslocar, e ir ao estado 165
+    TK_OP_DIV  deslocar, e ir ao estado 166
+    TK_OP_MOD  deslocar, e ir ao estado 167
 
     $padrão  reduzir usando a regra 99 (E)
 
 
-estado 239
+estado 240
 
   149 TERMINAL: SIGNAL TK_ID VECTOR_P .
 
     $padrão  reduzir usando a regra 149 (TERMINAL)
 
 
-estado 240
+estado 241
 
    82 E: E . TK_OP_SUM E
    83  | E . TK_OP_SUB E
@@ -4343,29 +4353,29 @@ estado 240
    99  | E . TK_OP_BIN_SHIFTL E
   110 DECLARATION: DECLARATION ',' TK_ID TK_ASSIGN E .
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 110 (DECLARATION)
 
 
-estado 241
+estado 242
 
   152 VECTOR_SIZES: '[' E_C ']' . VECTOR_SIZES
 
@@ -4373,31 +4383,31 @@ estado 241
 
     $padrão  reduzir usando a regra 153 (VECTOR_SIZES)
 
-    VECTOR_SIZES  ir ao estado 260
+    VECTOR_SIZES  ir ao estado 261
 
 
-estado 242
+estado 243
 
    12 FUNCTION_HEADER: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS .
 
     $padrão  reduzir usando a regra 12 (FUNCTION_HEADER)
 
 
-estado 243
+estado 244
 
-   16 ARGS: TYPE OPTIONAL_ID ',' ARGS .
+   16 ARGS: ARGS ',' TYPE OPTIONAL_ID .
 
     $padrão  reduzir usando a regra 16 (ARGS)
 
 
-estado 244
+estado 245
 
    27 CALL_FUNCTION: TK_ID '(' OPTIONAL_PARAMETERS ')' .
 
     $padrão  reduzir usando a regra 27 (CALL_FUNCTION)
 
 
-estado 245
+estado 246
 
    23 PARAMETERS: PARAMETERS ',' . E
 
@@ -4407,7 +4417,7 @@ estado 245
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -4421,7 +4431,7 @@ estado 245
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E              ir ao estado 261
+    E              ir ao estado 262
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
     ATTRIBUITION   ir ao estado 111
@@ -4430,59 +4440,15 @@ estado 245
     SIGNAL         ir ao estado 116
 
 
-estado 246
+estado 247
 
   154 VECTOR_P: '[' E_C ']' . VECTOR_P
 
-    '['  deslocar, e ir ao estado 133
+    '['  deslocar, e ir ao estado 134
 
     $padrão  reduzir usando a regra 155 (VECTOR_P)
 
-    VECTOR_P  ir ao estado 262
-
-
-estado 247
-
-   82 E: E . TK_OP_SUM E
-   83  | E . TK_OP_SUB E
-   84  | E . TK_OP_MUL E
-   85  | E . TK_OP_DIV E
-   86  | E . TK_OP_MOD E
-   87  | E . TK_OP_LOGIC_OR E
-   88  | E . TK_OP_LOGIC_AND E
-   89  | E . TK_OP_REL_EQ E
-   90  | E . TK_OP_REL_DIFF E
-   91  | E . TK_OP_REL_LESS E
-   92  | E . TK_OP_REL_GREATER E
-   93  | E . TK_OP_REL_EQLESS E
-   94  | E . TK_OP_REL_EQGREATER E
-   95  | E . TK_OP_BIN_AND E
-   96  | E . TK_OP_BIN_OR E
-   97  | E . TK_OP_BIN_XOR E
-   98  | E . TK_OP_BIN_SHIFTR E
-   99  | E . TK_OP_BIN_SHIFTL E
-  106 ATTRIBUITION: TK_ID VECTOR_P TK_ASSIGN E .
-
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
-
-    $padrão  reduzir usando a regra 106 (ATTRIBUITION)
+    VECTOR_P  ir ao estado 263
 
 
 estado 248
@@ -4505,151 +4471,117 @@ estado 248
    97  | E . TK_OP_BIN_XOR E
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
+  106 ATTRIBUITION: TK_ID VECTOR_P TK_ASSIGN E .
+
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
+
+    $padrão  reduzir usando a regra 106 (ATTRIBUITION)
+
+
+estado 249
+
+   82 E: E . TK_OP_SUM E
+   83  | E . TK_OP_SUB E
+   84  | E . TK_OP_MUL E
+   85  | E . TK_OP_DIV E
+   86  | E . TK_OP_MOD E
+   87  | E . TK_OP_LOGIC_OR E
+   88  | E . TK_OP_LOGIC_AND E
+   89  | E . TK_OP_REL_EQ E
+   90  | E . TK_OP_REL_DIFF E
+   91  | E . TK_OP_REL_LESS E
+   92  | E . TK_OP_REL_GREATER E
+   93  | E . TK_OP_REL_EQLESS E
+   94  | E . TK_OP_REL_EQGREATER E
+   95  | E . TK_OP_BIN_AND E
+   96  | E . TK_OP_BIN_OR E
+   97  | E . TK_OP_BIN_XOR E
+   98  | E . TK_OP_BIN_SHIFTR E
+   99  | E . TK_OP_BIN_SHIFTL E
   108 OP_ASSIGN: TK_ID VECTOR_P TK_OP_ASSIGN E .
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 108 (OP_ASSIGN)
 
 
-estado 249
+estado 250
 
    28 COUT: TK_COUT '(' E_C ')' .
 
     $padrão  reduzir usando a regra 28 (COUT)
 
 
-estado 250
+estado 251
 
    29 COUT: TK_COUTN '(' E_C ')' .
 
     $padrão  reduzir usando a regra 29 (COUT)
 
 
-estado 251
+estado 252
 
    31 CIN: TK_CIN '(' E_C ')' .
 
     $padrão  reduzir usando a regra 31 (CIN)
 
 
-estado 252
+estado 253
 
   148 TERMINAL: TK_ID . VECTOR_P
 
-    '['  deslocar, e ir ao estado 133
+    '['  deslocar, e ir ao estado 134
 
     $padrão  reduzir usando a regra 155 (VECTOR_P)
 
-    VECTOR_P  ir ao estado 263
+    VECTOR_P  ir ao estado 264
 
 
-estado 253
+estado 254
 
    81 E: '(' TYPE ')' TERMINAL .
 
     $padrão  reduzir usando a regra 81 (E)
 
 
-estado 254
+estado 255
 
    53 IF: IF_C '(' E_C ')' . STATEMENT
    54   | IF_C '(' E_C ')' . STATEMENT TK_ELSE STATEMENT
-
-    TK_INT                deslocar, e ir ao estado 58
-    TK_FLOAT              deslocar, e ir ao estado 59
-    TK_SCIENTIFIC         deslocar, e ir ao estado 60
-    TK_CHAR               deslocar, e ir ao estado 61
-    TK_STRING             deslocar, e ir ao estado 62
-    TK_BOOL               deslocar, e ir ao estado 63
-    TK_ID                 deslocar, e ir ao estado 64
-    TK_TYPE_CHAR          deslocar, e ir ao estado 5
-    TK_TYPE_STRING        deslocar, e ir ao estado 6
-    TK_TYPE_INT           deslocar, e ir ao estado 47
-    TK_TYPE_VOID          deslocar, e ir ao estado 8
-    TK_TYPE_FLOAT         deslocar, e ir ao estado 9
-    TK_TYPE_DOUBLE        deslocar, e ir ao estado 10
-    TK_TYPE_BOOL          deslocar, e ir ao estado 11
-    TK_MODIFIER_UNSIGNED  deslocar, e ir ao estado 12
-    TK_MODIFIER_SIGNED    deslocar, e ir ao estado 13
-    TK_MODIFIER_SHORT     deslocar, e ir ao estado 14
-    TK_MODIFIER_LONG      deslocar, e ir ao estado 15
-    TK_OP_SUM             deslocar, e ir ao estado 65
-    TK_OP_SUB             deslocar, e ir ao estado 66
-    TK_OP_LOGIC_NOT       deslocar, e ir ao estado 67
-    TK_OP_BIN_NOT         deslocar, e ir ao estado 68
-    TK_RETURN             deslocar, e ir ao estado 69
-    TK_COUT               deslocar, e ir ao estado 70
-    TK_COUTN              deslocar, e ir ao estado 71
-    TK_CIN                deslocar, e ir ao estado 72
-    TK_IF                 deslocar, e ir ao estado 73
-    TK_SWITCH             deslocar, e ir ao estado 74
-    TK_CASE               deslocar, e ir ao estado 75
-    TK_DEFAULT            deslocar, e ir ao estado 76
-    TK_FOR                deslocar, e ir ao estado 77
-    TK_WHILE              deslocar, e ir ao estado 78
-    TK_DO                 deslocar, e ir ao estado 79
-    TK_BREAK              deslocar, e ir ao estado 80
-    TK_CONTINUE           deslocar, e ir ao estado 81
-    TK_GOTO               deslocar, e ir ao estado 82
-    TK_OP_INCREASE        deslocar, e ir ao estado 83
-    ';'                   deslocar, e ir ao estado 84
-    '('                   deslocar, e ir ao estado 85
-    '{'                   deslocar, e ir ao estado 38
-
-    CALL_FUNCTION  ir ao estado 86
-    COUT           ir ao estado 87
-    CIN            ir ao estado 88
-    SCOPE          ir ao estado 89
-    BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 264
-    RETURN         ir ao estado 92
-    IF_C           ir ao estado 93
-    IF             ir ao estado 94
-    WHILE_C        ir ao estado 95
-    WHILE          ir ao estado 96
-    DO_WHILE_C     ir ao estado 97
-    DO_WHILE       ir ao estado 98
-    FOR_C          ir ao estado 99
-    FOR            ir ao estado 100
-    LABEL          ir ao estado 101
-    GOTO           ir ao estado 102
-    CONTINUE       ir ao estado 103
-    BREAK          ir ao estado 104
-    SWITCH_C       ir ao estado 105
-    SWITCH         ir ao estado 106
-    E_C            ir ao estado 107
-    E              ir ao estado 108
-    INCREASE       ir ao estado 109
-    PREV_INCREASE  ir ao estado 110
-    ATTRIBUITION   ir ao estado 111
-    OP_ASSIGN      ir ao estado 112
-    DECLARATION    ir ao estado 113
-    TYPE           ir ao estado 114
-    TERMINAL       ir ao estado 115
-    SIGNAL         ir ao estado 116
-
-
-estado 255
-
-   56 WHILE: WHILE_C '(' E_C ')' . STATEMENT
 
     TK_INT                deslocar, e ir ao estado 58
     TK_FLOAT              deslocar, e ir ao estado 59
@@ -4727,6 +4659,84 @@ estado 255
 
 estado 256
 
+   56 WHILE: WHILE_C '(' E_C ')' . STATEMENT
+
+    TK_INT                deslocar, e ir ao estado 58
+    TK_FLOAT              deslocar, e ir ao estado 59
+    TK_SCIENTIFIC         deslocar, e ir ao estado 60
+    TK_CHAR               deslocar, e ir ao estado 61
+    TK_STRING             deslocar, e ir ao estado 62
+    TK_BOOL               deslocar, e ir ao estado 63
+    TK_ID                 deslocar, e ir ao estado 64
+    TK_TYPE_CHAR          deslocar, e ir ao estado 5
+    TK_TYPE_STRING        deslocar, e ir ao estado 6
+    TK_TYPE_INT           deslocar, e ir ao estado 47
+    TK_TYPE_VOID          deslocar, e ir ao estado 8
+    TK_TYPE_FLOAT         deslocar, e ir ao estado 9
+    TK_TYPE_DOUBLE        deslocar, e ir ao estado 10
+    TK_TYPE_BOOL          deslocar, e ir ao estado 11
+    TK_MODIFIER_UNSIGNED  deslocar, e ir ao estado 12
+    TK_MODIFIER_SIGNED    deslocar, e ir ao estado 13
+    TK_MODIFIER_SHORT     deslocar, e ir ao estado 14
+    TK_MODIFIER_LONG      deslocar, e ir ao estado 15
+    TK_OP_SUM             deslocar, e ir ao estado 65
+    TK_OP_SUB             deslocar, e ir ao estado 66
+    TK_OP_LOGIC_NOT       deslocar, e ir ao estado 67
+    TK_OP_BIN_NOT         deslocar, e ir ao estado 68
+    TK_RETURN             deslocar, e ir ao estado 69
+    TK_COUT               deslocar, e ir ao estado 70
+    TK_COUTN              deslocar, e ir ao estado 71
+    TK_CIN                deslocar, e ir ao estado 72
+    TK_IF                 deslocar, e ir ao estado 73
+    TK_SWITCH             deslocar, e ir ao estado 74
+    TK_CASE               deslocar, e ir ao estado 75
+    TK_DEFAULT            deslocar, e ir ao estado 76
+    TK_FOR                deslocar, e ir ao estado 77
+    TK_WHILE              deslocar, e ir ao estado 78
+    TK_DO                 deslocar, e ir ao estado 79
+    TK_BREAK              deslocar, e ir ao estado 80
+    TK_CONTINUE           deslocar, e ir ao estado 81
+    TK_GOTO               deslocar, e ir ao estado 82
+    TK_OP_INCREASE        deslocar, e ir ao estado 83
+    ';'                   deslocar, e ir ao estado 84
+    '('                   deslocar, e ir ao estado 85
+    '{'                   deslocar, e ir ao estado 38
+
+    CALL_FUNCTION  ir ao estado 86
+    COUT           ir ao estado 87
+    CIN            ir ao estado 88
+    SCOPE          ir ao estado 89
+    BEGIN_SCOPE    ir ao estado 40
+    STATEMENT      ir ao estado 266
+    RETURN         ir ao estado 92
+    IF_C           ir ao estado 93
+    IF             ir ao estado 94
+    WHILE_C        ir ao estado 95
+    WHILE          ir ao estado 96
+    DO_WHILE_C     ir ao estado 97
+    DO_WHILE       ir ao estado 98
+    FOR_C          ir ao estado 99
+    FOR            ir ao estado 100
+    LABEL          ir ao estado 101
+    GOTO           ir ao estado 102
+    CONTINUE       ir ao estado 103
+    BREAK          ir ao estado 104
+    SWITCH_C       ir ao estado 105
+    SWITCH         ir ao estado 106
+    E_C            ir ao estado 107
+    E              ir ao estado 108
+    INCREASE       ir ao estado 109
+    PREV_INCREASE  ir ao estado 110
+    ATTRIBUITION   ir ao estado 111
+    OP_ASSIGN      ir ao estado 112
+    DECLARATION    ir ao estado 113
+    TYPE           ir ao estado 114
+    TERMINAL       ir ao estado 115
+    SIGNAL         ir ao estado 116
+
+
+estado 257
+
    58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' . E_C ')' ';'
 
     TK_INT           deslocar, e ir ao estado 58
@@ -4735,7 +4745,7 @@ estado 256
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -4749,7 +4759,7 @@ estado 256
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    E_C            ir ao estado 266
+    E_C            ir ao estado 267
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -4759,7 +4769,7 @@ estado 256
     SIGNAL         ir ao estado 116
 
 
-estado 257
+estado 258
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' . OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT
 
@@ -4769,7 +4779,7 @@ estado 257
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -4785,8 +4795,8 @@ estado 257
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    OPTIONAL_E     ir ao estado 267
-    E_C            ir ao estado 216
+    OPTIONAL_E     ir ao estado 268
+    E_C            ir ao estado 217
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -4796,7 +4806,7 @@ estado 257
     SIGNAL         ir ao estado 116
 
 
-estado 258
+estado 259
 
    67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT . TERMINAL ')' STATEMENT
 
@@ -4806,15 +4816,15 @@ estado 258
     TK_CHAR        deslocar, e ir ao estado 61
     TK_STRING      deslocar, e ir ao estado 62
     TK_BOOL        deslocar, e ir ao estado 63
-    TK_ID          deslocar, e ir ao estado 252
+    TK_ID          deslocar, e ir ao estado 253
     TK_OP_SUM      deslocar, e ir ao estado 65
     TK_OP_SUB      deslocar, e ir ao estado 66
 
-    TERMINAL  ir ao estado 268
+    TERMINAL  ir ao estado 269
     SIGNAL    ir ao estado 116
 
 
-estado 259
+estado 260
 
    75 SWITCH: SWITCH_C '(' E_C ')' . STATEMENT
 
@@ -4864,7 +4874,7 @@ estado 259
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 269
+    STATEMENT      ir ao estado 270
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -4892,14 +4902,14 @@ estado 259
     SIGNAL         ir ao estado 116
 
 
-estado 260
+estado 261
 
   152 VECTOR_SIZES: '[' E_C ']' VECTOR_SIZES .
 
     $padrão  reduzir usando a regra 152 (VECTOR_SIZES)
 
 
-estado 261
+estado 262
 
    23 PARAMETERS: PARAMETERS ',' E .
    82 E: E . TK_OP_SUM E
@@ -4921,88 +4931,88 @@ estado 261
    98  | E . TK_OP_BIN_SHIFTR E
    99  | E . TK_OP_BIN_SHIFTL E
 
-    TK_OP_SUM            deslocar, e ir ao estado 162
-    TK_OP_SUB            deslocar, e ir ao estado 163
-    TK_OP_MUL            deslocar, e ir ao estado 164
-    TK_OP_DIV            deslocar, e ir ao estado 165
-    TK_OP_MOD            deslocar, e ir ao estado 166
-    TK_OP_REL_LESS       deslocar, e ir ao estado 167
-    TK_OP_REL_GREATER    deslocar, e ir ao estado 168
-    TK_OP_REL_EQLESS     deslocar, e ir ao estado 169
-    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 170
-    TK_OP_REL_EQ         deslocar, e ir ao estado 171
-    TK_OP_REL_DIFF       deslocar, e ir ao estado 172
-    TK_OP_LOGIC_AND      deslocar, e ir ao estado 173
-    TK_OP_LOGIC_OR       deslocar, e ir ao estado 174
-    TK_OP_BIN_AND        deslocar, e ir ao estado 175
-    TK_OP_BIN_OR         deslocar, e ir ao estado 176
-    TK_OP_BIN_XOR        deslocar, e ir ao estado 177
-    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 178
-    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 179
+    TK_OP_SUM            deslocar, e ir ao estado 163
+    TK_OP_SUB            deslocar, e ir ao estado 164
+    TK_OP_MUL            deslocar, e ir ao estado 165
+    TK_OP_DIV            deslocar, e ir ao estado 166
+    TK_OP_MOD            deslocar, e ir ao estado 167
+    TK_OP_REL_LESS       deslocar, e ir ao estado 168
+    TK_OP_REL_GREATER    deslocar, e ir ao estado 169
+    TK_OP_REL_EQLESS     deslocar, e ir ao estado 170
+    TK_OP_REL_EQGREATER  deslocar, e ir ao estado 171
+    TK_OP_REL_EQ         deslocar, e ir ao estado 172
+    TK_OP_REL_DIFF       deslocar, e ir ao estado 173
+    TK_OP_LOGIC_AND      deslocar, e ir ao estado 174
+    TK_OP_LOGIC_OR       deslocar, e ir ao estado 175
+    TK_OP_BIN_AND        deslocar, e ir ao estado 176
+    TK_OP_BIN_OR         deslocar, e ir ao estado 177
+    TK_OP_BIN_XOR        deslocar, e ir ao estado 178
+    TK_OP_BIN_SHIFTR     deslocar, e ir ao estado 179
+    TK_OP_BIN_SHIFTL     deslocar, e ir ao estado 180
 
     $padrão  reduzir usando a regra 23 (PARAMETERS)
 
 
-estado 262
+estado 263
 
   154 VECTOR_P: '[' E_C ']' VECTOR_P .
 
     $padrão  reduzir usando a regra 154 (VECTOR_P)
 
 
-estado 263
+estado 264
 
   148 TERMINAL: TK_ID VECTOR_P .
 
     $padrão  reduzir usando a regra 148 (TERMINAL)
 
 
-estado 264
+estado 265
 
    53 IF: IF_C '(' E_C ')' STATEMENT .
    54   | IF_C '(' E_C ')' STATEMENT . TK_ELSE STATEMENT
 
-    TK_ELSE  deslocar, e ir ao estado 270
+    TK_ELSE  deslocar, e ir ao estado 271
 
     $padrão  reduzir usando a regra 53 (IF)
 
 
-estado 265
+estado 266
 
    56 WHILE: WHILE_C '(' E_C ')' STATEMENT .
 
     $padrão  reduzir usando a regra 56 (WHILE)
 
 
-estado 266
+estado 267
 
    58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C . ')' ';'
 
-    ')'  deslocar, e ir ao estado 271
-
-
-estado 267
-
-   66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E . ';' OPTIONAL_E ')' STATEMENT
-
-    ';'  deslocar, e ir ao estado 272
+    ')'  deslocar, e ir ao estado 272
 
 
 estado 268
 
-   67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL . ')' STATEMENT
+   66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E . ';' OPTIONAL_E ')' STATEMENT
 
-    ')'  deslocar, e ir ao estado 273
+    ';'  deslocar, e ir ao estado 273
 
 
 estado 269
+
+   67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL . ')' STATEMENT
+
+    ')'  deslocar, e ir ao estado 274
+
+
+estado 270
 
    75 SWITCH: SWITCH_C '(' E_C ')' STATEMENT .
 
     $padrão  reduzir usando a regra 75 (SWITCH)
 
 
-estado 270
+estado 271
 
    54 IF: IF_C '(' E_C ')' STATEMENT TK_ELSE . STATEMENT
 
@@ -5052,7 +5062,7 @@ estado 270
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 274
+    STATEMENT      ir ao estado 275
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -5080,14 +5090,14 @@ estado 270
     SIGNAL         ir ao estado 116
 
 
-estado 271
+estado 272
 
    58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' . ';'
 
-    ';'  deslocar, e ir ao estado 275
+    ';'  deslocar, e ir ao estado 276
 
 
-estado 272
+estado 273
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' . OPTIONAL_E ')' STATEMENT
 
@@ -5097,7 +5107,7 @@ estado 272
     TK_CHAR          deslocar, e ir ao estado 61
     TK_STRING        deslocar, e ir ao estado 62
     TK_BOOL          deslocar, e ir ao estado 63
-    TK_ID            deslocar, e ir ao estado 135
+    TK_ID            deslocar, e ir ao estado 136
     TK_OP_SUM        deslocar, e ir ao estado 65
     TK_OP_SUB        deslocar, e ir ao estado 66
     TK_OP_LOGIC_NOT  deslocar, e ir ao estado 67
@@ -5113,8 +5123,8 @@ estado 272
     CALL_FUNCTION  ir ao estado 86
     COUT           ir ao estado 87
     CIN            ir ao estado 88
-    OPTIONAL_E     ir ao estado 276
-    E_C            ir ao estado 216
+    OPTIONAL_E     ir ao estado 277
+    E_C            ir ao estado 217
     E              ir ao estado 108
     INCREASE       ir ao estado 109
     PREV_INCREASE  ir ao estado 110
@@ -5124,7 +5134,7 @@ estado 272
     SIGNAL         ir ao estado 116
 
 
-estado 273
+estado 274
 
    67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' . STATEMENT
 
@@ -5174,7 +5184,7 @@ estado 273
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 277
+    STATEMENT      ir ao estado 278
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -5202,35 +5212,35 @@ estado 273
     SIGNAL         ir ao estado 116
 
 
-estado 274
+estado 275
 
    54 IF: IF_C '(' E_C ')' STATEMENT TK_ELSE STATEMENT .
 
     $padrão  reduzir usando a regra 54 (IF)
 
 
-estado 275
+estado 276
 
    58 DO_WHILE: DO_WHILE_C STATEMENT TK_WHILE '(' E_C ')' ';' .
 
     $padrão  reduzir usando a regra 58 (DO_WHILE)
 
 
-estado 276
+estado 277
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E . ')' STATEMENT
 
-    ')'  deslocar, e ir ao estado 278
+    ')'  deslocar, e ir ao estado 279
 
 
-estado 277
+estado 278
 
    67 FOR: FOR_C '(' ATTRIBUITION_OR_TERMINAL TK_DOT_DOT TERMINAL ')' STATEMENT .
 
     $padrão  reduzir usando a regra 67 (FOR)
 
 
-estado 278
+estado 279
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' . STATEMENT
 
@@ -5280,7 +5290,7 @@ estado 278
     CIN            ir ao estado 88
     SCOPE          ir ao estado 89
     BEGIN_SCOPE    ir ao estado 40
-    STATEMENT      ir ao estado 279
+    STATEMENT      ir ao estado 280
     RETURN         ir ao estado 92
     IF_C           ir ao estado 93
     IF             ir ao estado 94
@@ -5308,7 +5318,7 @@ estado 278
     SIGNAL         ir ao estado 116
 
 
-estado 279
+estado 280
 
    66 FOR: FOR_C '(' OPTIONAL_E_OR_DECLARATION ';' OPTIONAL_E ';' OPTIONAL_E ')' STATEMENT .
 

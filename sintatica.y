@@ -583,35 +583,35 @@ CLOSE_ARGS				: ')'
 						;
 
 
-
-ARGS					: TYPE OPTIONAL_ID ',' ARGS
+						
+ARGS					: ARGS ',' TYPE OPTIONAL_ID
 						{
-								if($2.label != "")							   	
+								if($4.label != "")							   	
 								{
 									identifiers_map* IDMap = stackIDMap.front();
 									unsigned int size = 1;
 
-		                            (*IDMap)[$2.label].label = generateID();
-		                            (*IDMap)[$2.label].type = $1.type;
-		                            (*IDMap)[$2.label].modifier = $1.modifier;
+		                            (*IDMap)[$4.label].label = generateID();
+		                            (*IDMap)[$4.label].type = $3.type;
+		                            (*IDMap)[$4.label].modifier = $3.modifier;
 
-									$$.label = (*IDMap)[$2.label].label;
-									$$.type = (*IDMap)[$2.label].type;
-									$$.modifier = (*IDMap)[$2.label].modifier;
+									$$.label = (*IDMap)[$4.label].label;
+									$$.type = (*IDMap)[$4.label].type;
+									$$.modifier = (*IDMap)[$4.label].modifier;
 
 									if($2.vectSizes.size() > 0)
 									{
-										for(int i = 0; i < $2.vectSizes.size(); i++)
-											size *= $2.vectSizes.at(i);
+										for(int i = 0; i < $4.vectSizes.size(); i++)
+											size *= $4.vectSizes.at(i);
 									}
 
 									/*chuta-se um tamanho para argumentos do tipo string*/
 									if($1.type == "string")
 											size *= 100;
 
-									$$.translation = $$.type + " " + $$.label + $2.translation + ", " + $4.translation;
-									$$.typesArgsFunction = $$.type + $2.translation + ", " + $4.typesArgsFunction;
-									$$.hasIdInArgs = $4.hasIdInArgs &&  true;
+									$$.translation = $$.type + " " + $$.label + $4.translation + ", " + $1.translation;
+									$$.typesArgsFunction = $$.type + $4.translation + ", " + $1.typesArgsFunction;
+									$$.hasIdInArgs = $1.hasIdInArgs &&  true;
 
 		                            if ($$.modifier != "")
 		                                    declare($$.label, $$.modifier + " " + $$.type, size);
@@ -620,9 +620,9 @@ ARGS					: TYPE OPTIONAL_ID ',' ARGS
 								}
 								else
 								{
-									$$.translation = $$.type + $2.translation + ", " + $4.translation;
-									$$.typesArgsFunction = $$.type + $2.translation + ", " + $4.typesArgsFunction;
-									$$.hasIdInArgs = $4.hasIdInArgs && false;
+									$$.translation = $$.type + $4.translation + ", " + $1.translation;
+									$$.typesArgsFunction = $$.type + $4.translation + ", " + $1.typesArgsFunction;
+									$$.hasIdInArgs = $1.hasIdInArgs && false;
 									$$.line = yylineno;
 								}
 									 
