@@ -420,6 +420,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							functions_map::iterator i;
 							function_struct* f;
 							int line;
+							string arguments;
 
 							if($1.hasIdInArgs == false)
 							{
@@ -428,9 +429,8 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 								yyerror("parameter name omitted");
 								yylineno = line;
 							}
-
-							declarations = "";
-							mallocTranslations = "";
+						
+							arguments = getFunctionArgs();
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -444,10 +444,14 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							f = &i->second;
 
 							$$.translation = $1.translation;
-							$$.translation += "(" + getFunctionArgs() + ")";
+							$$.translation += "(" + arguments + ")";
 							$$.translation += "\n{\n" + declarations + mallocTranslations + "\n";
+							$$.translation += $2.translation;
 							$$.translation += f->returnTranslation;
-							$$.translation += $2.translation + "}\n\n";;
+							$$.translation += "\n}\n\n";
+
+							declarations = "";
+							mallocTranslations = "";
 
 
 							/*muda o estado da função para definida*/
@@ -487,7 +491,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							functionMap = stackFunctionMap.front();
 							i = functionMap->find($1.idFunction);
 							f = &i->second;
-							freeMainTranslation += f->freeTranslation;
+							//freeMainTranslation += f->freeTranslation;
 
 							if(i != functionMap->end())
 							{
@@ -943,7 +947,10 @@ RETURN                  : TK_RETURN E_C
 											freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 										}
 										else
-											$$.translation = $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
+										{
+											$$.translation = $2.translation + cast->translation + "\n\t";
+											f->returnTranslation += $1.translation + " " + cast->label + ";";
+										}
 									}
 									else if(f->typeOfReturn == "string")
 									{
@@ -964,7 +971,10 @@ RETURN                  : TK_RETURN E_C
 										freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 									}
 									else
-	                                	f->returnTranslation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+									{
+										$$.translation = $2.translation + "\n";
+	                                	f->returnTranslation += "\t" + $1.translation + " " + $2.label+ ";";
+									}
 
 								}
 								else
