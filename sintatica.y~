@@ -39,6 +39,8 @@ typedef struct
 		/*traduções de comandos free*/
 		string freeTranslation;
 
+		string returnTranslation;
+
 } function_struct;
 
 typedef struct
@@ -410,6 +412,8 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 FUNCTION				: FUNCTION_HEADER SCOPE
 						{
 							functions_map* functionMap;
+							functions_map::iterator i;
+							function_struct* f;
 							int line;
 
 							if($1.hasIdInArgs == false)
@@ -419,11 +423,6 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 								yyerror("parameter name omitted");
 								yylineno = line;
 							}
-
-							$$.translation = $1.translation;
-							$$.translation += "(" + getFunctionArgs() + ")";
-							$$.translation += "\n{\n" + declarations + mallocTranslations + "\n";
-							$$.translation += $2.translation + "}\n\n";;
 
 							declarations = "";
 							mallocTranslations = "";
@@ -436,6 +435,14 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							idOfCurrentFunction.pop_front();
 
 							functionMap = stackFunctionMap.front();
+							i = functionMap->find($1.idFunction);
+							f = &i->second;
+
+							$$.translation = $1.translation;
+							$$.translation += "(" + getFunctionArgs() + ")";
+							$$.translation += "\n{\n" + declarations + mallocTranslations + "\n";
+							$$.translation += f->returnTranslation;
+							$$.translation += $2.translation + "}\n\n";;
 
 
 							/*muda o estado da função para definida*/
@@ -455,8 +462,12 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 						}
 						| MAIN_HEADER SCOPE
 						{
-							headMainTranslation += "{\n" + declarations + mallocTranslations + "\n";
-							scopeMainTranslation = $2.translation;
+							functions_map* functionMap;
+							functions_map::iterator i;
+							function_struct* f;
+
+							headMainTranslation += "{\n" + declarations + "\n";
+							scopeMainTranslation = mallocTranslations + $2.translation;
 
 							declarations = "";
 							mallocTranslations = "";
@@ -467,6 +478,17 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 
 							/*desempilha o identificador da função corrente*/
 							idOfCurrentFunction.pop_front();
+
+							functionMap = stackFunctionMap.front();
+							i = functionMap->find($1.idFunction);
+							f = &i->second;
+							freeMainTranslation += f->freeTranslation;
+
+							if(i != functionMap->end())
+							{
+								freeMainTranslation += f->freeTranslation;
+							}
+						
 						}
 						;
 
@@ -911,7 +933,7 @@ RETURN                  : TK_RETURN E_C
 											
 											$$.translation = $2.translation + cast->translation;
 											$$.translation += "\tstrcpy(" + idReturn.label + ", " + cast->label + ");\n";
-											$$.translation += "\n\t" + $1.translation + " " + idReturn.label + ";";
+											f->returnTranslation += "\n\t" + $1.translation + " " + idReturn.label + ";";
 
 											freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 										}
@@ -932,22 +954,22 @@ RETURN                  : TK_RETURN E_C
 
 										$$.translation = $2.translation + "\n";
 										$$.translation += "\tstrcpy(" + idReturn.label + ", " + $2.label + ");\n";
-										$$.translation += "\t" + $1.translation + " " + idReturn.label + ";";
+										f->returnTranslation += "\t" + $1.translation + " " + idReturn.label + ";";
 
 										freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 									}
 									else
-	                                	$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+	                                	f->returnTranslation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
 
 								}
 								else
 	                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
 
-								if(idFunction == idMainFunction)
+								/*if(idFunction == idMainFunction)
 								{
 									returnMainTranslation = $$.translation;
 									$$.translation = "";
-								}
+								}*/
 									
                         }
                         ;
@@ -1867,7 +1889,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
 								if($4.isConstant == false)
 								{
 									pointer = "*";
-									$$.translation += dinamicallyVectDeclaration($$, $4);
+									addMalloc(dinamicallyVectDeclaration($$, $4));
 								}
 								else if($4.vectSizes.size() > 0)
 								{
@@ -1929,7 +1951,6 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                 $$.translation = "";
                                 $$.type = (*IDMap)[$2.label].type;
                                 $$.modifier = (*IDMap)[$2.label].modifier;
-
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								//if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
@@ -2337,7 +2358,7 @@ VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 							$$.vectSizes = $4.vectSizes;
 							$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
 
-							$$.isConstant = true;//$2.isConstant && $4.isConstant;
+							$$.isConstant = $2.isConstant && $4.isConstant;
 							$$.translation = "[" + $2.label + "]" + $4.translation;
 						}
 						|
@@ -2731,14 +2752,14 @@ YYSTYPE toString(YYSTYPE n)
 		length = 100;
 		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
 		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
-		res->translation += "\t" + res->label + "[" + length-1 + "] = " + "'\\0';\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "double")
 	{
 		length = 100;
 		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
 		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
-		res->translation += "\t" + res->label + "[" + length-1 + "] = " + "'\\0';\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 
 	declare(res->label, res->type, length);
@@ -2869,7 +2890,11 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes)
 	i = functionMap->find(idOfCurrentFunction.front());
 
 	if(i != functionMap->end())
-		freeMainTranslation += "\tfree(" + id.label + ");\n";
+	{
+		f = &i->second;
+		f->freeTranslation += "\tfree(" + id.label + ");\n";
+		//freeMainTranslation += "\tfree(" + id.label + ");\n";
+	}
 
 	sizesToMalloc = generateIntValue(1);
 
