@@ -1,6 +1,6 @@
 int main(void)
 {
-	int d;
+	/*int d;
 	int size;
 	
 	cout("\nEnter the value to d: ");
@@ -9,7 +9,11 @@ int main(void)
 	cout("\nEnter the size of matrix: ");
 	cin(size);
 
-	float matrix[size][size];
+	float matrix[size][size];*/
+
+	string a;
+
+	cin(a);
 
 	return 0;
 }
