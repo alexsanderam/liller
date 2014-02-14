@@ -196,11 +196,13 @@ typedef map<string, variable_declarations_struct> declarations_map;
 typedef map<string, function_struct> functions_map;
 typedef map<string, label_struct> labels_map;
 typedef map<string, case_label_struct> case_label_map;
+typedef vector<string> mallocs_vector;
 				
 
 /*pilhas para controle de escopo*/
 list<identifiers_map*> stackIDMap;
 list<declarations_map*> stackDeclarationsMap;
+list<mallocs_vector*> stackMallocsMap;
 list<functions_map*> stackFunctionMap;
 
 
@@ -225,6 +227,9 @@ const string voidStr = "";
 
 /*declaraçãoes (todas referente a atual função)*/
 string declarations = "";
+
+/*tradução de malloc no início de uma função*/
+string mallocTranslations = "";
 
 /*headers de todas as funções*/
 string headersFunctions = "";
@@ -262,6 +267,8 @@ unsigned int countMain = 0;
 
 /*tradução de frees na main*/
 string freeMainTranslation = "";
+/*tradução do return da main*/
+string returnMainTranslation = "";
 
 
 int yylex(void);
@@ -292,6 +299,8 @@ label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string);
 bool isDeclaredFunctionInCurrentScope(string);
 void declare(string, string, unsigned int);
+string getMallocs();
+void addMalloc(string);
 string normalizedType(string);
 unsigned int getDeclarationLength(YYSTYPE);
 bool setDeclarationLength(YYSTYPE, unsigned int);
@@ -308,7 +317,7 @@ void loadOpearationsMap(void);
 
 
 /* Line 268 of yacc.c  */
-#line 312 "y.tab.c"
+#line 321 "y.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -482,7 +491,7 @@ typedef int YYSTYPE;
 
 
 /* Line 343 of yacc.c  */
-#line 486 "y.tab.c"
+#line 495 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -839,22 +848,22 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   287,   287,   331,   337,   351,   368,   369,   376,   381,
-     382,   398,   443,   463,   492,   524,   533,   538,   581,   625,
-     635,   645,   660,   662,   669,   676,   685,   686,   687,   736,
-     741,   746,   753,   766,   775,   788,   802,   807,   814,   815,
-     816,   825,   826,   827,   828,   829,   830,   837,   838,   839,
-     840,   841,   849,   923,   930,   949,   974,   993,  1026,  1045,
-    1077,  1078,  1082,  1083,  1089,  1090,  1095,  1118,  1161,  1228,
-    1250,  1279,  1305,  1323,  1338,  1353,  1373,  1418,  1436,  1446,
-    1447,  1448,  1449,  1458,  1462,  1466,  1470,  1474,  1478,  1482,
-    1486,  1492,  1498,  1504,  1510,  1516,  1522,  1526,  1530,  1534,
-    1538,  1542,  1556,  1574,  1575,  1581,  1643,  1703,  1727,  1731,
-    1806,  1849,  1874,  1915,  1942,  1948,  1954,  1960,  1966,  1972,
-    1978,  1984,  1990,  1996,  2002,  2008,  2014,  2020,  2026,  2032,
-    2038,  2044,  2050,  2056,  2062,  2068,  2074,  2080,  2086,  2096,
-    2108,  2119,  2131,  2143,  2155,  2166,  2178,  2190,  2203,  2218,
-    2246,  2284,  2284,  2289,  2306,  2316,  2328
+       0,   296,   296,   343,   349,   363,   380,   381,   388,   393,
+     394,   410,   456,   476,   510,   542,   551,   556,   599,   643,
+     653,   663,   678,   680,   687,   694,   703,   704,   705,   754,
+     759,   764,   771,   784,   793,   806,   821,   826,   833,   834,
+     835,   844,   845,   846,   847,   848,   849,   856,   857,   858,
+     859,   860,   868,   959,   966,   985,  1010,  1029,  1062,  1081,
+    1113,  1114,  1118,  1119,  1125,  1126,  1131,  1154,  1197,  1264,
+    1286,  1315,  1341,  1359,  1374,  1389,  1409,  1454,  1472,  1482,
+    1483,  1484,  1485,  1494,  1498,  1502,  1506,  1510,  1514,  1518,
+    1522,  1528,  1534,  1540,  1546,  1552,  1558,  1562,  1566,  1570,
+    1574,  1578,  1592,  1610,  1611,  1617,  1679,  1739,  1763,  1767,
+    1842,  1885,  1910,  1952,  1979,  1985,  1991,  1997,  2003,  2009,
+    2015,  2021,  2027,  2033,  2039,  2045,  2051,  2057,  2063,  2069,
+    2075,  2081,  2087,  2093,  2099,  2105,  2111,  2117,  2123,  2133,
+    2145,  2156,  2168,  2180,  2192,  2203,  2215,  2227,  2241,  2256,
+    2284,  2322,  2322,  2327,  2344,  2354,  2366
 };
 #endif
 
@@ -2027,7 +2036,7 @@ yyreduce:
         case 2:
 
 /* Line 1806 of yacc.c  */
-#line 288 "sintatica.y"
+#line 297 "sintatica.y"
     {
 							verifyLabels(); /*verifica se há erros relacionados à rótulos*/
 							verifyMain(); /*verifica se há inconsistência com relação a main*/
@@ -2059,6 +2068,9 @@ yyreduce:
 							(yyval).translation += globalDeclarationsTranslation;
 							(yyval).translation += "\t/*-------------------------------*/\n\n";
 							(yyval).translation += scopeMainTranslation;
+							(yyval).translation += freeMainTranslation;
+							(yyval).translation += returnMainTranslation;
+							(yyval).translation += "\n}\n\n";
 
 							(yyval).translation += (yyvsp[(2) - (2)]).translation;
 
@@ -2071,7 +2083,7 @@ yyreduce:
   case 3:
 
 /* Line 1806 of yacc.c  */
-#line 331 "sintatica.y"
+#line 343 "sintatica.y"
     {
                                 openNewScope();        
                         }
@@ -2080,7 +2092,7 @@ yyreduce:
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 338 "sintatica.y"
+#line 350 "sintatica.y"
     {
 							(yyval).translation = "";
 							(yyval).idFunction = (yyvsp[(2) - (5)]).translation + " (void)";
@@ -2099,7 +2111,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 352 "sintatica.y"
+#line 364 "sintatica.y"
     {
 							(yyval).translation = "";
 							(yyval).idFunction = (yyvsp[(2) - (4)]).translation + " (void)";
@@ -2118,7 +2130,7 @@ yyreduce:
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 370 "sintatica.y"
+#line 382 "sintatica.y"
     {
 							(yyval).translation = (yyvsp[(1) - (2)]).translation + (yyvsp[(2) - (2)]).translation;
 						}
@@ -2127,7 +2139,7 @@ yyreduce:
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 377 "sintatica.y"
+#line 389 "sintatica.y"
     {
 							globalDeclarationsTranslation += (yyvsp[(1) - (2)]).translation;
 							(yyval).translation = "";
@@ -2137,7 +2149,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 383 "sintatica.y"
+#line 395 "sintatica.y"
     {	
 							(yyval).translation = "";
 							headersFunctions += (yyvsp[(1) - (2)]).translation;
@@ -2155,7 +2167,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 399 "sintatica.y"
+#line 411 "sintatica.y"
     {
 							functions_map* functionMap;
 							int line;
@@ -2170,10 +2182,11 @@ yyreduce:
 
 							(yyval).translation = (yyvsp[(1) - (2)]).translation;
 							(yyval).translation += "(" + getFunctionArgs() + ")";
-							(yyval).translation += "\n{\n" + declarations + "\n";
-							(yyval).translation += (yyvsp[(2) - (2)]).translation;
+							(yyval).translation += "\n{\n" + declarations + mallocTranslations + "\n";
+							(yyval).translation += (yyvsp[(2) - (2)]).translation + "}\n\n";;
 
 							declarations = "";
+							mallocTranslations = "";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -2183,7 +2196,7 @@ yyreduce:
 							idOfCurrentFunction.pop_front();
 
 							functionMap = stackFunctionMap.front();
-							(yyval).translation += (*functionMap)[(yyvsp[(1) - (2)]).idFunction].freeTranslation + "}\n\n";
+
 
 							/*muda o estado da função para definida*/
 							if((*functionMap)[(yyvsp[(1) - (2)]).idFunction].defined == false)
@@ -2205,13 +2218,13 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 444 "sintatica.y"
+#line 457 "sintatica.y"
     {
-							headMainTranslation += "{\n" + declarations + "\n";
+							headMainTranslation += "{\n" + declarations + mallocTranslations + "\n";
 							scopeMainTranslation = (yyvsp[(2) - (2)]).translation;
-							scopeMainTranslation += "}\n\n";
 
 							declarations = "";
+							mallocTranslations = "";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -2225,9 +2238,10 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 464 "sintatica.y"
+#line 477 "sintatica.y"
     {
 							string id;
+							string type;
 							(yyval).idFunction = (yyvsp[(2) - (5)]).label + "(" + (yyvsp[(4) - (5)]).typesArgsFunction + ")";
 							idOfCurrentFunction.push_front((yyval).idFunction);
 
@@ -2247,10 +2261,14 @@ yyreduce:
 							else
 									id = (*functionMap)[(yyval).idFunction].label;
 
+							if((yyvsp[(1) - (5)]).type == "string")
+								type = "char*";
+							else
+								type = (yyvsp[(1) - (5)]).type;
+
 							(yyval).label = id;
 							(yyval).typesArgsFunction = (yyvsp[(4) - (5)]).typesArgsFunction;
-							//$$.translation = $1.type + " " + id;
-							(yyval).translation = normalizedType((yyvsp[(1) - (5)]).type) + " " + id;
+							(yyval).translation = type + " " + id;
 							(yyval).hasIdInArgs = (yyvsp[(4) - (5)]).hasIdInArgs;
 							(yyval).line = (yyvsp[(4) - (5)]).line;
 						}
@@ -2259,7 +2277,7 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 493 "sintatica.y"
+#line 511 "sintatica.y"
     {
 							string id;
 							(yyval).idFunction = (yyvsp[(1) - (4)]).label + "(" + (yyvsp[(3) - (4)]).typesArgsFunction + ")";
@@ -2292,7 +2310,7 @@ yyreduce:
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 525 "sintatica.y"
+#line 543 "sintatica.y"
     {
 							/*cria uma nova entrada na pilha
 							para armazenar os argumentos da função*/
@@ -2303,7 +2321,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 539 "sintatica.y"
+#line 557 "sintatica.y"
     {
 								if((yyvsp[(2) - (4)]).label != "")							   	
 								{
@@ -2351,7 +2369,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 582 "sintatica.y"
+#line 600 "sintatica.y"
     {
 							if((yyvsp[(2) - (2)]).label != "")
 							{
@@ -2399,7 +2417,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 625 "sintatica.y"
+#line 643 "sintatica.y"
     {
 							(yyval).translation = "";
 							(yyval).typesArgsFunction = "void";
@@ -2411,7 +2429,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 636 "sintatica.y"
+#line 654 "sintatica.y"
     {
 							(yyval).vectSizes = (yyvsp[(2) - (2)]).vectSizes;
 							(yyval).vectPositions = (yyvsp[(2) - (2)]).vectPositions;
@@ -2426,7 +2444,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 646 "sintatica.y"
+#line 664 "sintatica.y"
     {
 							(yyval).label = "";
 
@@ -2443,7 +2461,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 662 "sintatica.y"
+#line 680 "sintatica.y"
     {
 							(yyval).typesArgsFunction = "void";
 							(yyval).label = "";
@@ -2454,7 +2472,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 670 "sintatica.y"
+#line 688 "sintatica.y"
     {
 							(yyval).translation = (yyvsp[(1) - (3)]).translation + (yyvsp[(3) - (3)]).translation;
 							(yyval).label = (yyvsp[(1) - (3)]).label + ", " + (yyvsp[(3) - (3)]).label;
@@ -2466,7 +2484,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 677 "sintatica.y"
+#line 695 "sintatica.y"
     {
 							(yyval).typesArgsFunction = (yyvsp[(1) - (1)]).type;
 							(yyval).label = (yyvsp[(1) - (1)]).label;
@@ -2477,7 +2495,7 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 688 "sintatica.y"
+#line 706 "sintatica.y"
     {
 							function_struct* f;
 							YYSTYPE* ass;
@@ -2528,7 +2546,7 @@ yyreduce:
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 737 "sintatica.y"
+#line 755 "sintatica.y"
     {
                                 (yyval).translation = (yyvsp[(3) - (4)]).translation + "\n\tcout << ";
 								(yyval).translation += (yyvsp[(3) - (4)]).label + ((yyvsp[(3) - (4)]).vectPositions.size() > 0 ? "[" + (yyvsp[(3) - (4)]).posLabel + "]" : "") + ";\n";
@@ -2538,7 +2556,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 742 "sintatica.y"
+#line 760 "sintatica.y"
     {
 								(yyval).translation = (yyvsp[(3) - (4)]).translation + "\n\tcout << ";
 								(yyval).translation += (yyvsp[(3) - (4)]).label + ((yyvsp[(3) - (4)]).vectPositions.size() > 0 ? "[" + (yyvsp[(3) - (4)]).posLabel + "]" : "") + " << endl;\n";
@@ -2548,7 +2566,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 747 "sintatica.y"
+#line 765 "sintatica.y"
     {
 								(yyval).translation = "\n\tcout << endl;";
 						}
@@ -2557,21 +2575,21 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 754 "sintatica.y"
+#line 772 "sintatica.y"
     {
                                 (yyval).translation = (yyvsp[(3) - (4)]).translation;
 								(yyval).translation += "\n\tcin >> " + (yyvsp[(3) - (4)]).label + ((yyvsp[(3) - (4)]).vectPositions.size() > 0 ? "[" + (yyvsp[(3) - (4)]).posLabel + "]" : "") + ";\n";
 
 								//redeclara, atualizando o tamanho da string*/
-								if(((yyvsp[(3) - (4)]).type == "string") && (getDeclarationLength((yyvsp[(3) - (4)])) < 100))
-									declare((yyvsp[(3) - (4)]).label, (yyvsp[(3) - (4)]).modifier + ((yyvsp[(3) - (4)]).modifier != "" ? " " : "") + (yyvsp[(3) - (4)]).type, 100);
+								if(((yyvsp[(3) - (4)]).type == "string") && (getDeclarationLength((yyvsp[(3) - (4)])) < 1000))
+									declare((yyvsp[(3) - (4)]).label, (yyvsp[(3) - (4)]).modifier + ((yyvsp[(3) - (4)]).modifier != "" ? " " : "") + (yyvsp[(3) - (4)]).type, 1000);
                         }
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 767 "sintatica.y"
+#line 785 "sintatica.y"
     {
                                 (yyval).translation =  (yyvsp[(1) - (3)]).translation + (yyvsp[(2) - (3)]).translation + (yyvsp[(3) - (3)]).translation;
                         }
@@ -2580,7 +2598,7 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 776 "sintatica.y"
+#line 794 "sintatica.y"
     {
                                 openNewScope();                        
                                 (yyval).translation = "";
@@ -2594,9 +2612,10 @@ yyreduce:
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 789 "sintatica.y"
+#line 807 "sintatica.y"
     {
                                 declarations += getDeclarations();
+								mallocTranslations += getMallocs();
                                 closeCurrentScope(); /*desempilha*/                                
                                 (yyval).translation = "";
 
@@ -2609,7 +2628,7 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 803 "sintatica.y"
+#line 822 "sintatica.y"
     {
                                 (yyval).translation = (yyvsp[(1) - (2)]).translation + "\n" + (yyvsp[(2) - (2)]).translation;
                         }
@@ -2618,7 +2637,7 @@ yyreduce:
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 807 "sintatica.y"
+#line 826 "sintatica.y"
     {
                                 (yyval).translation = "";
                         }
@@ -2627,7 +2646,7 @@ yyreduce:
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 817 "sintatica.y"
+#line 836 "sintatica.y"
     {
                                 /*controle de declarações, quando tais não são permititdas (exemplo: if, for, ...)*/
                                 if(flagDeclarationNotAllowed)
@@ -2641,7 +2660,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 831 "sintatica.y"
+#line 850 "sintatica.y"
     {
 							(yyval).translation = (yyvsp[(1) - (2)]).translation + (yyvsp[(2) - (2)]).translation;
 							(yyval).label = (yyvsp[(2) - (2)]).label;
@@ -2653,7 +2672,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 842 "sintatica.y"
+#line 861 "sintatica.y"
     {
                                 (yyval).translation = "";
                         }
@@ -2662,7 +2681,7 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 850 "sintatica.y"
+#line 869 "sintatica.y"
     {
 								functions_map* functionMap;
 								functions_map::iterator i;
@@ -2671,16 +2690,14 @@ yyreduce:
 								YYSTYPE func;
 								function_struct* f;
 				
-								string free = "";
-								string label;
+								string idMainFunction = "main (void)";
+								YYSTYPE idReturn;
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
-								i = functionMap->find(idOfCurrentFunction.front());
+								string idFunction = idOfCurrentFunction.front();
+								i = functionMap->find(idFunction);
 
-								/*enxerta as traduções de free antes do return no main*/
-								if(idOfCurrentFunction.front() == "main (void)")
-									free = freeMainTranslation;
-
+								/*enxerta as traduções de free antes do return no main*/									
 								if(i != functionMap->end())
 								{
 									f = &(i->second);
@@ -2698,44 +2715,63 @@ yyreduce:
 
 										else if(f->typeOfReturn == "string")
 										{
-											label = generateID();
+											idReturn.label = generateID();
+											idReturn.translation = "";
+											idReturn.type = cast->type;
+											idReturn.modifier = cast->modifier;
 
+											//declara a variável globalmente e realiza o malloc
 											declarations_map* declarationsMap = stackDeclarationsMap.back();
-											(*declarationsMap)[label] = {"char*", getDeclarationLength(*cast)};
+											(*declarationsMap)[idReturn.label] = {(yyvsp[(2) - (2)]).type, 0};
+											addMalloc(dinamicallyVectDeclaration(idReturn, (yyvsp[(2) - (2)])));
+											
+											(yyval).translation = (yyvsp[(2) - (2)]).translation + cast->translation;
+											(yyval).translation += "\tstrcpy(" + idReturn.label + ", " + cast->label + ");\n";
+											(yyval).translation += "\n\t" + (yyvsp[(1) - (2)]).translation + " " + idReturn.label + ";";
 
-											(yyval).translation = free + (yyvsp[(2) - (2)]).translation + cast->translation;
-											(yyval).translation += "\tstrcpy(" + label + ", " + cast->label + ");\n";
-											(yyval).translation += "\n\t" + (yyvsp[(1) - (2)]).translation + " " + label + ";";
-											freeMainTranslation += "\tfree(" + label + ")";
+											freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 										}
 										else
-											(yyval).translation = free + (yyvsp[(2) - (2)]).translation + cast->translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + cast->label + ";";
+											(yyval).translation = (yyvsp[(2) - (2)]).translation + cast->translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + cast->label + ";";
 									}
 									else if(f->typeOfReturn == "string")
 									{
-										label = generateID();
+										idReturn.label = generateID();
+										idReturn.translation = "";
+										idReturn.type = (yyvsp[(2) - (2)]).type;
+										idReturn.modifier = (yyvsp[(2) - (2)]).modifier;
 
+										//declara a variável globalmente e realiza o malloc
 										declarations_map* declarationsMap = stackDeclarationsMap.back();
-										(*declarationsMap)[label] = {"char*", getDeclarationLength((yyvsp[(2) - (2)]))};
+										(*declarationsMap)[idReturn.label] = {(yyvsp[(2) - (2)]).type, 0};
+										addMalloc(dinamicallyVectDeclaration(idReturn, (yyvsp[(2) - (2)])));
 
-										headMainTranslation += "\tchar* " + label + ";\n";
-										(yyval).translation = "\tstrcpy(" + label + ", " + (yyvsp[(2) - (2)]).label + ");\n";
-										(yyval).translation += free + (yyvsp[(2) - (2)]).translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + label+ ";";
-										freeMainTranslation += "\tfree(" + label + ")";
+										(yyval).translation = (yyvsp[(2) - (2)]).translation + "\n";
+										(yyval).translation += "\tstrcpy(" + idReturn.label + ", " + (yyvsp[(2) - (2)]).label + ");\n";
+										(yyval).translation += "\t" + (yyvsp[(1) - (2)]).translation + " " + idReturn.label + ";";
+
+										freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 									}
 									else
-		                                	(yyval).translation = free + (yyvsp[(2) - (2)]).translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + (yyvsp[(2) - (2)]).label+ ";";
+	                                	(yyval).translation = (yyvsp[(2) - (2)]).translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + (yyvsp[(2) - (2)]).label+ ";";
 
 								}
 								else
-	                                (yyval).translation = free + (yyvsp[(2) - (2)]).translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + (yyvsp[(2) - (2)]).label + ";";
+	                                (yyval).translation = (yyvsp[(2) - (2)]).translation + "\n\t" + (yyvsp[(1) - (2)]).translation + " " + (yyvsp[(2) - (2)]).label + ";";
+
+								if(idFunction == idMainFunction)
+								{
+									returnMainTranslation = (yyval).translation;
+									(yyval).translation = "";
+								}
+									
                         }
     break;
 
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 924 "sintatica.y"
+#line 960 "sintatica.y"
     {
 							/*controle de declaraçãoes*/
 							flagDeclarationNotAllowed = true;
@@ -2745,7 +2781,7 @@ yyreduce:
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 931 "sintatica.y"
+#line 967 "sintatica.y"
     {                                
                                 YYSTYPE notE;
                                 string labelEndIF = generateLabel();
@@ -2769,7 +2805,7 @@ yyreduce:
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 950 "sintatica.y"
+#line 986 "sintatica.y"
     {
                                 YYSTYPE notE;
                                 string labelEndCmd1 = generateLabel();
@@ -2796,7 +2832,7 @@ yyreduce:
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 975 "sintatica.y"
+#line 1011 "sintatica.y"
     {
 							/*controle de declaraçãoes*/
 						                    flagDeclarationNotAllowed = true;
@@ -2817,7 +2853,7 @@ yyreduce:
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 994 "sintatica.y"
+#line 1030 "sintatica.y"
     {
                                 YYSTYPE notE;
                                 string labelBeginWhile = stackBeginLabels.front();
@@ -2852,7 +2888,7 @@ yyreduce:
   case 58:
 
 /* Line 1806 of yacc.c  */
-#line 1027 "sintatica.y"
+#line 1063 "sintatica.y"
     {
 					/*controle de declaraçãoes*/
 		                            flagDeclarationNotAllowed = true;
@@ -2873,7 +2909,7 @@ yyreduce:
   case 59:
 
 /* Line 1806 of yacc.c  */
-#line 1046 "sintatica.y"
+#line 1082 "sintatica.y"
     {
                                 string labelBeginDoWhile = stackBeginLabels.front();
                                 string labelEndDoWhile = stackEndLabels.front();
@@ -2905,7 +2941,7 @@ yyreduce:
   case 66:
 
 /* Line 1806 of yacc.c  */
-#line 1096 "sintatica.y"
+#line 1132 "sintatica.y"
     {
 				/*controle de declaraçãoes*/
 		        flagDeclarationNotAllowed = true;
@@ -2930,7 +2966,7 @@ yyreduce:
   case 67:
 
 /* Line 1806 of yacc.c  */
-#line 1119 "sintatica.y"
+#line 1155 "sintatica.y"
     {
                             YYSTYPE notE;
                             string labelBeginFor = generateLabel();
@@ -2978,7 +3014,7 @@ yyreduce:
   case 68:
 
 /* Line 1806 of yacc.c  */
-#line 1162 "sintatica.y"
+#line 1198 "sintatica.y"
     {
                             YYSTYPE expr; /*expressão que controla a parada do for*/
 						  	YYSTYPE value; /*constante 1*/
@@ -3047,7 +3083,7 @@ yyreduce:
   case 69:
 
 /* Line 1806 of yacc.c  */
-#line 1229 "sintatica.y"
+#line 1265 "sintatica.y"
     {
 				label_struct* l;
 
@@ -3074,7 +3110,7 @@ yyreduce:
   case 70:
 
 /* Line 1806 of yacc.c  */
-#line 1251 "sintatica.y"
+#line 1287 "sintatica.y"
     {
 				case_label_map* caseLabelMap = stackCaseLabel.front();
 				string newLabel;
@@ -3108,7 +3144,7 @@ yyreduce:
   case 71:
 
 /* Line 1806 of yacc.c  */
-#line 1280 "sintatica.y"
+#line 1316 "sintatica.y"
     {
 				case_label_map* caseLabelMap = stackCaseLabel.front();
 				string newLabel;
@@ -3134,7 +3170,7 @@ yyreduce:
   case 72:
 
 /* Line 1806 of yacc.c  */
-#line 1306 "sintatica.y"
+#line 1342 "sintatica.y"
     {
 				label_struct* l;
 
@@ -3153,7 +3189,7 @@ yyreduce:
   case 73:
 
 /* Line 1806 of yacc.c  */
-#line 1324 "sintatica.y"
+#line 1360 "sintatica.y"
     {
 				if(!flagContinue)
 					yyerror("continue statement not within a loop");
@@ -3170,7 +3206,7 @@ yyreduce:
   case 74:
 
 /* Line 1806 of yacc.c  */
-#line 1339 "sintatica.y"
+#line 1375 "sintatica.y"
     {
 				if(!flagBreak)
 					yyerror("break statement not within loop or switch");
@@ -3187,7 +3223,7 @@ yyreduce:
   case 75:
 
 /* Line 1806 of yacc.c  */
-#line 1354 "sintatica.y"
+#line 1390 "sintatica.y"
     {
 				/*controle do break*/
 				flagBreak = true;
@@ -3209,7 +3245,7 @@ yyreduce:
   case 76:
 
 /* Line 1806 of yacc.c  */
-#line 1374 "sintatica.y"
+#line 1410 "sintatica.y"
     {
 				YYSTYPE ass;
 				YYSTYPE op;
@@ -3255,7 +3291,7 @@ yyreduce:
   case 77:
 
 /* Line 1806 of yacc.c  */
-#line 1419 "sintatica.y"
+#line 1455 "sintatica.y"
     {
 							/*controle para alertar a recursão de operações relacionais*/
 		                   	(yyval).relationalCounter = 0;
@@ -3274,7 +3310,7 @@ yyreduce:
   case 78:
 
 /* Line 1806 of yacc.c  */
-#line 1437 "sintatica.y"
+#line 1473 "sintatica.y"
     {
                                 (yyval).translation = (yyvsp[(2) - (3)]).translation;
                                 (yyval).label = (yyvsp[(2) - (3)]).label;
@@ -3289,7 +3325,7 @@ yyreduce:
   case 82:
 
 /* Line 1806 of yacc.c  */
-#line 1450 "sintatica.y"
+#line 1486 "sintatica.y"
     {
 	                        (yyval) = *runCast((yyvsp[(4) - (4)]), (yyvsp[(2) - (4)]));
 
@@ -3303,7 +3339,7 @@ yyreduce:
   case 83:
 
 /* Line 1806 of yacc.c  */
-#line 1459 "sintatica.y"
+#line 1495 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3312,7 +3348,7 @@ yyreduce:
   case 84:
 
 /* Line 1806 of yacc.c  */
-#line 1463 "sintatica.y"
+#line 1499 "sintatica.y"
     {
                                  (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3321,7 +3357,7 @@ yyreduce:
   case 85:
 
 /* Line 1806 of yacc.c  */
-#line 1467 "sintatica.y"
+#line 1503 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3330,7 +3366,7 @@ yyreduce:
   case 86:
 
 /* Line 1806 of yacc.c  */
-#line 1471 "sintatica.y"
+#line 1507 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3339,7 +3375,7 @@ yyreduce:
   case 87:
 
 /* Line 1806 of yacc.c  */
-#line 1475 "sintatica.y"
+#line 1511 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3348,7 +3384,7 @@ yyreduce:
   case 88:
 
 /* Line 1806 of yacc.c  */
-#line 1479 "sintatica.y"
+#line 1515 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3357,7 +3393,7 @@ yyreduce:
   case 89:
 
 /* Line 1806 of yacc.c  */
-#line 1483 "sintatica.y"
+#line 1519 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3366,7 +3402,7 @@ yyreduce:
   case 90:
 
 /* Line 1806 of yacc.c  */
-#line 1487 "sintatica.y"
+#line 1523 "sintatica.y"
     {
 
                                 relationalControl(&(yyval), (yyvsp[(2) - (3)]));
@@ -3377,7 +3413,7 @@ yyreduce:
   case 91:
 
 /* Line 1806 of yacc.c  */
-#line 1493 "sintatica.y"
+#line 1529 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
 								(yyval).relationalCounter = (yyvsp[(1) - (3)]).relationalCounter + (yyvsp[(2) - (3)]).relationalCounter;
@@ -3388,7 +3424,7 @@ yyreduce:
   case 92:
 
 /* Line 1806 of yacc.c  */
-#line 1499 "sintatica.y"
+#line 1535 "sintatica.y"
     {                                
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
 								(yyval).relationalCounter = (yyvsp[(1) - (3)]).relationalCounter + (yyvsp[(2) - (3)]).relationalCounter;
@@ -3399,7 +3435,7 @@ yyreduce:
   case 93:
 
 /* Line 1806 of yacc.c  */
-#line 1505 "sintatica.y"
+#line 1541 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
 								(yyval).relationalCounter = (yyvsp[(1) - (3)]).relationalCounter + (yyvsp[(2) - (3)]).relationalCounter;
@@ -3410,7 +3446,7 @@ yyreduce:
   case 94:
 
 /* Line 1806 of yacc.c  */
-#line 1511 "sintatica.y"
+#line 1547 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
 								(yyval).relationalCounter = (yyvsp[(1) - (3)]).relationalCounter + (yyvsp[(2) - (3)]).relationalCounter;
@@ -3421,7 +3457,7 @@ yyreduce:
   case 95:
 
 /* Line 1806 of yacc.c  */
-#line 1517 "sintatica.y"
+#line 1553 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
 								(yyval).relationalCounter = (yyvsp[(1) - (3)]).relationalCounter + (yyvsp[(2) - (3)]).relationalCounter;
@@ -3432,7 +3468,7 @@ yyreduce:
   case 96:
 
 /* Line 1806 of yacc.c  */
-#line 1523 "sintatica.y"
+#line 1559 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3441,7 +3477,7 @@ yyreduce:
   case 97:
 
 /* Line 1806 of yacc.c  */
-#line 1527 "sintatica.y"
+#line 1563 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3450,7 +3486,7 @@ yyreduce:
   case 98:
 
 /* Line 1806 of yacc.c  */
-#line 1531 "sintatica.y"
+#line 1567 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3459,7 +3495,7 @@ yyreduce:
   case 99:
 
 /* Line 1806 of yacc.c  */
-#line 1535 "sintatica.y"
+#line 1571 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3468,7 +3504,7 @@ yyreduce:
   case 100:
 
 /* Line 1806 of yacc.c  */
-#line 1539 "sintatica.y"
+#line 1575 "sintatica.y"
     {
                                 (yyval) = runBasicOperation((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)]), (yyvsp[(2) - (3)]).translation);
                         }
@@ -3477,7 +3513,7 @@ yyreduce:
   case 101:
 
 /* Line 1806 of yacc.c  */
-#line 1543 "sintatica.y"
+#line 1579 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "int";
@@ -3496,7 +3532,7 @@ yyreduce:
   case 102:
 
 /* Line 1806 of yacc.c  */
-#line 1557 "sintatica.y"
+#line 1593 "sintatica.y"
     {
                                  (yyval).label = generateID();
 
@@ -3519,7 +3555,7 @@ yyreduce:
   case 105:
 
 /* Line 1806 of yacc.c  */
-#line 1582 "sintatica.y"
+#line 1618 "sintatica.y"
     {
                                 id_struct* id;
                                 string operation;
@@ -3582,7 +3618,7 @@ yyreduce:
   case 106:
 
 /* Line 1806 of yacc.c  */
-#line 1644 "sintatica.y"
+#line 1680 "sintatica.y"
     {
                                 id_struct* id;
                                 string operation;
@@ -3642,7 +3678,7 @@ yyreduce:
   case 107:
 
 /* Line 1806 of yacc.c  */
-#line 1704 "sintatica.y"
+#line 1740 "sintatica.y"
     {
 								YYSTYPE pos;
 								id_struct* id;
@@ -3671,7 +3707,7 @@ yyreduce:
   case 109:
 
 /* Line 1806 of yacc.c  */
-#line 1732 "sintatica.y"
+#line 1768 "sintatica.y"
     {
 								YYSTYPE pos;
                                 string operation;
@@ -3747,7 +3783,7 @@ yyreduce:
   case 110:
 
 /* Line 1806 of yacc.c  */
-#line 1807 "sintatica.y"
+#line 1843 "sintatica.y"
     {
 								int size = 1;
 								string pointer = "";
@@ -3795,7 +3831,7 @@ yyreduce:
   case 111:
 
 /* Line 1806 of yacc.c  */
-#line 1850 "sintatica.y"
+#line 1886 "sintatica.y"
     {
                                 string ATTRIBUITION = "";
 								unsigned int length;
@@ -3825,7 +3861,7 @@ yyreduce:
   case 112:
 
 /* Line 1806 of yacc.c  */
-#line 1875 "sintatica.y"
+#line 1911 "sintatica.y"
     {
 								int size = 1;
 								string pointer = "";
@@ -3845,8 +3881,9 @@ yyreduce:
 
                                 (yyval).label = (*IDMap)[(yyvsp[(2) - (3)]).label].label;
                                 (yyval).translation = "";
-                                (yyval).type = (yyvsp[(1) - (3)]).type;//(*IDMap)[$2.label].type;
-                                (yyval).modifier = (yyvsp[(1) - (3)]).modifier;//(*IDMap)[$2.label].modifier;
+                                (yyval).type = (*IDMap)[(yyvsp[(2) - (3)]).label].type;
+                                (yyval).modifier = (*IDMap)[(yyvsp[(2) - (3)]).label].modifier;
+
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								//if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
@@ -3871,7 +3908,7 @@ yyreduce:
   case 113:
 
 /* Line 1806 of yacc.c  */
-#line 1916 "sintatica.y"
+#line 1953 "sintatica.y"
     {
 
 								unsigned int length;
@@ -3887,7 +3924,7 @@ yyreduce:
                                         yyerror("identifier: '" + (yyvsp[(2) - (4)]).label + "'  previously declared here.");
 
                                 (yyval) = assign(voidStr, (yyvsp[(2) - (4)]), (yyvsp[(4) - (4)]));
-								length = getDeclarationLength((yyval));
+								length = 1;
 				
                                 if ((yyval).modifier != "")
                                         declare((yyval).label, (yyval).modifier + " " + (yyval).type, length);
@@ -3899,7 +3936,7 @@ yyreduce:
   case 114:
 
 /* Line 1806 of yacc.c  */
-#line 1943 "sintatica.y"
+#line 1980 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3910,7 +3947,7 @@ yyreduce:
   case 115:
 
 /* Line 1806 of yacc.c  */
-#line 1949 "sintatica.y"
+#line 1986 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3921,7 +3958,7 @@ yyreduce:
   case 116:
 
 /* Line 1806 of yacc.c  */
-#line 1955 "sintatica.y"
+#line 1992 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3932,7 +3969,7 @@ yyreduce:
   case 117:
 
 /* Line 1806 of yacc.c  */
-#line 1961 "sintatica.y"
+#line 1998 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3943,7 +3980,7 @@ yyreduce:
   case 118:
 
 /* Line 1806 of yacc.c  */
-#line 1967 "sintatica.y"
+#line 2004 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3954,7 +3991,7 @@ yyreduce:
   case 119:
 
 /* Line 1806 of yacc.c  */
-#line 1973 "sintatica.y"
+#line 2010 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(1) - (1)]).translation;
                                 (yyval).modifier = "";
@@ -3965,7 +4002,7 @@ yyreduce:
   case 120:
 
 /* Line 1806 of yacc.c  */
-#line 1979 "sintatica.y"
+#line 2016 "sintatica.y"
     {
                                 (yyval).type = "int";
                                 (yyval).modifier = "unsigned short";
@@ -3976,7 +4013,7 @@ yyreduce:
   case 121:
 
 /* Line 1806 of yacc.c  */
-#line 1985 "sintatica.y"
+#line 2022 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -3987,7 +4024,7 @@ yyreduce:
   case 122:
 
 /* Line 1806 of yacc.c  */
-#line 1991 "sintatica.y"
+#line 2028 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -3998,7 +4035,7 @@ yyreduce:
   case 123:
 
 /* Line 1806 of yacc.c  */
-#line 1997 "sintatica.y"
+#line 2034 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -4009,7 +4046,7 @@ yyreduce:
   case 124:
 
 /* Line 1806 of yacc.c  */
-#line 2003 "sintatica.y"
+#line 2040 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -4020,7 +4057,7 @@ yyreduce:
   case 125:
 
 /* Line 1806 of yacc.c  */
-#line 2009 "sintatica.y"
+#line 2046 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -4031,7 +4068,7 @@ yyreduce:
   case 126:
 
 /* Line 1806 of yacc.c  */
-#line 2015 "sintatica.y"
+#line 2052 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -4042,7 +4079,7 @@ yyreduce:
   case 127:
 
 /* Line 1806 of yacc.c  */
-#line 2021 "sintatica.y"
+#line 2058 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(2) - (2)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (2)]).translation;
@@ -4053,7 +4090,7 @@ yyreduce:
   case 128:
 
 /* Line 1806 of yacc.c  */
-#line 2027 "sintatica.y"
+#line 2064 "sintatica.y"
     {
                                 (yyval).type = "int";
                                 (yyval).modifier = (yyvsp[(1) - (1)]).translation;
@@ -4064,7 +4101,7 @@ yyreduce:
   case 129:
 
 /* Line 1806 of yacc.c  */
-#line 2033 "sintatica.y"
+#line 2070 "sintatica.y"
     {
                                 (yyval).type = "int";
                                 (yyval).modifier = (yyvsp[(1) - (1)]).translation;
@@ -4075,7 +4112,7 @@ yyreduce:
   case 130:
 
 /* Line 1806 of yacc.c  */
-#line 2039 "sintatica.y"
+#line 2076 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(3) - (3)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation;
@@ -4086,7 +4123,7 @@ yyreduce:
   case 131:
 
 /* Line 1806 of yacc.c  */
-#line 2045 "sintatica.y"
+#line 2082 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(3) - (3)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation;
@@ -4097,7 +4134,7 @@ yyreduce:
   case 132:
 
 /* Line 1806 of yacc.c  */
-#line 2051 "sintatica.y"
+#line 2088 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(3) - (3)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation;
@@ -4108,7 +4145,7 @@ yyreduce:
   case 133:
 
 /* Line 1806 of yacc.c  */
-#line 2057 "sintatica.y"
+#line 2094 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(3) - (3)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation;
@@ -4119,7 +4156,7 @@ yyreduce:
   case 134:
 
 /* Line 1806 of yacc.c  */
-#line 2063 "sintatica.y"
+#line 2100 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(3) - (3)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation;
@@ -4130,7 +4167,7 @@ yyreduce:
   case 135:
 
 /* Line 1806 of yacc.c  */
-#line 2069 "sintatica.y"
+#line 2106 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(4) - (4)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (4)]).translation + " " + (yyvsp[(2) - (4)]).translation + " " + (yyvsp[(3) - (4)]).translation;
@@ -4141,7 +4178,7 @@ yyreduce:
   case 136:
 
 /* Line 1806 of yacc.c  */
-#line 2075 "sintatica.y"
+#line 2112 "sintatica.y"
     {
                                 (yyval).type = (yyvsp[(4) - (4)]).translation;
                                 (yyval).modifier = (yyvsp[(1) - (4)]).translation + " " + (yyvsp[(2) - (4)]).translation + " " + (yyvsp[(3) - (4)]).translation;
@@ -4152,7 +4189,7 @@ yyreduce:
   case 137:
 
 /* Line 1806 of yacc.c  */
-#line 2081 "sintatica.y"
+#line 2118 "sintatica.y"
     {
                                 (yyval).type = "int";
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation + " " + (yyvsp[(3) - (3)]).translation;
@@ -4163,7 +4200,7 @@ yyreduce:
   case 138:
 
 /* Line 1806 of yacc.c  */
-#line 2087 "sintatica.y"
+#line 2124 "sintatica.y"
     {
                                 (yyval).type = "int";
                                 (yyval).modifier = (yyvsp[(1) - (3)]).translation + " " + (yyvsp[(2) - (3)]).translation + " " + (yyvsp[(3) - (3)]).translation;
@@ -4174,7 +4211,7 @@ yyreduce:
   case 139:
 
 /* Line 1806 of yacc.c  */
-#line 2097 "sintatica.y"
+#line 2134 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "int";
@@ -4191,7 +4228,7 @@ yyreduce:
   case 140:
 
 /* Line 1806 of yacc.c  */
-#line 2109 "sintatica.y"
+#line 2146 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "float";
@@ -4207,7 +4244,7 @@ yyreduce:
   case 141:
 
 /* Line 1806 of yacc.c  */
-#line 2120 "sintatica.y"
+#line 2157 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "float"; //poderia ser double
@@ -4224,7 +4261,7 @@ yyreduce:
   case 142:
 
 /* Line 1806 of yacc.c  */
-#line 2132 "sintatica.y"
+#line 2169 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "char";
@@ -4241,7 +4278,7 @@ yyreduce:
   case 143:
 
 /* Line 1806 of yacc.c  */
-#line 2144 "sintatica.y"
+#line 2181 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "int";
@@ -4258,7 +4295,7 @@ yyreduce:
   case 144:
 
 /* Line 1806 of yacc.c  */
-#line 2156 "sintatica.y"
+#line 2193 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "float";
@@ -4274,7 +4311,7 @@ yyreduce:
   case 145:
 
 /* Line 1806 of yacc.c  */
-#line 2167 "sintatica.y"
+#line 2204 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "float"; //poderia ser double
@@ -4291,7 +4328,7 @@ yyreduce:
   case 146:
 
 /* Line 1806 of yacc.c  */
-#line 2179 "sintatica.y"
+#line 2216 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "char";
@@ -4308,7 +4345,7 @@ yyreduce:
   case 147:
 
 /* Line 1806 of yacc.c  */
-#line 2191 "sintatica.y"
+#line 2228 "sintatica.y"
     {                        
 
 			       				(yyval).label = generateID();
@@ -4317,16 +4354,17 @@ yyreduce:
                                	(yyval).isConstant = true;
 
 								(yyval).translation = "\tstrcpy(" + (yyval).label + ", " + (yyvsp[(1) - (1)]).translation + ");\n";                           
+								(yyval).translation += "\t" + (yyval).label + "[" + intToString((yyvsp[(1) - (1)]).translation.length() - 2) + "] = " + "'\\0';\n";
 
-								/*comprimento da string '-2' por conta das aspas*/
-                                declare((yyval).label, (yyval).type, (yyvsp[(1) - (1)]).translation.length() - 2);
+								/*comprimento da string '-2' por conta das aspas +1 por conta do '/0'*/
+                                declare((yyval).label, (yyval).type, (yyvsp[(1) - (1)]).translation.length() - 2 + 1);
                         }
     break;
 
   case 148:
 
 /* Line 1806 of yacc.c  */
-#line 2204 "sintatica.y"
+#line 2242 "sintatica.y"
     {
                                 (yyval).label = generateID();
                                 (yyval).type = "int";
@@ -4346,7 +4384,7 @@ yyreduce:
   case 149:
 
 /* Line 1806 of yacc.c  */
-#line 2219 "sintatica.y"
+#line 2257 "sintatica.y"
     {
                                 id_struct* id;
 								YYSTYPE pos;
@@ -4379,7 +4417,7 @@ yyreduce:
   case 150:
 
 /* Line 1806 of yacc.c  */
-#line 2247 "sintatica.y"
+#line 2285 "sintatica.y"
     {
                                 id_struct* id;
 								YYSTYPE pos;
@@ -4419,7 +4457,7 @@ yyreduce:
   case 153:
 
 /* Line 1806 of yacc.c  */
-#line 2290 "sintatica.y"
+#line 2328 "sintatica.y"
     {
 							if((yyvsp[(2) - (4)]).type != "int")
 								yyerror("size of array has non-integer type");
@@ -4432,7 +4470,7 @@ yyreduce:
 							(yyval).vectSizes = (yyvsp[(4) - (4)]).vectSizes;
 							(yyval).vectSizes.insert((yyval).vectSizes.begin(), (yyvsp[(2) - (4)]).intValue);
 
-							(yyval).isConstant = (yyvsp[(2) - (4)]).isConstant && (yyvsp[(4) - (4)]).isConstant;
+							(yyval).isConstant = true;//$2.isConstant && $4.isConstant;
 							(yyval).translation = "[" + (yyvsp[(2) - (4)]).label + "]" + (yyvsp[(4) - (4)]).translation;
 						}
     break;
@@ -4440,7 +4478,7 @@ yyreduce:
   case 154:
 
 /* Line 1806 of yacc.c  */
-#line 2306 "sintatica.y"
+#line 2344 "sintatica.y"
     {
 							(yyval).vectSizes.clear();
 							(yyval).vectPositions.clear();
@@ -4452,7 +4490,7 @@ yyreduce:
   case 155:
 
 /* Line 1806 of yacc.c  */
-#line 2317 "sintatica.y"
+#line 2355 "sintatica.y"
     {
 							if((yyvsp[(2) - (4)]).type != "int")
 								yyerror("size of array has non-integer type");
@@ -4468,7 +4506,7 @@ yyreduce:
   case 156:
 
 /* Line 1806 of yacc.c  */
-#line 2328 "sintatica.y"
+#line 2366 "sintatica.y"
     {
 							(yyval).vectPositions.clear();
 							(yyval).translation = "";
@@ -4478,7 +4516,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 4482 "y.tab.c"
+#line 4520 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -4709,7 +4747,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 2337 "sintatica.y"
+#line 2375 "sintatica.y"
 
 
 #include "lex.yy.c"
@@ -4750,10 +4788,12 @@ void openNewScope()
         identifiers_map* IDMap = new identifiers_map();
         declarations_map* declarationsMap = new declarations_map();
         functions_map* functionMap = new functions_map();
+		mallocs_vector* mallocsVector = new mallocs_vector();
 
         stackIDMap.push_front(IDMap);
         stackDeclarationsMap.push_front(declarationsMap);
         stackFunctionMap.push_front(functionMap);
+		stackMallocsMap.push_front(mallocsVector);
 }
 
 void closeCurrentScope()
@@ -4761,6 +4801,7 @@ void closeCurrentScope()
         stackIDMap.pop_front();
         stackDeclarationsMap.pop_front();
 		stackFunctionMap.pop_front();
+		stackMallocsMap.pop_front();
 }
 
 void relationalControl(YYSTYPE* expr, YYSTYPE operation)
@@ -4811,6 +4852,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 		if(operand1.type == "int" && operand2.type == "int")
 			res->intValue = runComputingIntValue(operand1, operand2, operation);
 		
+		res->isConstant = operand1.isConstant & operand2.isConstant;
 
         res->label = generateID();
         res->translation = operand1.translation + operand2.translation;
@@ -4952,6 +4994,8 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 			res->translation += "\tstrcat(" + res->label + ", " + op2Str.label + ");\n";
 
 			length = getDeclarationLength(op1Str) + getDeclarationLength(op2Str);
+			if(length == 0)
+				length = 1000;
 		}
 		else /*no caso de operações relacionais*/
 		{
@@ -5047,23 +5091,30 @@ YYSTYPE toString(YYSTYPE n)
 	if(n.type == "int")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%d\", " + n.label + ");\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", \"%d\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "char")
 	{
 		length = 2;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
-		res->translation += "\t" + res->label + "[" + intToString(1) + "] = " + "'\\0';\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "float")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";		
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "double")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 
 	declare(res->label, res->type, length);
@@ -5138,7 +5189,6 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 	YYSTYPE opSum;
 	YYSTYPE ass;
 	YYSTYPE value;
-	YYSTYPE value_2;
 
 	if(declaration.size() < call.size())
 	{
@@ -5149,21 +5199,21 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 	{	
 		res = new YYSTYPE();
 		opSum = generateIntValue(0);
-		res->translation = opSum.translation;
-
 
 		//Calcula a posição de acesso
 		for(int i = 0; i < call.size(); i++)
 		{
-			value = call.at(i);
-			opMul = generateIntValue(1);
+			opMul = call.at(i);
 
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
-				value_2 = generateIntValue(declaration.at(j));
-				opMul = runBasicOperation(value, value_2, "*");
+				value = generateIntValue(declaration.at(j));
+				opMul = runBasicOperation(opMul, value, "*");
+			}
 
-				res->translation += opMul.translation;
+			if(i > 0)
+			{
+				opSum.translation = "";
 			}
 
 			opSum = runBasicOperation(opSum, opMul, "+");
@@ -5194,26 +5244,19 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes)
 	functionMap = *next(stackFunctionMap.begin(), 2);
 	i = functionMap->find(idOfCurrentFunction.front());
 
-	if(idOfCurrentFunction.front() == "main (void)")
-		freeMainTranslation += "\t free(" + id.label + ");\n";
-	else if(i != functionMap->end()) 
-	{
-		f = &(i->second);
-		f->freeTranslation += "\t free(" + id.label + ");\n";
-	}
-	else
-		yyerror("unkonow");
+	if(i != functionMap->end())
+		freeMainTranslation += "\tfree(" + id.label + ");\n";
 
 	sizesToMalloc = generateIntValue(1);
 
 	for(int i = 0; i < vector_sizes.vectSizes.size(); i++)
 	{
-	sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
+		sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
 	}
 
 	translation += sizesToMalloc.translation;
 	translation += "\t" + id.label + " = ";
-	translation += "(" + id.modifier + " " + id.type + "*)" + "malloc" + "(sizeof(" + id.type + ")*" + sizesToMalloc.label+");\n";
+	translation += "(" + id.modifier + " " + normalizedType(id.type) + "*) " + "malloc" + " (sizeof(" + normalizedType(id.type) + ")*" + sizesToMalloc.label+");\n";
 
 	return translation;
 }
@@ -5484,16 +5527,34 @@ void declare(string label, string dIType, unsigned int length)
         
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
-        finalType = normalizedType(dIType);
+        (*declarationsMap)[label] = {dIType, length};
+}
 
-        (*declarationsMap)[label] = {finalType, length};
-} 
+void addMalloc(string translationMalloc)
+{    
+	mallocs_vector* mallocsVector = stackMallocsMap.front();
+	mallocsVector->insert(mallocsVector->begin(), translationMalloc);
+}
+
+string getMallocs()
+{
+        string mallocs = "";
+
+		mallocs_vector* mallocsVector = stackMallocsMap.front();
+
+        for(int i = 0; i < mallocsVector->size(); i++)
+        {                        
+			mallocs += mallocsVector->at(i);
+        }
+
+        return mallocs;
+}
 
 
 string normalizedType(string type)
 {
        if (type == "string")
-       		return "char*";
+       		return "char";
 	
 		return type;
 }
@@ -5502,6 +5563,7 @@ string normalizedType(string type)
 string getDeclarations()
 {
         string declarations = "";
+		string pointer = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::iterator i;
@@ -5510,15 +5572,19 @@ string getDeclarations()
         for(i = declarationsMap.begin(); i != declarationsMap.end(); i++)
         {                        
 			type = i->second.dIType;
-			if(type == "char*")
+
+			if(type == "string")
 				type = "char";
 
-		            declarations += "\t" + type + " " + i->first;
+			if (i->second.length == 0)
+				type = type + "*";								
 
-		            if ((i->second.dIType != "char*") && (i->second.length > 1))
-		                    declarations += "[" + intToString(i->second.length) + "]";
-					else if (i->second.dIType == "char*")
-		                    declarations += "[" + intToString(i->second.length) + "]";
+	            declarations += "\t" + type + pointer + " " + i->first;
+
+	            if ((i->second.dIType != "string") && (i->second.length > 1))
+	                    declarations += "[" + intToString(i->second.length) + "]";
+				else if ((i->second.dIType == "string") && (i->second.length > 0))
+	                    declarations += "[" + intToString(i->second.length) + "]";
 
 			declarations += ";\n";
         }
@@ -5529,7 +5595,7 @@ string getDeclarations()
 
 string getFunctionArgs()
 {
-		string args = "";
+	string args = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::reverse_iterator i;
@@ -5538,14 +5604,14 @@ string getFunctionArgs()
         for(i = declarationsMap.rbegin(); i != declarationsMap.rend(); i++)
         {                        
 			type = i->second.dIType;
-			if(type == "char*")
+			if(type == "string")
 				type = "char";
 
 		            args += type + " " + i->first;
 
-		            if ((i->second.dIType != "char*") && (i->second.length > 1))
+		            if ((i->second.dIType != "string") && (i->second.length > 1))
 		                    args += "[" + intToString(i->second.length) + "]";
-					else if (i->second.dIType == "char*")
+					else if (i->second.dIType == "string")
 		                    args += "[" + intToString(i->second.length) + "]";
 
 			if(next(i , 1) != declarationsMap.rend())
@@ -5564,7 +5630,7 @@ unsigned int getDeclarationLength(YYSTYPE id)
 	if(i != declarationsMap->end())
 		return i->second.length;
 
-	return 0;
+	return 1;
 }
 
 bool setDeclarationLength(YYSTYPE id, unsigned int length)

@@ -1,44 +1,35 @@
 int main(void)
 {
 
-	int a[2][3];
+	int d;
+	int size;
+	
+	cout("\nEnter the value to d: ");
+	cin(d);
 
-	int b[3][3][3];
-	int i = 1;
-	int x[5];
+	int matrix[3][3];
 
-	a[0][0] = 0;
+	// fill the diagonal of matrix with d
+	for (int i = 0; i < 3; i++)
+		for(int j = 0; j < 3; j++)
+		{
+			if (i == j)
+				matrix[i][j] = d;
+			else
+				matrix[i][j] = 0;
+		}
 
-	b[0][0][0] = a[0][i];
-
-	string abb = "oi";
-	coutn(abb);
-
-	for(int v = 0; v < 5; v++)
-		x[v] = v;
-
-	for(int v = 0; v < 5; v++)
-		coutn(x[v]);
-
-
-	a[0][0]++;
-	++a[0][0];
-	a[0][0] += 2;
-
-	coutn(a[0][0]);
+	// print matrix
+	for (int i = 0; i < 3; i++)
+	{
+		for(int j = 0; j < 3; j++)
+		{
+			cout(matrix[i][j] + " ");
+		}
+		coutn();
+	}
 
 	return 0;
 }
 
-string a(string a, int b)
-{
-	return a + b;
 
-}
-
-
-string c(string a[2], string b)
-{
-	return a + b;
-
-}

@@ -127,11 +127,13 @@ typedef map<string, variable_declarations_struct> declarations_map;
 typedef map<string, function_struct> functions_map;
 typedef map<string, label_struct> labels_map;
 typedef map<string, case_label_struct> case_label_map;
+typedef vector<string> mallocs_vector;
 				
 
 /*pilhas para controle de escopo*/
 list<identifiers_map*> stackIDMap;
 list<declarations_map*> stackDeclarationsMap;
+list<mallocs_vector*> stackMallocsMap;
 list<functions_map*> stackFunctionMap;
 
 
@@ -156,6 +158,9 @@ const string voidStr = "";
 
 /*declaraçãoes (todas referente a atual função)*/
 string declarations = "";
+
+/*tradução de malloc no início de uma função*/
+string mallocTranslations = "";
 
 /*headers de todas as funções*/
 string headersFunctions = "";
@@ -193,6 +198,8 @@ unsigned int countMain = 0;
 
 /*tradução de frees na main*/
 string freeMainTranslation = "";
+/*tradução do return da main*/
+string returnMainTranslation = "";
 
 
 int yylex(void);
@@ -223,6 +230,8 @@ label_struct* findLabel(string);
 bool isDeclaredCurrentScope(string);
 bool isDeclaredFunctionInCurrentScope(string);
 void declare(string, string, unsigned int);
+string getMallocs();
+void addMalloc(string);
 string normalizedType(string);
 unsigned int getDeclarationLength(YYSTYPE);
 bool setDeclarationLength(YYSTYPE, unsigned int);
@@ -316,6 +325,9 @@ BEGIN                   : START TRANSLATION_UNIT
 							$$.translation += globalDeclarationsTranslation;
 							$$.translation += "\t/*-------------------------------*/\n\n";
 							$$.translation += scopeMainTranslation;
+							$$.translation += freeMainTranslation;
+							$$.translation += returnMainTranslation;
+							$$.translation += "\n}\n\n";
 
 							$$.translation += $2.translation;
 
@@ -410,10 +422,11 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 
 							$$.translation = $1.translation;
 							$$.translation += "(" + getFunctionArgs() + ")";
-							$$.translation += "\n{\n" + declarations + "\n";
-							$$.translation += $2.translation;
+							$$.translation += "\n{\n" + declarations + mallocTranslations + "\n";
+							$$.translation += $2.translation + "}\n\n";;
 
 							declarations = "";
+							mallocTranslations = "";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -423,7 +436,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							idOfCurrentFunction.pop_front();
 
 							functionMap = stackFunctionMap.front();
-							$$.translation += (*functionMap)[$1.idFunction].freeTranslation + "}\n\n";
+
 
 							/*muda o estado da função para definida*/
 							if((*functionMap)[$1.idFunction].defined == false)
@@ -442,11 +455,11 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 						}
 						| MAIN_HEADER SCOPE
 						{
-							headMainTranslation += "{\n" + declarations + "\n";
+							headMainTranslation += "{\n" + declarations + mallocTranslations + "\n";
 							scopeMainTranslation = $2.translation;
-							scopeMainTranslation += "}\n\n";
 
 							declarations = "";
+							mallocTranslations = "";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -463,6 +476,7 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 						{
 							string id;
+							string type;
 							$$.idFunction = $2.label + "(" + $4.typesArgsFunction + ")";
 							idOfCurrentFunction.push_front($$.idFunction);
 
@@ -482,10 +496,14 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 							else
 									id = (*functionMap)[$$.idFunction].label;
 
+							if($1.type == "string")
+								type = "char*";
+							else
+								type = $1.type;
+
 							$$.label = id;
 							$$.typesArgsFunction = $4.typesArgsFunction;
-							//$$.translation = $1.type + " " + id;
-							$$.translation = normalizedType($1.type) + " " + id;
+							$$.translation = type + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
 							$$.line = $4.line;
 						}
@@ -756,8 +774,8 @@ CIN                    : TK_CIN '(' E_C ')'
 								$$.translation += "\n\tcin >> " + $3.label + ($3.vectPositions.size() > 0 ? "[" + $3.posLabel + "]" : "") + ";\n";
 
 								//redeclara, atualizando o tamanho da string*/
-								if(($3.type == "string") && (getDeclarationLength($3) < 100))
-									declare($3.label, $3.modifier + ($3.modifier != "" ? " " : "") + $3.type, 100);
+								if(($3.type == "string") && (getDeclarationLength($3) < 1000))
+									declare($3.label, $3.modifier + ($3.modifier != "" ? " " : "") + $3.type, 1000);
                         }
                         ;
 
@@ -788,6 +806,7 @@ BEGIN_SCOPE             : '{'
 END_SCOPE                : '}'
                         {
                                 declarations += getDeclarations();
+								mallocTranslations += getMallocs();
                                 closeCurrentScope(); /*desempilha*/                                
                                 $$.translation = "";
 
@@ -855,16 +874,14 @@ RETURN                  : TK_RETURN E_C
 								YYSTYPE func;
 								function_struct* f;
 				
-								string free = "";
-								string label;
+								string idMainFunction = "main (void)";
+								YYSTYPE idReturn;
 
 								functionMap = *next(stackFunctionMap.begin(), 2);
-								i = functionMap->find(idOfCurrentFunction.front());
+								string idFunction = idOfCurrentFunction.front();
+								i = functionMap->find(idFunction);
 
-								/*enxerta as traduções de free antes do return no main*/
-								if(idOfCurrentFunction.front() == "main (void)")
-									free = freeMainTranslation;
-
+								/*enxerta as traduções de free antes do return no main*/									
 								if(i != functionMap->end())
 								{
 									f = &(i->second);
@@ -882,37 +899,56 @@ RETURN                  : TK_RETURN E_C
 
 										else if(f->typeOfReturn == "string")
 										{
-											label = generateID();
+											idReturn.label = generateID();
+											idReturn.translation = "";
+											idReturn.type = cast->type;
+											idReturn.modifier = cast->modifier;
 
+											//declara a variável globalmente e realiza o malloc
 											declarations_map* declarationsMap = stackDeclarationsMap.back();
-											(*declarationsMap)[label] = {"char*", getDeclarationLength(*cast)};
+											(*declarationsMap)[idReturn.label] = {$2.type, 0};
+											addMalloc(dinamicallyVectDeclaration(idReturn, $2));
+											
+											$$.translation = $2.translation + cast->translation;
+											$$.translation += "\tstrcpy(" + idReturn.label + ", " + cast->label + ");\n";
+											$$.translation += "\n\t" + $1.translation + " " + idReturn.label + ";";
 
-											$$.translation = free + $2.translation + cast->translation;
-											$$.translation += "\tstrcpy(" + label + ", " + cast->label + ");\n";
-											$$.translation += "\n\t" + $1.translation + " " + label + ";";
-											freeMainTranslation += "\tfree(" + label + ")";
+											freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 										}
 										else
-											$$.translation = free + $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
+											$$.translation = $2.translation + cast->translation + "\n\t" + $1.translation + " " + cast->label + ";";
 									}
 									else if(f->typeOfReturn == "string")
 									{
-										label = generateID();
+										idReturn.label = generateID();
+										idReturn.translation = "";
+										idReturn.type = $2.type;
+										idReturn.modifier = $2.modifier;
 
+										//declara a variável globalmente e realiza o malloc
 										declarations_map* declarationsMap = stackDeclarationsMap.back();
-										(*declarationsMap)[label] = {"char*", getDeclarationLength($2)};
+										(*declarationsMap)[idReturn.label] = {$2.type, 0};
+										addMalloc(dinamicallyVectDeclaration(idReturn, $2));
 
-										headMainTranslation += "\tchar* " + label + ";\n";
-										$$.translation = "\tstrcpy(" + label + ", " + $2.label + ");\n";
-										$$.translation += free + $2.translation + "\n\t" + $1.translation + " " + label+ ";";
-										freeMainTranslation += "\tfree(" + label + ")";
+										$$.translation = $2.translation + "\n";
+										$$.translation += "\tstrcpy(" + idReturn.label + ", " + $2.label + ");\n";
+										$$.translation += "\t" + $1.translation + " " + idReturn.label + ";";
+
+										freeMainTranslation += "\tfree(" + idReturn.label + ");\n";
 									}
 									else
-		                                	$$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
+	                                	$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label+ ";";
 
 								}
 								else
-	                                $$.translation = free + $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
+	                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
+
+								if(idFunction == idMainFunction)
+								{
+									returnMainTranslation = $$.translation;
+									$$.translation = "";
+								}
+									
                         }
                         ;
 
@@ -1891,8 +1927,9 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
 
                                 $$.label = (*IDMap)[$2.label].label;
                                 $$.translation = "";
-                                $$.type = $1.type;//(*IDMap)[$2.label].type;
-                                $$.modifier = $1.modifier;//(*IDMap)[$2.label].modifier;
+                                $$.type = (*IDMap)[$2.label].type;
+                                $$.modifier = (*IDMap)[$2.label].modifier;
+
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
 								//if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
@@ -1928,7 +1965,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
 
                                 $$ = assign(voidStr, $2, $4);
-								length = getDeclarationLength($$);
+								length = 1;
 				
                                 if ($$.modifier != "")
                                         declare($$.label, $$.modifier + " " + $$.type, length);
@@ -2196,9 +2233,10 @@ TERMINAL        :       TK_INT
                                	$$.isConstant = true;
 
 								$$.translation = "\tstrcpy(" + $$.label + ", " + $1.translation + ");\n";                           
+								$$.translation += "\t" + $$.label + "[" + intToString($1.translation.length() - 2) + "] = " + "'\\0';\n";
 
-								/*comprimento da string '-2' por conta das aspas*/
-                                declare($$.label, $$.type, $1.translation.length() - 2);
+								/*comprimento da string '-2' por conta das aspas +1 por conta do '/0'*/
+                                declare($$.label, $$.type, $1.translation.length() - 2 + 1);
                         }
                         | TK_BOOL
                         {
@@ -2299,7 +2337,7 @@ VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 							$$.vectSizes = $4.vectSizes;
 							$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
 
-							$$.isConstant = $2.isConstant && $4.isConstant;
+							$$.isConstant = true;//$2.isConstant && $4.isConstant;
 							$$.translation = "[" + $2.label + "]" + $4.translation;
 						}
 						|
@@ -2374,10 +2412,12 @@ void openNewScope()
         identifiers_map* IDMap = new identifiers_map();
         declarations_map* declarationsMap = new declarations_map();
         functions_map* functionMap = new functions_map();
+		mallocs_vector* mallocsVector = new mallocs_vector();
 
         stackIDMap.push_front(IDMap);
         stackDeclarationsMap.push_front(declarationsMap);
         stackFunctionMap.push_front(functionMap);
+		stackMallocsMap.push_front(mallocsVector);
 }
 
 void closeCurrentScope()
@@ -2385,6 +2425,7 @@ void closeCurrentScope()
         stackIDMap.pop_front();
         stackDeclarationsMap.pop_front();
 		stackFunctionMap.pop_front();
+		stackMallocsMap.pop_front();
 }
 
 void relationalControl(YYSTYPE* expr, YYSTYPE operation)
@@ -2435,6 +2476,7 @@ YYSTYPE runBasicOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 		if(operand1.type == "int" && operand2.type == "int")
 			res->intValue = runComputingIntValue(operand1, operand2, operation);
 		
+		res->isConstant = operand1.isConstant & operand2.isConstant;
 
         res->label = generateID();
         res->translation = operand1.translation + operand2.translation;
@@ -2576,6 +2618,8 @@ YYSTYPE stringOperation(YYSTYPE operand1, YYSTYPE operand2, string operation)
 			res->translation += "\tstrcat(" + res->label + ", " + op2Str.label + ");\n";
 
 			length = getDeclarationLength(op1Str) + getDeclarationLength(op2Str);
+			if(length == 0)
+				length = 1000;
 		}
 		else /*no caso de operações relacionais*/
 		{
@@ -2671,23 +2715,30 @@ YYSTYPE toString(YYSTYPE n)
 	if(n.type == "int")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%d\", " + n.label + ");\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", \"%d\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "char")
 	{
 		length = 2;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", " + n.label + ");\n";
-		res->translation += "\t" + res->label + "[" + intToString(1) + "] = " + "'\\0';\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%c\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + intToString(length-1) + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "float")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";		
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + length-1 + "] = " + "'\\0';\n";
 	}
 	else if(n.type == "double")
 	{
 		length = 100;
-		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", " + n.label + ");\n";
+		res->translation += "\tsnprintf(" + res->label + ", " + intToString(length) + ", " + "\"%f\", ";
+		res->translation += n.label + (n.vectPositions.size() > 0 ? "[" + n.posLabel + "]" : "") + ");\n";
+		res->translation += "\t" + res->label + "[" + length-1 + "] = " + "'\\0';\n";
 	}
 
 	declare(res->label, res->type, length);
@@ -2762,7 +2813,6 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 	YYSTYPE opSum;
 	YYSTYPE ass;
 	YYSTYPE value;
-	YYSTYPE value_2;
 
 	if(declaration.size() < call.size())
 	{
@@ -2773,21 +2823,21 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 	{	
 		res = new YYSTYPE();
 		opSum = generateIntValue(0);
-		res->translation = opSum.translation;
-
 
 		//Calcula a posição de acesso
 		for(int i = 0; i < call.size(); i++)
 		{
-			value = call.at(i);
-			opMul = generateIntValue(1);
+			opMul = call.at(i);
 
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
-				value_2 = generateIntValue(declaration.at(j));
-				opMul = runBasicOperation(value, value_2, "*");
+				value = generateIntValue(declaration.at(j));
+				opMul = runBasicOperation(opMul, value, "*");
+			}
 
-				res->translation += opMul.translation;
+			if(i > 0)
+			{
+				opSum.translation = "";
 			}
 
 			opSum = runBasicOperation(opSum, opMul, "+");
@@ -2818,26 +2868,19 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes)
 	functionMap = *next(stackFunctionMap.begin(), 2);
 	i = functionMap->find(idOfCurrentFunction.front());
 
-	if(idOfCurrentFunction.front() == "main (void)")
-		freeMainTranslation += "\t free(" + id.label + ");\n";
-	else if(i != functionMap->end()) 
-	{
-		f = &(i->second);
-		f->freeTranslation += "\t free(" + id.label + ");\n";
-	}
-	else
-		yyerror("unkonow");
+	if(i != functionMap->end())
+		freeMainTranslation += "\tfree(" + id.label + ");\n";
 
 	sizesToMalloc = generateIntValue(1);
 
 	for(int i = 0; i < vector_sizes.vectSizes.size(); i++)
 	{
-	sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
+		sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
 	}
 
 	translation += sizesToMalloc.translation;
 	translation += "\t" + id.label + " = ";
-	translation += "(" + id.modifier + " " + id.type + "*)" + "malloc" + "(sizeof(" + id.type + ")*" + sizesToMalloc.label+");\n";
+	translation += "(" + id.modifier + " " + normalizedType(id.type) + "*) " + "malloc" + " (sizeof(" + normalizedType(id.type) + ")*" + sizesToMalloc.label+");\n";
 
 	return translation;
 }
@@ -3108,16 +3151,34 @@ void declare(string label, string dIType, unsigned int length)
         
         declarations_map* declarationsMap = stackDeclarationsMap.front();
 
-        finalType = normalizedType(dIType);
+        (*declarationsMap)[label] = {dIType, length};
+}
 
-        (*declarationsMap)[label] = {finalType, length};
-} 
+void addMalloc(string translationMalloc)
+{    
+	mallocs_vector* mallocsVector = stackMallocsMap.front();
+	mallocsVector->insert(mallocsVector->begin(), translationMalloc);
+}
+
+string getMallocs()
+{
+        string mallocs = "";
+
+		mallocs_vector* mallocsVector = stackMallocsMap.front();
+
+        for(int i = 0; i < mallocsVector->size(); i++)
+        {                        
+			mallocs += mallocsVector->at(i);
+        }
+
+        return mallocs;
+}
 
 
 string normalizedType(string type)
 {
        if (type == "string")
-       		return "char*";
+       		return "char";
 	
 		return type;
 }
@@ -3126,6 +3187,7 @@ string normalizedType(string type)
 string getDeclarations()
 {
         string declarations = "";
+		string pointer = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::iterator i;
@@ -3134,15 +3196,19 @@ string getDeclarations()
         for(i = declarationsMap.begin(); i != declarationsMap.end(); i++)
         {                        
 			type = i->second.dIType;
-			if(type == "char*")
+
+			if(type == "string")
 				type = "char";
 
-		            declarations += "\t" + type + " " + i->first;
+			if (i->second.length == 0)
+				type = type + "*";								
 
-		            if ((i->second.dIType != "char*") && (i->second.length > 1))
-		                    declarations += "[" + intToString(i->second.length) + "]";
-					else if (i->second.dIType == "char*")
-		                    declarations += "[" + intToString(i->second.length) + "]";
+	            declarations += "\t" + type + pointer + " " + i->first;
+
+	            if ((i->second.dIType != "string") && (i->second.length > 1))
+	                    declarations += "[" + intToString(i->second.length) + "]";
+				else if ((i->second.dIType == "string") && (i->second.length > 0))
+	                    declarations += "[" + intToString(i->second.length) + "]";
 
 			declarations += ";\n";
         }
@@ -3153,7 +3219,7 @@ string getDeclarations()
 
 string getFunctionArgs()
 {
-		string args = "";
+	string args = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
         declarations_map::reverse_iterator i;
@@ -3162,14 +3228,14 @@ string getFunctionArgs()
         for(i = declarationsMap.rbegin(); i != declarationsMap.rend(); i++)
         {                        
 			type = i->second.dIType;
-			if(type == "char*")
+			if(type == "string")
 				type = "char";
 
 		            args += type + " " + i->first;
 
-		            if ((i->second.dIType != "char*") && (i->second.length > 1))
+		            if ((i->second.dIType != "string") && (i->second.length > 1))
 		                    args += "[" + intToString(i->second.length) + "]";
-					else if (i->second.dIType == "char*")
+					else if (i->second.dIType == "string")
 		                    args += "[" + intToString(i->second.length) + "]";
 
 			if(next(i , 1) != declarationsMap.rend())
@@ -3188,7 +3254,7 @@ unsigned int getDeclarationLength(YYSTYPE id)
 	if(i != declarationsMap->end())
 		return i->second.length;
 
-	return 0;
+	return 1;
 }
 
 bool setDeclarationLength(YYSTYPE id, unsigned int length)
