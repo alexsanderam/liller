@@ -290,7 +290,7 @@ BEGIN                   : START TRANSLATION_UNIT
 							string globalDeclarations = getDeclarations();
 
 							$$.translation = "/*Compiler prescot-liller*/\n\n";
-							$$.translation += "#include <stdio.h>\n#include <iostream>\n#include<string.h>\n#include<stdio.h>\n\n";
+							$$.translation += "#include <stdio.h>\n#include <iostream>\n#include<string.h>\n#include<stdio.h>\n#include<stdlib.h>\n";
 							$$.translation += "using namespace std;\n\n";
 
 
@@ -1679,6 +1679,7 @@ OP_ASSIGN                : TK_ID VECTOR_P TK_OP_ASSIGN E
 DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                         {
 								int size = 1;
+								string pointer = "";
 
                                 identifiers_map* IDMap = stackIDMap.front();
                                                         
@@ -1699,13 +1700,33 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                 $$.translation = $1.translation;
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
-								for(int i = 0; i < $4.vectSizes.size(); i++)
-									size *= $4.vectSizes.at(i);
+								if(($4.vectSizes.size() > 0) && ($4.vectPositions.size() > 0))
+								{
+									YYSTYPE sizesToMalloc;
+									pointer = "*";
 
-                                if ($$.modifier != "")
-                                        declare($$.label, $$.modifier + " " + $$.type, size);
-                                else
-                                        declare($$.label, $$.type, size);
+									sizesToMalloc = generateIntValue(1);
+
+									for(int i = 0; i < $4.vectSizes.size(); i++)
+									{
+										sizesToMalloc = runBasicOperation(sizesToMalloc, $4.vectPositions.at(i), "*");
+									}
+
+									$$.translation += sizesToMalloc.translation;
+									$$.translation += "\t" + $$.label + " = ";;
+									$$.translation += "(" + $$.modifier + " " + $$.type + "*)" + "malloc" + "(sizeof(" + $$.type + ")*" + sizesToMalloc.label+");\n";
+								}
+								else
+								{
+									for(int i = 0; i < $4.vectSizes.size(); i++)
+										size *= $4.vectSizes.at(i);
+								}
+
+	                            if ($$.modifier != "")
+	                                    declare($$.label, $$.modifier + " " + $$.type + pointer, size);
+	                            else
+	                                    declare($$.label, $$.type + pointer, size);
+
 
                         }
                         | DECLARATION ',' TK_ID TK_ASSIGN E
@@ -1736,6 +1757,7 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                         | TYPE TK_ID VECTOR_SIZES
                         {
 								int size = 1;
+								string pointer = "";
 
                                 identifiers_map* IDMap = stackIDMap.front();
 
@@ -1756,15 +1778,32 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                 $$.modifier = (*IDMap)[$2.label].modifier;
 
 								//Calcula o tamanho do vetor, se for uma variável simples, o tamanho será 1
-								for(int i = 0; i < $3.vectSizes.size(); i++)
-									size *= $3.vectSizes.at(i);
+								if(($3.vectSizes.size() > 0) && ($3.vectPositions.size() > 0))
+								{
+									YYSTYPE sizesToMalloc;
+									pointer = "*";
 
+									sizesToMalloc = generateIntValue(1);
 
-                                if ($$.modifier != "")
-                                        declare($$.label, $$.modifier + " " + $$.type, size);
-                                else
-                                        declare($$.label, $$.type, size);
+									for(int i = 0; i < $3.vectSizes.size(); i++)
+									{
+										sizesToMalloc = runBasicOperation(sizesToMalloc, $3.vectPositions.at(i), "*");
+									}
 
+									$$.translation += sizesToMalloc.translation;
+									$$.translation += "\t" + $$.label + " = ";
+									$$.translation += "(" + $$.modifier + " " + $$.type + "*)" + "malloc" + "(sizeof(" + $$.type + ")*" + sizesToMalloc.label+");\n";
+								}
+								else
+								{
+									for(int i = 0; i < $3.vectSizes.size(); i++)
+										size *= $3.vectSizes.at(i);
+								}
+
+	                            if ($$.modifier != "")
+	                                    declare($$.label, $$.modifier + " " + $$.type + pointer, size);
+	                            else
+	                                    declare($$.label, $$.type + pointer, size);
                         }
                         | TYPE TK_ID TK_ASSIGN E
                         {
@@ -2145,12 +2184,18 @@ VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 							if($2.type != "int")
 								yyerror("size of array has non-integer type");
 
-								$$.vectSizes = $4.vectSizes;
-								$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
+							/*isso é utilizado nos casos que há algum tamanho não constante,
+							para se realizar alocação dinâmica com malloc*/
+							$$.vectPositions = $4.vectPositions;
+							$$.vectPositions.insert($$.vectPositions.begin(), $2);
+							
+							$$.vectSizes = $4.vectSizes;
+							$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
 						}
 						|
 						{
 							$$.vectSizes.clear();
+							$$.vectPositions.clear();
 						}
 						;
 
@@ -2623,12 +2668,12 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 		for(int i = 0; i < call.size(); i++)
 		{
 			value = call.at(i);
-			res->translation += value.translation;
+			//res->translation += value.translation;
 
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
 				value_2 = generateIntValue(declaration.at(j));
-				res->translation += value_2.translation;
+				//res->translation += value_2.translation;
 
 				opMul = runBasicOperation(value, value_2, "*");
 				res->translation += opMul.translation;

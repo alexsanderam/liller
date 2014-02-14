@@ -4,7 +4,7 @@
 #include <iostream>
 #include<string.h>
 #include<stdio.h>
-
+#include<stdlib.h>
 using namespace std;
 
 /*-----Cabeçalhos de funções-------*/
@@ -13,24 +13,45 @@ using namespace std;
 /*--------Variáveis globais--------*/
 /*-------------------------------*/
 
-int main()
+int main(void)
 {
-	int _temp0[20];
+	int _temp0;
 	int _temp1;
-	int _temp2;
-	int _temp3;
+	char _temp2[24];
+	char _temp3[28];
+	float* _temp4;
+	int _temp5;
+	int _temp6;
+	int _temp7;
+	int _temp8;
 
 	/*Atribuição de variáveis globais*/
 	/*-------------------------------*/
 
 
 
-	_temp2 = 5;
-	_temp0[16] = _temp2;
+	strcpy(_temp2, "\nEnter the value to d: ");
 
-	_temp3 = 0;
+	cout << _temp2;
 
-	return _temp3;
+
+	cin >> _temp0;
+
+	strcpy(_temp3, "\nEnter the size of matrix: ");
+
+	cout << _temp3;
+
+
+	cin >> _temp1;
+
+	_temp5 = 1;
+	_temp6 = _temp5 * _temp1;
+	_temp7 = _temp6 * _temp1;
+	_temp4 = ( float*)malloc(sizeof(float)*_temp7);
+
+	_temp8 = 0;
+
+	return _temp8;
 }
 
 
