@@ -35,4 +35,8 @@ int main(void)
 	return 0;
 }
 
+int func(int a[2])
+{
+	return 1;
+}
 

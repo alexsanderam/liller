@@ -12,15 +12,6 @@ extern int yylineno;
 
 using namespace std;
 
-typedef struct idStruct
-{
-        string type;
-        string modifier;
-        string label;
-
-		/*utilizado no tratamento de vetores*/
-		vector<unsigned int> vectSizes;
-} id_struct;
 
 
 typedef struct
@@ -89,6 +80,19 @@ struct args
 	string posLabel;
 
 };
+
+typedef struct idStruct
+{
+        string type;
+        string modifier;
+        string label;
+
+		/*utilizado no tratamento de vetores*/
+		vector<unsigned int> vectSizes;
+		vector<YYSTYPE> vectSizesFromIds;
+		bool hasSizes;
+} id_struct;
+
 
 typedef struct opStruct
 {
@@ -217,6 +221,7 @@ YYSTYPE stringOperation(YYSTYPE, YYSTYPE, string);
 YYSTYPE toString(YYSTYPE);
 YYSTYPE* runCast(YYSTYPE, YYSTYPE);
 YYSTYPE computingPosition(vector<unsigned int>, vector<YYSTYPE>);
+YYSTYPE computingPositionFromIds(vector<YYSTYPE>, vector<YYSTYPE>);
 string dinamicallyVectDeclaration(YYSTYPE, YYSTYPE);
 bool verifyCast(string, string);
 YYSTYPE assign(string, YYSTYPE, YYSTYPE);
@@ -1662,7 +1667,11 @@ INCREASE                : TK_ID VECTOR_P TK_OP_INCREASE
 										else
 										{
 											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
-												pos = computingPosition(id->vectSizes, $2.vectPositions);
+												if(id->hasSizes == true)
+													pos = computingPosition(id->vectSizes, $2.vectPositions);
+												else
+													pos = computingPositionFromIds(id->vectSizesFromIds, $2.vectPositions);
+													
 
 											$1.posLabel = pos.label;
 											posTranslation = pos.translation;
@@ -1729,7 +1738,10 @@ PREV_INCREASE                : TK_OP_INCREASE TK_ID VECTOR_P
 										else
 										{
 											if(($3.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
-												pos = computingPosition(id->vectSizes, $2.vectPositions);
+												if(id->hasSizes == true)
+													pos = computingPosition(id->vectSizes, $3.vectPositions);
+												else
+													pos = computingPositionFromIds(id->vectSizesFromIds, $3.vectPositions);
 
 											$2.posLabel = pos.label;
 											posTranslation = pos.translation;
@@ -1774,7 +1786,10 @@ ATTRIBUITION       	: TK_ID VECTOR_P TK_ASSIGN E
 										else
 										{
 											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
-												pos = computingPosition(id->vectSizes, $2.vectPositions);
+												if(id->hasSizes == true)
+													pos = computingPosition(id->vectSizes, $2.vectPositions);
+												else
+													pos = computingPositionFromIds(id->vectSizesFromIds, $2.vectPositions);
 
 											$1.posLabel = pos.label;
 		                                    $$ = assign(voidStr, $1, $4);
@@ -1839,7 +1854,10 @@ OP_ASSIGN                : TK_ID VECTOR_P TK_OP_ASSIGN E
 										else
 										{
 											if(($2.vectPositions.size() > 0) && (id->vectSizes.size() > 0))
-												pos = computingPosition(id->vectSizes, $2.vectPositions);
+												if(id->hasSizes == true)
+													pos = computingPosition(id->vectSizes, $2.vectPositions);
+												else
+													pos = computingPositionFromIds(id->vectSizesFromIds, $2.vectPositions);
 
 											$1.posLabel = pos.label;
 											$1.vectPositions = $2.vectPositions;
@@ -1874,6 +1892,8 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                         (*IDMap)[$3.label].type = $1.type;
                                         (*IDMap)[$3.label].modifier = $1.modifier;
                                         (*IDMap)[$3.label].vectSizes = $4.vectSizes;
+                                        (*IDMap)[$3.label].vectSizesFromIds = $4.vectPositions;
+										(*IDMap)[$3.label].hasSizes = $4.isConstant;
                                 }
                                 else
                                         yyerror("identifier: '" + $3.label + "'  previously declared here.");
@@ -1942,6 +1962,8 @@ DECLARATION        		: DECLARATION ',' TK_ID VECTOR_SIZES
                                         (*IDMap)[$2.label].type = $1.type;
                                         (*IDMap)[$2.label].modifier = $1.modifier;
                                         (*IDMap)[$2.label].vectSizes = $3.vectSizes;
+                                        (*IDMap)[$2.label].vectSizesFromIds = $3.vectPositions;
+										(*IDMap)[$3.label].hasSizes = $3.isConstant;
                                 }
                                 else
                                         yyerror("identifier: '" + $2.label + "'  previously declared here.");
@@ -2292,7 +2314,10 @@ TERMINAL        :       TK_INT
 
 										if($2.vectPositions.size() > 0)
 										{
-											pos = computingPosition(id->vectSizes, $2.vectPositions);
+											if(id->hasSizes == true)
+												pos = computingPosition(id->vectSizes, $2.vectPositions);
+											else
+												pos = computingPositionFromIds(id->vectSizesFromIds, $2.vectPositions);
 											$$.translation = pos.translation;
 											posLabel = pos.label;
 										}
@@ -2316,7 +2341,10 @@ TERMINAL        :       TK_INT
 
 										if($3.vectSizes.size() > 0)
 										{
-											pos = computingPosition(id->vectSizes, $3.vectPositions);
+											if(id->hasSizes == true)
+												pos = computingPosition(id->vectSizes, $3.vectPositions);
+											else
+												pos = computingPositionFromIds(id->vectSizesFromIds, $3.vectPositions);
 											$$.translation = pos.translation;
 											posLabel = pos.label;
 										}
@@ -2853,6 +2881,55 @@ YYSTYPE computingPosition(vector<unsigned int> declaration, vector<YYSTYPE> call
 			for(int j = declaration.size() - 1; j > i; j--)
 			{
 				value = generateIntValue(declaration.at(j));
+				opMul = runBasicOperation(opMul, value, "*");
+			}
+
+			if(i > 0)
+			{
+				opSum.translation = "";
+			}
+
+			opSum = runBasicOperation(opSum, opMul, "+");
+			res->translation += opSum.translation;
+		}
+
+		res->label = opSum.label;
+		res->type = opSum.type;
+		res->modifier = opSum.modifier;	
+
+		declare(res->label, res->modifier + (res->modifier != "" ? " " : "") + res->type, 1);
+	}
+
+	return *res;
+}
+
+
+YYSTYPE computingPositionFromIds(vector<YYSTYPE> declaration, vector<YYSTYPE> call)
+{
+	YYSTYPE* res;
+	YYSTYPE opMul;
+	YYSTYPE opSum;
+	YYSTYPE ass;
+	YYSTYPE value;
+
+	if(declaration.size() < call.size())
+	{
+		yyerror("subscripted value is neither array nor pointer nor vector");
+		res = NULL;
+	}
+	else
+	{	
+		res = new YYSTYPE();
+		opSum = generateIntValue(0);
+
+		//Calcula a posição de acesso
+		for(int i = 0; i < call.size(); i++)
+		{
+			opMul = call.at(i);
+
+			for(int j = declaration.size() - 1; j > i; j--)
+			{
+				value = declaration.at(j);
 				opMul = runBasicOperation(opMul, value, "*");
 			}
 
