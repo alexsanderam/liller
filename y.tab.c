@@ -5390,7 +5390,7 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 		declarations_map::iterator i;
 		declarations_map::iterator iBkp;
 
-		declarationsMap->clear();	
+		declarationsMap->clear();
 
 		sizesToMalloc = generateIntValue(1);
 
@@ -5402,7 +5402,7 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 		auxDeclarations += getDeclarations();
 		declarationsMap->clear();
 
-		for(iBkp = declarationsMapBkp.begin(), i = declarationsMap->begin(); i != declarationsMapBkp.end(); iBkp++, i++)
+		for(iBkp = declarationsMapBkp.begin(), i = declarationsMap->begin(); iBkp != declarationsMapBkp.end(); iBkp++, i++)
 			declarationsMap->insert(i, iBkp->second);
 	}
 	else
