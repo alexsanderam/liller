@@ -35,8 +35,4 @@ int main(void)
 	return 0;
 }
 
-int func(int size, int a[size])
-{
-	return 1;
-}
 

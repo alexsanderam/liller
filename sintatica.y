@@ -69,6 +69,11 @@ struct args
 	função*/
 	bool hasIdInArgs;
 
+	/*utilizado para verificar se tem
+	tamanho nos argumentos de uma
+	função*/
+	bool hasIdSizeInVectArgs;
+
 	/*utilizado no tratamento de erros
 	 ou warnings*/
 	unsigned int line;
@@ -78,6 +83,8 @@ struct args
 	vector<unsigned int> vectSizes;
 	/*posição de acesso, refere-se a um label*/
 	string posLabel;
+
+	string normalizedArgs;
 
 };
 
@@ -210,6 +217,10 @@ string returnMainTranslation = "";
 /*tradução de frees nos argumentos de uma função*/
 string freeArgsTranslation = "";
 
+/*utilizado como auxiliar nos casos em que a declaraçãoes
+devem ser globais, em especial nos casos de argumentos de funções*/
+bool inFunctionArgs;
+
 int yylex(void);
 void yyerror(string);
 void yywarning(string);
@@ -249,6 +260,7 @@ void verifyMain();
 void verifyCallsFunctions();
 string getDeclarations();
 string getFunctionArgs();
+string findAndReplaceR(string, const string, const string);
 void findAndReplace(string*, const string, const string);
 string verifyResultOperation(string, string, string);
 string verifyStrongType(string, string);
@@ -360,6 +372,16 @@ MAIN_HEADER             : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS
 							$$.translation = "";
 							$$.idFunction = $2.translation + " (void)";
 
+							/*functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
+                            (*functionMap)[$$.idFunction].idFunction = $$.idFunction;
+                            (*functionMap)[$$.idFunction].label = "main";
+                            (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
+                            (*functionMap)[$$.idFunction].modifierOfReturn = "";
+                            (*functionMap)[$$.idFunction].declared = true;
+                            (*functionMap)[$$.idFunction].defined = false;
+                            (*functionMap)[$$.idFunction].called = false;
+							(*functionMap)[$$.idFunction].freeTranslation = freeMainTranslation;*/
+
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + $4.translation + ')' + "\n";
 
 							idOfCurrentFunction.push_front($$.idFunction);
@@ -373,6 +395,16 @@ MAIN_HEADER             : TK_TYPE_INT TK_MAIN OPEN_ARGS TK_TYPE_VOID CLOSE_ARGS
                         {
 							$$.translation = "";
 							$$.idFunction = $2.translation + " (void)";
+
+							/*functions_map* functionMap = *next(stackFunctionMap.begin(), 1);
+                            (*functionMap)[$$.idFunction].idFunction = $$.idFunction;
+                            (*functionMap)[$$.idFunction].label = "main";
+                            (*functionMap)[$$.idFunction].typeOfReturn = $1.type;
+                            (*functionMap)[$$.idFunction].modifierOfReturn = "";
+                            (*functionMap)[$$.idFunction].declared = true;
+                            (*functionMap)[$$.idFunction].defined = false;
+                            (*functionMap)[$$.idFunction].called = false;
+							(*functionMap)[$$.idFunction].freeTranslation = freeMainTranslation;*/
 
                             headMainTranslation = $1.translation + " " + $2.translation + '(' + ')' + "\n";
 
@@ -401,10 +433,10 @@ EXTERNAL_DECLARATION	: DECLARATION ';'
 						}
 						| FUNCTION
 						| FUNCTION_HEADER ';'
-						{	
+						{								
 							$$.translation = "";
 							headersFunctions += $1.translation;
-							headersFunctions += "(" + $1.typesArgsFunction + ");\n";
+							headersFunctions += "(" + $1.normalizedArgs + ");\n";
 
 							/*desempilha o mapa que armazena
 							os argumentos da função*/
@@ -422,8 +454,8 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							functions_map::iterator i;
 							function_struct* f;
 							int line;
-							string arguments;
-							string mallocArguments;
+							string arguments = "";
+							string mallocArguments = "";
 
 							if($1.hasIdInArgs == false)
 							{
@@ -431,6 +463,14 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 								yylineno = $1.line;							
 								yyerror("parameter name omitted");
 								yylineno = line;
+							}
+
+							if($1.hasIdSizeInVectArgs == false)
+							{
+								line = yylineno;
+								yylineno = $1.line;							
+								yyerror("size not defined in vect args of fuction '" + $1.idFunction + "'");
+								yylineno = line;								
 							}
 						
 							arguments = getFunctionArgs();
@@ -495,15 +535,15 @@ FUNCTION				: FUNCTION_HEADER SCOPE
 							/*desempilha o identificador da função corrente*/
 							idOfCurrentFunction.pop_front();
 
-							functionMap = stackFunctionMap.front();
-							i = functionMap->find($1.idFunction);
-							f = &i->second;
+							//functionMap = stackFunctionMap.front();
+							//i = functionMap->find($1.idFunction);
+							//f = &i->second;
 							//freeMainTranslation += f->freeTranslation;
 
-							if(i != functionMap->end())
-							{
-								freeMainTranslation += f->freeTranslation;
-							}
+							//if(i != functionMap->end())
+							//{
+								//freeMainTranslation += f->freeTranslation;
+							//}
 						
 						}
 						;
@@ -544,7 +584,9 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 							$$.typesArgsFunction = $4.typesArgsFunction;
 							$$.translation = type + " " + id;
 							$$.hasIdInArgs = $4.hasIdInArgs;
-							$$.line = $4.line;
+							$$.hasIdSizeInVectArgs = $4.hasIdSizeInVectArgs;
+							$$.line = yylineno;
+							$$.normalizedArgs = $4.normalizedArgs;
 						}
 						| TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 						{
@@ -573,7 +615,9 @@ FUNCTION_HEADER			: TYPE TK_ID OPEN_ARGS ARGS CLOSE_ARGS
 							$$.typesArgsFunction = $3.typesArgsFunction;
 		                    $$.translation = "void " + id;
 							$$.hasIdInArgs = $3.hasIdInArgs;
-							$$.line = $3.line;
+							$$.hasIdSizeInVectArgs = $3.hasIdSizeInVectArgs;
+							$$.line = yylineno;
+							$$.normalizedArgs = $3.normalizedArgs;
 						}
 						;
 
@@ -584,21 +628,27 @@ OPEN_ARGS				: '('
 							/*cria uma nova entrada na pilha
 							para armazenar os argumentos da função*/
 							openNewScope();
+							inFunctionArgs = true;
 						}
 						;
 
 
 CLOSE_ARGS				: ')'
+						{
+							inFunctionArgs = false;
+						}
 						;
 
 
 						
 ARGS					: ARGS ',' TYPE OPTIONAL_ID
 						{
+								unsigned int size = 1;
+								string pointer = "";
+
 								if($4.label != "")							   	
 								{
 									identifiers_map* IDMap = stackIDMap.front();
-									unsigned int size = 1;
 
 		                            (*IDMap)[$4.label].label = generateID();
 		                            (*IDMap)[$4.label].type = $3.type;
@@ -612,41 +662,56 @@ ARGS					: ARGS ',' TYPE OPTIONAL_ID
 									{
 										for(int i = 0; i < $4.vectSizes.size(); i++)
 											size *= $4.vectSizes.at(i);
+									}
 
-										if($4.isConstant == false)
-										{
-											addMalloc(dinamicallyVectDeclaration($$, $4, 1));
-										}
+									if($4.isConstant == false)
+									{
+										//addMalloc(dinamicallyVectDeclaration($$, $4, 1));
+										size = 0; /*será declarado como ponteiro*/
 									}
 
 									/*chuta-se um tamanho para argumentos do tipo string*/
-									if($3.type == "string")
+									if(($3.type == "string") && (size > 0))
 											size *= 100;
+									else if($3.type == "string")
+											size = 1000;
+
+
 
 									$$.translation = $1.translation + ", " + $$.type + " " + $$.label + $4.translation;
 									$$.typesArgsFunction = $1.typesArgsFunction + ", " + $$.type + $4.translation;
 									$$.hasIdInArgs = $1.hasIdInArgs &&  true;
+									$$.hasIdSizeInVectArgs = $1.hasIdSizeInVectArgs && $4.hasIdSizeInVectArgs;
 
+									inFunctionArgs = false;
 		                            if ($$.modifier != "")
 		                                    declare($$.label, $$.modifier + " " + $$.type, size);
 		                            else
 		                                    declare($$.label, $$.type, size);
+									inFunctionArgs = true;
 								}
 								else
 								{
 									$$.translation = $$.type + $4.translation + ", " + $1.translation;
 									$$.typesArgsFunction = $$.type + $4.translation + ", " + $1.typesArgsFunction;
-									$$.hasIdInArgs = $1.hasIdInArgs && false;
+									$$.hasIdInArgs = false;
 									$$.line = yylineno;
-								}
-									 
+								}	 
+
+								if((size == 0) || ($3.type == "string"))
+									pointer = "*";
+
+								$$.normalizedArgs = $1.normalizedArgs + ", " + $$.modifier + ($$.modifier != "" ? " " : "") + normalizedType($$.type) + pointer + $4.label + $4.translation;
+
 						}
 						| TYPE OPTIONAL_ID
 						{
+							unsigned int size = 1;
+							string pointer = "";
+
 							if($2.label != "")
 							{
 								identifiers_map* IDMap = stackIDMap.front();
-								unsigned int size = 1;
 
 		                        (*IDMap)[$2.label].label = generateID();
 		                        (*IDMap)[$2.label].type = $1.type;
@@ -660,26 +725,32 @@ ARGS					: ARGS ',' TYPE OPTIONAL_ID
 								{
 									for(int i = 0; i < $2.vectSizes.size(); i++)
 										size *= $2.vectSizes.at(i);
+								}
 
-									if($2.isConstant == false)
-									{
-										addMalloc(dinamicallyVectDeclaration($$, $2, 1));
-									}
+								if($2.isConstant == false)
+								{
+									//addMalloc(dinamicallyVectDeclaration($$, $2, 1));
+									size = 0; /*será declarado como ponteiro*/
 								}
 
 								/*chuta-se um tamanho para argumentos do tipo string*/
-								if($1.type == "string")
+								if(($1.type == "string") && (size > 0))
 										size *= 100;
+								else if($1.type == "string")
+										size = 1000;
 
 
 								$$.translation = $$.type + " " + $$.label + $2.translation;
 								$$.typesArgsFunction = $1.type + $2.translation;
-								$$.hasIdInArgs = true;
+								$$.hasIdInArgs = ($2.label != "");
+								$$.hasIdSizeInVectArgs = $2.hasIdSizeInVectArgs;
 
+								inFunctionArgs = false;
 		                        if ($$.modifier != "")
 		                                declare($$.label, $$.modifier + " " + $$.type, size);
 		                        else
-		                                declare($$.label, $$.type, size);							
+		                                declare($$.label, $$.type, size);
+								inFunctionArgs = true;
 							}
 							else
 							{
@@ -688,6 +759,12 @@ ARGS					: ARGS ',' TYPE OPTIONAL_ID
 									$$.hasIdInArgs = false;
 									$$.line = yylineno;
 							}
+
+							if((size == 0) || ($1.type == "string"))
+								pointer = "*";
+
+							$$.normalizedArgs = $$.modifier + ($$.modifier != "" ? " " : "") + normalizedType($$.type) + pointer + $2.label + $2.translation;
+
 						}
 						|
 						{
@@ -695,6 +772,8 @@ ARGS					: ARGS ',' TYPE OPTIONAL_ID
 							$$.typesArgsFunction = "void";
 							$$.hasIdInArgs = true;
 							$$.line = yylineno;
+
+							$$.normalizedArgs = "";
 						}
 						;
 
@@ -705,6 +784,7 @@ OPTIONAL_ID				: TK_ID VECTOR_SIZES
 							$$.vectSizes = $2.vectSizes;
 							$$.vectPositions = $2.vectPositions;
 							$$.isConstant = $2.isConstant;
+							$$.hasIdSizeInVectArgs = $2.hasIdSizeInVectArgs;
 
 							//if($2.isConstant == false)
 								//yyerror("not allowed not constant in size args of function");
@@ -718,6 +798,7 @@ OPTIONAL_ID				: TK_ID VECTOR_SIZES
 							$$.vectSizes = $1.vectSizes;
 							$$.vectPositions = $1.vectPositions;
 							$$.isConstant = $1.isConstant;
+							$$.hasIdSizeInVectArgs = $1.hasIdSizeInVectArgs;
 
 							//if($1.isConstant == false)
 								//yyerror("not allowed not constant in size args of function");
@@ -780,7 +861,7 @@ CALL_FUNCTION			: COUT
 									ass->label = $$.label;
 									ass->type = $$.type;
 									ass->modifier = $$.modifier;
-									declare(ass->label, ass->modifier + (ass->modifier == "" ? "" : " ") + ass->type, 1);
+									declare(ass->label, ass->modifier + (ass->modifier == "" ? "" : " ") + ass->type, (f->typeOfReturn == "string" ? 0 : 1));
 
 									$$.translation += "\t" + ass->label + " = " + f->label + "(" +  $3.label + ");\n";
 								}
@@ -934,7 +1015,7 @@ RETURN                  : TK_RETURN E_C
 								i = functionMap->find(idFunction);
 
 								/*enxerta as traduções de free antes do return no main*/									
-								if(i != functionMap->end())
+								if((i != functionMap->end()))
 								{
 									f = &(i->second);
 									f->hasReturn = true;
@@ -998,15 +1079,13 @@ RETURN                  : TK_RETURN E_C
 									}
 
 								}
-								else
-	                                $$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
-
-								/*if(idFunction == idMainFunction)
+								else if(idFunction == idMainFunction)
 								{
-									returnMainTranslation = $$.translation;
+	                                returnMainTranslation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
 									$$.translation = "";
-								}*/
-									
+								}
+								else
+									$$.translation = $2.translation + "\n\t" + $1.translation + " " + $2.label + ";";
                         }
                         ;
 
@@ -1521,6 +1600,9 @@ E_C						: E
 		                            flagIncreaseTranslation = false;
 		                            auxIncreaseTranslation = "";
 		                    }
+
+							/*if((inFunctionArgs == true) && ($1.isConstant == false))
+								scopeMainTranslation = $$.translation + scopeMainTranslation;*/
 
 						}
 						;
@@ -2418,7 +2500,18 @@ VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 							$$.vectSizes.insert($$.vectSizes.begin(), $2.intValue);
 
 							$$.isConstant = $2.isConstant && $4.isConstant;
-							$$.translation = "[" + $2.label + "]" + $4.translation;
+							$$.hasIdSizeInVectArgs = $4.hasIdSizeInVectArgs && true;
+							$$.translation = "[]" + $4.translation;
+							//$$.translation = "[" + $2.label + "]" + $4.translation;;
+						}
+						| '[' ']' VECTOR_SIZES
+						{
+							$$.vectSizes = $3.vectSizes;
+							$$.vectPositions = $3.vectPositions;
+							$$.isConstant = true;
+							$$.translation = "";
+							$$.hasIdSizeInVectArgs = false;
+							$$.translation = "[]" + $3.translation;
 						}
 						|
 						{
@@ -2426,6 +2519,7 @@ VECTOR_SIZES			: '[' E_C ']' VECTOR_SIZES
 							$$.vectPositions.clear();
 							$$.isConstant = true;
 							$$.translation = "";
+							$$.hasIdSizeInVectArgs = true;
 						}
 						;
 
@@ -2493,6 +2587,11 @@ void openNewScope()
         declarations_map* declarationsMap = new declarations_map();
         functions_map* functionMap = new functions_map();
 		mallocs_vector* mallocsVector = new mallocs_vector();
+
+		IDMap->clear();
+		declarationsMap->clear();
+		functionMap->clear();
+		mallocsVector->clear();
 
         stackIDMap.push_front(IDMap);
         stackDeclarationsMap.push_front(declarationsMap);
@@ -2999,31 +3098,32 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 	functionMap = *next(stackFunctionMap.begin(), depth);
 	i = functionMap->find(idOfCurrentFunction.front());
 
-	freeArgsTranslation += "\tfree(" + id.label + ");\n";
+	/*freeArgsTranslation += "\tfree(" + id.label + ");\n";
 
 	if(i != functionMap->end())
 	{
 		f = &i->second;
 		f->freeTranslation += freeArgsTranslation;
 		//freeMainTranslation += "\tfree(" + id.label + ");\n";
-	}
+	}*/
+
 
 	if(depth == 1)
 	{
-		YYSTYPE intermediaryId;
-
 		declarations_map* declarationsMap = stackDeclarationsMap.front();		
 		declarations_map declarationsMapBkp;
 		declarations_map::iterator iBkp;
 
+		/*
+		YYSTYPE intermediaryId;
 		intermediaryId.label = generateID();
 		intermediaryId.type = id.type;
-		intermediaryId.modifier = id.modifier;
+		intermediaryId.modifier = id.modifier;*/
 
 		declarationsMapBkp = *declarationsMap;
 		declarationsMap->clear();
 
-		(*declarationsMap)[intermediaryId.label] = {intermediaryId.modifier + (intermediaryId.modifier != "" ? " " : "") + intermediaryId.type, 0};
+		//(*declarationsMap)[intermediaryId.label] = {intermediaryId.modifier + (intermediaryId.modifier != "" ? " " : "") + intermediaryId.type, 0};
 
 		sizesToMalloc = generateIntValue(1);
 		for(int i = 0; i < vector_sizes.vectSizes.size(); i++)
@@ -3039,10 +3139,13 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 
 		translation = auxDeclarations;
 		translation += sizesToMalloc.translation;
-		translation += "\t" + intermediaryId.label + " = ";
+		translation += "\t" + id.label + " = ";
+		translation += "(" + id.modifier + " " + normalizedType(id.type) + "*) " + "malloc" + " (sizeof(" + normalizedType(id.type) + ")*" + sizesToMalloc.label+");\n";
+
+		/*translation += "\t" + intermediaryId.label + " = ";
 		translation += "(" + intermediaryId.modifier + " " + normalizedType(intermediaryId.type) + "*) ";
 		translation += "malloc (sizeof(" + normalizedType(intermediaryId.type) + ")*" + sizesToMalloc.label + ");\n";
-		translation += "\t" + id.label + " = " + intermediaryId.label + ";\n";
+		translation += "\t" + id.label + " = " + intermediaryId.label + ";\n";*/
 	}
 	else
 	{
@@ -3323,8 +3426,18 @@ void verifyCallsFunctions()
 void declare(string label, string dIType, unsigned int length)
 {
         string finalType = dIType;
-        
-        declarations_map* declarationsMap = stackDeclarationsMap.front();
+		declarations_map* declarationsMap;
+
+		if(inFunctionArgs == false)
+        {
+		     declarationsMap = stackDeclarationsMap.front();
+		}
+		else
+		{
+			/*mapa global*/
+		     declarationsMap = stackDeclarationsMap.back();
+		}
+
         (*declarationsMap)[label] = {dIType, length};
 }
 
@@ -3458,6 +3571,19 @@ void findAndReplace(string* source, const string find, const string replace)
     }
 }
 
+string findAndReplaceR(string source, const string find, const string replace)
+{
+	string* res = new string();
+	*res = source;
+
+    for(std::string::size_type i = 0; (i = res->find(find, i)) != std::string::npos;)
+    {
+        res->replace(i, find.length(), replace);
+        i += replace.length() - find.length() + 1;
+    }
+
+	return *res;
+}
 
 string verifyResultOperation(string op1Type, string op2Type, string sOperator)
 {
