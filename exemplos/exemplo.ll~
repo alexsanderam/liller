@@ -35,7 +35,7 @@ int main(void)
 	return 0;
 }
 
-int func(int size, int a[size])
+int func(int size, float a)
 {
 	return 1;
 }

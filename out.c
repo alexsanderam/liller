@@ -217,18 +217,22 @@ int main(void)
 
 }
 
-int _temp55(int _temp54, int _temp53, int* _temp52, int _temp51)
+int _temp56(int _temp51, int* _temp52)
 {
-	int _temp56;
-	_temp53 = 1;
-	_temp54 = _temp53 * _temp51;
-	_temp52 = ( int*) malloc (sizeof(int)*_temp54);
+	int _temp57;
+	int* _temp53;
+	int _temp54;
+	int _temp55;
+	_temp54 = 1;
+	_temp55 = _temp54 * _temp51;
+	_temp53 = ( int*) malloc (sizeof(int)*_temp55);
+	_temp52 = _temp53;
 
-	_temp56 = 1;
+	_temp57 = 1;
 
 
 	free(_temp52);
-	return _temp56;
+	return _temp57;
 }
 
 

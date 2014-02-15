@@ -5385,15 +5385,22 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 
 	if(depth == 1)
 	{
+		YYSTYPE intermediaryId;
+
 		declarations_map* declarationsMap = stackDeclarationsMap.front();		
-		declarations_map declarationsMapBkp = *declarationsMap;
-		declarations_map::iterator i;
+		declarations_map declarationsMapBkp;
 		declarations_map::iterator iBkp;
 
+		intermediaryId.label = generateID();
+		intermediaryId.type = id.type;
+		intermediaryId.modifier = id.modifier;
+
+		declarationsMapBkp = *declarationsMap;
 		declarationsMap->clear();
 
-		sizesToMalloc = generateIntValue(1);
+		(*declarationsMap)[intermediaryId.label] = {intermediaryId.modifier + (intermediaryId.modifier != "" ? " " : "") + intermediaryId.type, 0};
 
+		sizesToMalloc = generateIntValue(1);
 		for(int i = 0; i < vector_sizes.vectSizes.size(); i++)
 		{
 			sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
@@ -5402,8 +5409,15 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 		auxDeclarations += getDeclarations();
 		declarationsMap->clear();
 
-		for(iBkp = declarationsMapBkp.begin(), i = declarationsMap->begin(); iBkp != declarationsMapBkp.end(); iBkp++, i++)
-			declarationsMap->insert(i, iBkp->second);
+		for(iBkp = declarationsMapBkp.begin(); iBkp != declarationsMapBkp.end(); iBkp++)
+			(*declarationsMap)[iBkp->first] = {iBkp->second.dIType, iBkp->second.length};
+
+		translation = auxDeclarations;
+		translation += sizesToMalloc.translation;
+		translation += "\t" + intermediaryId.label + " = ";
+		translation += "(" + intermediaryId.modifier + " " + normalizedType(intermediaryId.type) + "*) ";
+		translation += "malloc (sizeof(" + normalizedType(intermediaryId.type) + ")*" + sizesToMalloc.label + ");\n";
+		translation += "\t" + id.label + " = " + intermediaryId.label + ";\n";
 	}
 	else
 	{
@@ -5412,12 +5426,11 @@ string dinamicallyVectDeclaration(YYSTYPE id, YYSTYPE vector_sizes, unsigned int
 		{
 			sizesToMalloc = runBasicOperation(sizesToMalloc, vector_sizes.vectPositions.at(i), "*");
 		}
+
+		translation += sizesToMalloc.translation;
+		translation += "\t" + id.label + " = ";
+		translation += "(" + id.modifier + " " + normalizedType(id.type) + "*) " + "malloc" + " (sizeof(" + normalizedType(id.type) + ")*" + sizesToMalloc.label+");\n";
 	}
-	
-	translation += auxDeclarations;
-	translation += sizesToMalloc.translation;
-	translation += "\t" + id.label + " = ";
-	translation += "(" + id.modifier + " " + normalizedType(id.type) + "*) " + "malloc" + " (sizeof(" + normalizedType(id.type) + ")*" + sizesToMalloc.label+");\n";
 
 	return translation;
 }
@@ -5757,10 +5770,10 @@ string getFunctionArgs()
 	string args = "";
 
         declarations_map declarationsMap = *stackDeclarationsMap.front();
-        declarations_map::reverse_iterator i;
+        declarations_map::iterator i;
 		string type;
         
-        for(i = declarationsMap.rbegin(); i != declarationsMap.rend(); i++)
+        for(i = declarationsMap.begin(); i != declarationsMap.end(); i++)
         {                        
 			type = i->second.dIType;
 			if(type == "string")
@@ -5776,7 +5789,7 @@ string getFunctionArgs()
 				else if (i->second.dIType == "string")
 	                    args += "[" + intToString(i->second.length) + "]";
 
-			if(next(i , 1) != declarationsMap.rend())
+			if(next(i , 1) != declarationsMap.end())
 				args += ", ";
         }
 
