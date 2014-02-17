@@ -861,7 +861,7 @@ CALL_FUNCTION			: COUT
 									ass->label = $$.label;
 									ass->type = $$.type;
 									ass->modifier = $$.modifier;
-									declare(ass->label, ass->modifier + (ass->modifier == "" ? "" : " ") + ass->type, 1);
+									declare(ass->label, ass->modifier + (ass->modifier == "" ? "" : " ") + ass->type, (f->typeOfReturn == "string" ? 0 : 1));
 
 									$$.translation += "\t" + ass->label + " = " + f->label + "(" +  $3.label + ");\n";
 								}
@@ -2458,6 +2458,7 @@ TERMINAL        :       TK_INT
 												pos = computingPosition(id->vectSizes, $3.vectPositions);
 											else
 												pos = computingPositionFromIds(id->vectSizesFromIds, $3.vectPositions);
+
 											$$.translation = pos.translation;
 											posLabel = pos.label;
 										}

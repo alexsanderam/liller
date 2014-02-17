@@ -32,6 +32,8 @@ int main(void)
 		coutn();
 	}
 
+	-d;
+
 	return 0;
 }
 

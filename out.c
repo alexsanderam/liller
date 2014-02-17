@@ -64,6 +64,7 @@ int main(void)
 	int* _temp4;
 	int _temp5;
 	int _temp50;
+	int _temp51;
 	int _temp6;
 	int _temp7;
 
@@ -211,10 +212,12 @@ int main(void)
 	goto _tempLabel13;
 	_tempLabel9:
 
+	_temp50 = -_temp0;
 
-	_temp50 = 0;
 
-	return _temp50;
+	_temp51 = 0;
+
+	return _temp51;
 }
 
 

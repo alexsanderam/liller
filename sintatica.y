@@ -2451,6 +2451,7 @@ TERMINAL        :       TK_INT
                                 else
                                 {
 										string modifier;
+										$$.translation = "";
 
 										if($3.vectSizes.size() > 0)
 										{
@@ -2458,6 +2459,7 @@ TERMINAL        :       TK_INT
 												pos = computingPosition(id->vectSizes, $3.vectPositions);
 											else
 												pos = computingPositionFromIds(id->vectSizesFromIds, $3.vectPositions);
+
 											$$.translation = pos.translation;
 											posLabel = pos.label;
 										}

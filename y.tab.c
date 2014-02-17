@@ -884,7 +884,7 @@ static const yytype_uint16 yyrline[] =
     2171,  2177,  2183,  2189,  2195,  2201,  2207,  2213,  2219,  2225,
     2231,  2237,  2243,  2249,  2255,  2261,  2267,  2273,  2279,  2289,
     2301,  2312,  2324,  2336,  2348,  2359,  2371,  2383,  2397,  2412,
-    2443,  2484,  2484,  2489,  2507,  2517,  2528,  2540
+    2443,  2486,  2486,  2491,  2509,  2519,  2530,  2542
 };
 #endif
 
@@ -4598,6 +4598,7 @@ yyreduce:
                                 else
                                 {
 										string modifier;
+										(yyval).translation = "";
 
 										if((yyvsp[(3) - (3)]).vectSizes.size() > 0)
 										{
@@ -4605,6 +4606,7 @@ yyreduce:
 												pos = computingPosition(id->vectSizes, (yyvsp[(3) - (3)]).vectPositions);
 											else
 												pos = computingPositionFromIds(id->vectSizesFromIds, (yyvsp[(3) - (3)]).vectPositions);
+
 											(yyval).translation = pos.translation;
 											posLabel = pos.label;
 										}
@@ -4630,7 +4632,7 @@ yyreduce:
   case 153:
 
 /* Line 1806 of yacc.c  */
-#line 2490 "sintatica.y"
+#line 2492 "sintatica.y"
     {
 							if((yyvsp[(2) - (4)]).type != "int")
 								yyerror("size of array has non-integer type");
@@ -4653,7 +4655,7 @@ yyreduce:
   case 154:
 
 /* Line 1806 of yacc.c  */
-#line 2508 "sintatica.y"
+#line 2510 "sintatica.y"
     {
 							(yyval).vectSizes = (yyvsp[(3) - (3)]).vectSizes;
 							(yyval).vectPositions = (yyvsp[(3) - (3)]).vectPositions;
@@ -4667,7 +4669,7 @@ yyreduce:
   case 155:
 
 /* Line 1806 of yacc.c  */
-#line 2517 "sintatica.y"
+#line 2519 "sintatica.y"
     {
 							(yyval).vectSizes.clear();
 							(yyval).vectPositions.clear();
@@ -4680,7 +4682,7 @@ yyreduce:
   case 156:
 
 /* Line 1806 of yacc.c  */
-#line 2529 "sintatica.y"
+#line 2531 "sintatica.y"
     {
 							if((yyvsp[(2) - (4)]).type != "int")
 								yyerror("size of array has non-integer type");
@@ -4696,7 +4698,7 @@ yyreduce:
   case 157:
 
 /* Line 1806 of yacc.c  */
-#line 2540 "sintatica.y"
+#line 2542 "sintatica.y"
     {
 							(yyval).vectPositions.clear();
 							(yyval).translation = "";
@@ -4706,7 +4708,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 4710 "y.tab.c"
+#line 4712 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -4937,7 +4939,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 2549 "sintatica.y"
+#line 2551 "sintatica.y"
 
 
 #include "lex.yy.c"

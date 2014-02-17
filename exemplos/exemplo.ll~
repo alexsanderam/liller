@@ -1,5 +1,3 @@
-string func(int, int);
-
 int main(void)
 {
 
@@ -33,6 +31,8 @@ int main(void)
 		}
 		coutn();
 	}
+
+	-d;
 
 	return 0;
 }
