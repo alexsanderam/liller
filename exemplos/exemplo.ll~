@@ -1,6 +1,20 @@
+int fibonacci(int);
+string printFibonacciSequence(int);
+void printDiagonalMatrix(void);
+int fat(int n);
+printEven(int n);
+
 int main(void)
 {
+	int n;
+	cin(n);
+	
+	coutn(printFibonacciSequence(n));
+	return 0;
+}
 
+void printDiagonalMatrix()
+{
 	int d;
 	int size;
 	
@@ -29,12 +43,56 @@ int main(void)
 		{
 			cout(matrix[i][j] + " ");
 		}
-		coutn();
+	coutn();
 	}
-
-	-d;
-
-	return 0;
 }
 
+int fibonacci(int n)
+{
+	if (n <= 1)
+		return 1;
 
+	return fibonacci(n-1) + fibonacci(n-2);
+}
+
+string printFibonacciSequence(int n)
+{
+	int resd;
+	string res = "";
+
+	res += "\n[ ";
+
+	for (int i = 1; i <= n; i++)
+	{
+		res = res + fibonacci(i) + " ";
+	}
+
+	res += "]";
+	return res;
+}
+
+int fat(int n)
+{
+	int i = 1;
+	int fat = 1;
+
+	for(i = 1..n)
+	{
+		fat *= i;	
+	}
+
+	return fat;
+}
+
+printEven(int n)
+{
+	int i = 0;
+	while(i <= n)
+	{
+		i++;
+		if(i % 2 == 1)
+			continue;
+
+		cout(i);
+	}
+}

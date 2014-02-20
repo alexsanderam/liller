@@ -1,0 +1,38 @@
+int fibonacci(int);
+void printFibonacciSequence(int);
+
+int main(void)
+{
+	int n;
+	cout("\nEnter the value for n: ");
+	cin(n);
+
+	coutn("Fibonacci(" + n + ") = " + fibonacci(n));
+
+	printFibonacciSequence(n);
+
+	return 0;
+}
+
+int fibonacci(int n)
+{
+	int fib = 1;
+	
+	for (int i = n; i > 0; i--)
+		fib *= n;
+
+	return n;
+}
+
+void printFibonacciSequence(int n)
+{
+	int fib = 1;
+	
+	coutn("[ ");
+	for (int i = 1; i <= n; i++)
+	{
+		fib *= n;
+		cout(n + " ");
+	}
+	cout("]");
+}
