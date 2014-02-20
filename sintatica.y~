@@ -1045,7 +1045,7 @@ RETURN                  : TK_RETURN E_C
 											addMalloc(dinamicallyVectDeclaration(idReturn, $2, 2));
 											
 											$$.translation = $2.translation + cast->translation;
-											$$.translation += "\t" + idReturn.label + " = realloc(" + idReturn.label + ", " + intToString(getDeclarationLength(*cast)) + ");\n";
+											$$.translation += "\t" + idReturn.label + " = (char*) realloc(" + idReturn.label + ", " + intToString(getDeclarationLength(*cast)) + ");\n";
 											$$.translation += "\tstrcpy(" + idReturn.label + ", " + cast->label + ");\n";
 											f->returnTranslation = "\n\t" + $1.translation + " " + idReturn.label + ";";
 											$$.translation += f->returnTranslation;
@@ -1073,7 +1073,7 @@ RETURN                  : TK_RETURN E_C
 										addMalloc(dinamicallyVectDeclaration(idReturn, $2, 2));
 
 										$$.translation = $2.translation + "\n";
-										$$.translation += "\t" + idReturn.label + " = realloc(" + idReturn.label + ", " + intToString(getDeclarationLength($2)) + ");\n";
+										$$.translation += "\t" + idReturn.label + " = (char*) realloc(" + idReturn.label + ", " + intToString(getDeclarationLength($2)) + ");\n";
 										$$.translation += "\tstrcpy(" + idReturn.label + ", " + $2.label + ");\n";
 										f->returnTranslation = "\t" + $1.translation + " " + idReturn.label + ";";
 										$$.translation += f->returnTranslation;

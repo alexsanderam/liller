@@ -6,10 +6,51 @@ printEven(int n);
 
 int main(void)
 {
+	bool menu = true;
+	int op;
 	int n;
-	cin(n);
-	
-	coutn(printFibonacciSequence(n));
+
+	do
+	{
+		coutn("Entre com uma opção: ");
+		coutn("\t[0] - Sair");
+		coutn("\t[1] - Diagonal de matriz");
+		coutn("\t[2] - Sequência de Fibonacci");
+		coutn("\t[3] - Fatorial");
+		coutn("\t[4] - Imprimir pares menores que");
+
+		cin(op);
+
+		switch (op)
+		{
+			case 0:
+				menu = false;
+				break;
+			case 1:
+				printDiagonalMatrix();
+				break;
+			case 2:
+				coutn("Entre com um inteiro:");
+				cin(n);
+				cout(fibonacci(n) + ": " + printFibonacciSequence(n));
+				break;
+			case 3:
+				coutn("Entre com um inteiro:");
+				cin(n);
+				coutn(fat(n) + "\n");
+				break;
+			case 4:
+				coutn("Entre com um inteiro:");
+				cin(n);
+				printEven(n);
+				break;
+			default:
+				coutn("Opção inválida");
+				break;
+		}
+
+	} while(menu);
+
 	return 0;
 }
 
@@ -60,7 +101,7 @@ string printFibonacciSequence(int n)
 	int resd;
 	string res = "";
 
-	res += "\n[ ";
+	res += "[ ";
 
 	for (int i = 1; i <= n; i++)
 	{
@@ -93,6 +134,8 @@ printEven(int n)
 		if(i % 2 == 1)
 			continue;
 
-		cout(i);
+		cout(i + " ");
 	}
+
+	coutn();
 }
